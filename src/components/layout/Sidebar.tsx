@@ -67,7 +67,7 @@ export default function Sidebar() {
         {!collapsed && (
           <div className="flex flex-col">
             <span className="font-bold text-xl text-slate-900 truncate tracking-tight font-sans">
-              CloudLedger
+              Ashiq's Creation
             </span>
             <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Enterprise Edition</span>
           </div>
