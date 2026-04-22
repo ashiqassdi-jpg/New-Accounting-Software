@@ -14,6 +14,9 @@ CREATE TABLE companies (
   opening_bank DECIMAL(15,2) DEFAULT 0,
   opening_bkash DECIMAL(15,2) DEFAULT 0,
   opening_nagad DECIMAL(15,2) DEFAULT 0,
+  fiscal_year_start DATE DEFAULT '2024-01-01',
+  currency_symbol TEXT DEFAULT '৳',
+  financial_status TEXT DEFAULT 'ACTIVE' CHECK (financial_status IN ('ACTIVE', 'CLOSED', 'AUDITED')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id)
 );

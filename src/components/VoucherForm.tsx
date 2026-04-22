@@ -11,6 +11,7 @@ import { VOUCHER_TYPES, PAYMENT_CHANNELS, ACCOUNT_GROUPS, formatBDT } from '../c
 import { useAuth } from '../hooks/useAuth';
 import { useCompany } from '../hooks/useCompany';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../lib/utils';
 
 interface VoucherItem {
   account_id: string;
@@ -35,6 +36,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
   const [channel, setChannel] = useState<PaymentChannel>('CASH');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [voucherNo, setVoucherNo] = useState('');
+  const [manualVoucherNo, setManualVoucherNo] = useState(false);
   const [narration, setNarration] = useState('');
   const [items, setItems] = useState<VoucherItem[]>([
     { account_id: '', debit: 0, credit: 0 },
@@ -55,6 +57,56 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
       .order('name');
     setAccounts(data || []);
   };
+
+  const getVoucherPrefix = (vType: VoucherType) => {
+    switch (vType) {
+      case 'PAYMENT': return 'PV';
+      case 'RECEIPT': return 'RV';
+      case 'JOURNAL': return 'JV';
+      case 'CONTRA': return 'CV';
+      case 'SALES': return 'SV';
+      case 'PURCHASE': return 'PU';
+      default: return 'VO';
+    }
+  };
+
+  const generateVoucherNo = async () => {
+    if (!selectedCompany) return;
+
+    try {
+      const prefix = getVoucherPrefix(type);
+      
+      const { data, error } = await supabase
+        .from('vouchers')
+        .select('voucher_no')
+        .eq('company_id', selectedCompany.id)
+        .eq('type', type)
+        .order('voucher_no', { ascending: false })
+        .limit(1);
+
+      if (error) throw error;
+
+      let nextNumber = 1;
+      if (data && data.length > 0) {
+        const lastNo = data[0].voucher_no;
+        const lastSequence = lastNo.split('-').pop();
+        if (lastSequence && !isNaN(Number(lastSequence))) {
+          nextNumber = parseInt(lastSequence) + 1;
+        }
+      }
+
+      const generated = `${prefix}-${nextNumber.toString().padStart(3, '0')}`;
+      if (!manualVoucherNo) {
+        setVoucherNo(generated);
+      }
+    } catch (err) {
+      console.error('Error auto-generating voucher number:', err);
+    }
+  };
+
+  useEffect(() => {
+    generateVoucherNo();
+  }, [type, selectedCompany]);
 
   const addItem = () => {
     setItems([...items, { account_id: '', debit: 0, credit: 0 }]);
@@ -183,11 +235,26 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Voucher Number</label>
+            <div className="flex items-center justify-between">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Voucher Number</label>
+              {!manualVoucherNo && (
+                <button 
+                  type="button"
+                  onClick={() => setManualVoucherNo(true)}
+                  className="text-[9px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-tighter"
+                >
+                  Manual Entry
+                </button>
+              )}
+            </div>
             <input 
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono"
+              className={cn(
+                "w-full border rounded-2xl px-4 py-3 text-sm outline-none transition-all font-mono",
+                manualVoucherNo ? "bg-white border-slate-300 focus:ring-2 focus:ring-indigo-500/10" : "bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed"
+              )}
               value={voucherNo}
               onChange={(e) => setVoucherNo(e.target.value)}
+              readOnly={!manualVoucherNo}
               placeholder="e.g. PV-001"
             />
           </div>

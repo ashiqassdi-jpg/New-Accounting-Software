@@ -26,6 +26,9 @@ export interface Company {
   opening_bank?: number;
   opening_bkash?: number;
   opening_nagad?: number;
+  fiscal_year_start?: string;
+  currency_symbol?: string;
+  financial_status?: 'ACTIVE' | 'CLOSED' | 'AUDITED';
   created_at: string;
   created_by: string;
 }
