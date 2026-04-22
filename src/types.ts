@@ -14,6 +14,9 @@ export interface UserProfile {
   joining_date?: string;
   role: UserRole;
   companies?: string[];
+  can_add?: boolean;
+  can_edit?: boolean;
+  can_delete?: boolean;
 }
 
 export interface Company {

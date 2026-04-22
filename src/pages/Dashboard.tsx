@@ -37,6 +37,7 @@ export default function Dashboard() {
     from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
     to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
   });
+  const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
 
   const [stats, setStats] = useState({
     totalRevenue: 0,
@@ -53,13 +54,11 @@ export default function Dashboard() {
     if (selectedCompany) {
       fetchStats();
     }
-  }, [selectedCompany, dateRange]);
+  }, [selectedCompany, confirmedDateRange]);
 
   const fetchStats = async () => {
     setLoading(true);
     try {
-      // In a real system, these would be calculated via Supabase RPC or complex queries
-      // For the demo/structure, we aggregate from accounts and transactions
       const { data: accounts } = await supabase
         .from('accounts')
         .select('*')
@@ -67,20 +66,30 @@ export default function Dashboard() {
 
       if (!accounts) return;
 
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('account_id, debit, credit, accounts!inner(type)')
+        .eq('company_id', selectedCompany!.id)
+        .gte('date', confirmedDateRange.from)
+        .lte('date', confirmedDateRange.to);
+
       const getBalance = (name: string) => {
         const acc = accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
         return acc ? acc.current_balance : 0;
       };
 
-      // Aggregating revenue and expenses
-      const revenueAccounts = accounts.filter(a => a.type === 'INCOME');
-      const expenseAccounts = accounts.filter(a => a.type === 'EXPENSE');
+      // Aggregating revenue and expenses from transactions in date range
+      const totalRevenue = transactions
+        ?.filter(t => (t as any).accounts.type === 'INCOME')
+        .reduce((sum, t) => sum + (Number(t.credit) || 0) - (Number(t.debit) || 0), 0) || 0;
 
-      const sumCurrentBalance = (accs: any[]) => accs.reduce((sum, a) => sum + Math.abs(a.current_balance || 0), 0);
+      const totalExpenses = transactions
+        ?.filter(t => (t as any).accounts.type === 'EXPENSE')
+        .reduce((sum, t) => sum + (Number(t.debit) || 0) - (Number(t.credit) || 0), 0) || 0;
 
       setStats({
-        totalRevenue: sumCurrentBalance(revenueAccounts),
-        totalExpenses: sumCurrentBalance(expenseAccounts),
+        totalRevenue: Math.max(0, totalRevenue),
+        totalExpenses: Math.max(0, totalExpenses),
         cashBalance: getBalance('Cash'),
         bankBalance: getBalance('Bank'),
         bkashBalance: getBalance('bKash'),
@@ -106,25 +115,33 @@ export default function Dashboard() {
           </p>
         </div>
         
-        <div className="inline-flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm border-b-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl text-slate-400">
-            <Calendar size={16} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Date Filters</span>
-          </div>
-          <div className="flex items-center gap-2 pr-4">
-            <input 
-              type="date" 
-              value={dateRange.from}
-              onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-              className="text-xs outline-none border-none bg-transparent font-bold text-slate-700 w-28"
-            />
-            <span className="text-slate-300">→</span>
-            <input 
-              type="date" 
-              value={dateRange.to}
-              onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-              className="text-xs outline-none border-none bg-transparent font-bold text-slate-700 w-28"
-            />
+        <div className="flex items-center gap-4">
+          <div className="inline-flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm border-b-2">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl text-slate-400">
+              <Calendar size={16} />
+              <span className="text-[10px] font-bold uppercase tracking-wider">Date Filters</span>
+            </div>
+            <div className="flex items-center gap-2 pr-2">
+              <input 
+                type="date" 
+                value={dateRange.from}
+                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                className="text-xs outline-none border-none bg-transparent font-bold text-slate-700 w-28"
+              />
+              <span className="text-slate-300">→</span>
+              <input 
+                type="date" 
+                value={dateRange.to}
+                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                className="text-xs outline-none border-none bg-transparent font-bold text-slate-700 w-28"
+              />
+            </div>
+            <button 
+              onClick={() => setConfirmedDateRange(dateRange)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            >
+              Apply Filter
+            </button>
           </div>
         </div>
       </div>

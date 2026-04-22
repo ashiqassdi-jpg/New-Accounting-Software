@@ -22,15 +22,51 @@ import { motion, AnimatePresence } from 'motion/react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { cn } from '../lib/utils';
 
+import { useAuth } from '../hooks/useAuth';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+
 type ReportTab = 'TRIAL_BALANCE' | 'BALANCE_SHEET' | 'LEDGER_REPORT';
 
 export default function Reports() {
   const { selectedCompany } = useCompany();
+  const { profile } = useAuth();
   const [activeTab, setActiveTab] = useState<ReportTab>('TRIAL_BALANCE');
+
+  const handleExportPDF = (data: any[], title: string, columns: string[], filename: string) => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("Ashiq's Creation", 14, 15);
+    doc.setFontSize(14);
+    doc.text(selectedCompany?.name || '', 14, 25);
+    doc.setFontSize(12);
+    doc.text(title, 14, 35);
+    doc.setFontSize(10);
+    doc.text(`Period: ${dateRange.from} to ${dateRange.to}`, 14, 42);
+    
+    autoTable(doc, {
+      head: [columns],
+      body: data,
+      startY: 50,
+      theme: 'grid',
+      headStyles: { fillColor: [99, 102, 241] }
+    });
+    
+    doc.save(`${filename}.pdf`);
+  };
+
+  const handleExportExcel = (data: any[], filename: string) => {
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb, `${filename}.xlsx`);
+  };
   const [dateRange, setDateRange] = useState({
     from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
     to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
   });
+  const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
 
   return (
     <div className="space-y-10 pb-20">
@@ -47,7 +83,7 @@ export default function Reports() {
             <div className="flex items-center gap-2 pl-3">
               <Calendar size={16} className="text-slate-400" />
             </div>
-            <div className="flex items-center gap-2 pr-4">
+            <div className="flex items-center gap-2 pr-2">
               <input 
                 type="date" 
                 value={dateRange.from}
@@ -62,6 +98,12 @@ export default function Reports() {
                 className="text-xs font-bold text-slate-700 outline-none border-none bg-transparent"
               />
             </div>
+            <button 
+              onClick={() => setConfirmedDateRange(dateRange)}
+              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+            >
+              Apply Filter
+            </button>
           </div>
           
           <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm">
@@ -97,9 +139,30 @@ export default function Reports() {
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
         >
-          {activeTab === 'TRIAL_BALANCE' && <TrialBalance companyId={selectedCompany?.id} dateRange={dateRange} />}
-          {activeTab === 'BALANCE_SHEET' && <BalanceSheet companyId={selectedCompany?.id} dateRange={dateRange} />}
-          {activeTab === 'LEDGER_REPORT' && <LedgerReport companyId={selectedCompany?.id} dateRange={dateRange} />}
+          {activeTab === 'TRIAL_BALANCE' && (
+            <TrialBalance 
+              companyId={selectedCompany?.id} 
+              dateRange={confirmedDateRange} 
+              onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
+              onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
+            />
+          )}
+          {activeTab === 'BALANCE_SHEET' && (
+            <BalanceSheet 
+              companyId={selectedCompany?.id} 
+              dateRange={confirmedDateRange} 
+              onExportPDF={(data: any) => handleExportPDF(data, 'Balance Sheet', ['Account', 'Value'], 'balance_sheet')}
+              onExportExcel={(data: any) => handleExportExcel(data, 'balance_sheet')}
+            />
+          )}
+          {activeTab === 'LEDGER_REPORT' && (
+            <LedgerReport 
+              companyId={selectedCompany?.id} 
+              dateRange={confirmedDateRange} 
+              onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Report', ['Date', 'Voucher #', 'Description', 'Debit', 'Credit'], 'ledger_report')}
+              onExportExcel={(data: any) => handleExportExcel(data, 'ledger_report')}
+            />
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
@@ -123,7 +186,7 @@ function TabButton({ active, onClick, label }: any) {
 }
 
 // Sub-components for Reports
-function TrialBalance({ companyId, dateRange }: any) {
+function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -192,7 +255,22 @@ function TrialBalance({ companyId, dateRange }: any) {
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
       <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
         <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Trial Balance Summary</h3>
-        <Download size={18} className="text-slate-300" />
+        <div className="flex gap-2">
+          <button 
+            onClick={() => onExportExcel(data.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
+            className="p-2 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-lg transition-colors"
+            title="Export to Excel"
+          >
+            <Download size={18} />
+          </button>
+          <button 
+            onClick={() => onExportPDF(data.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
+            className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
+            title="Export to PDF"
+          >
+            <FileText size={18} />
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
@@ -236,7 +314,7 @@ function TrialBalance({ companyId, dateRange }: any) {
   );
 }
 
-function BalanceSheet({ companyId, dateRange }: any) {
+function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
   const [data, setData] = useState({ assets: [], liabilities: [], equity: [] });
   const [loading, setLoading] = useState(true);
 
@@ -332,7 +410,7 @@ function BalanceRow({ label, value, bold }: any) {
   );
 }
 
-function LedgerReport({ companyId, dateRange }: any) {
+function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [accounts, setAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -387,8 +465,17 @@ function LedgerReport({ companyId, dateRange }: any) {
         </div>
         
         <div className="flex gap-3">
-          <button className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all">
-            <Download size={14} /> Export CSV
+          <button 
+            onClick={() => onExportExcel(transactions.map(t => ({ Date: t.date, Voucher: t.voucher?.voucher_no, Description: t.voucher?.narration, Debit: t.debit, Credit: t.credit })))}
+            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all"
+          >
+            <Download size={14} /> Export Excel
+          </button>
+          <button 
+            onClick={() => onExportPDF(transactions.map(t => [t.date, t.voucher?.voucher_no, t.voucher?.narration, t.debit, t.credit]))}
+            className="flex items-center gap-2 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all"
+          >
+            <FileText size={14} /> Export PDF
           </button>
         </div>
       </div>

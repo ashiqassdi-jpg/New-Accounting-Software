@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Receipt, ChevronRight, ArrowRight } from 'lucide-react';
+import { Plus, Search, Filter, Receipt, ChevronRight, ArrowRight, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
 import { Voucher, VoucherType } from '../types';
@@ -155,7 +155,15 @@ export default function Vouchers() {
                             </div>
                           </td>
                           <td className="px-8 py-5 text-sm font-mono font-black text-slate-900 text-right pr-10">
-                            {formatBDT(v.amount)}
+                            <div className="flex items-center justify-end gap-3">
+                              {formatBDT(v.amount)}
+                              <button 
+                                className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                onClick={(e) => { e.stopPropagation(); /* Logic to open view */ }}
+                              >
+                                <Eye size={16} />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}

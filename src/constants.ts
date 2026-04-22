@@ -29,7 +29,7 @@ export const ACCOUNT_GROUPS = [
   { value: 'EXPENSE', label: 'Expenses', color: 'indigo' },
 ];
 
-export const BDT_FORMATTER = new Intl.NumberFormat('en-BD', {
+export const BDT_FORMATTER = new Intl.NumberFormat('en-IN', {
   style: 'currency',
   currency: 'BDT',
   minimumFractionDigits: 2,
@@ -37,6 +37,9 @@ export const BDT_FORMATTER = new Intl.NumberFormat('en-BD', {
 });
 
 export const formatBDT = (amount: number = 0) => {
-  // Ensure we show 2 decimal places and standard separators
-  return BDT_FORMATTER.format(amount || 0).replace('BDT', '৳').trim();
+  // Use en-IN for South Asian comma grouping (1,00,000) and replace BDT with ৳
+  return BDT_FORMATTER.format(amount || 0)
+    .replace('BDT', '৳')
+    .replace('Tk', '৳')
+    .trim();
 };

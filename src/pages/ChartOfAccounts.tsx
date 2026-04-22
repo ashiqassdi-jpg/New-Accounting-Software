@@ -115,6 +115,14 @@ export default function ChartOfAccounts() {
 
   const handleDelete = async (id: string) => {
     if (isModerator) return;
+    
+    // Safety Rule: Check if account has a balance
+    const account = accounts.find(a => a.id === id);
+    if (account && Math.abs(account.current_balance) > 0.001) {
+      alert('Critical Safety Rule: This ledger has an active balance. It cannot be deleted until the balance is cleared via reverse transactions.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to delete this account? It will only work if there are no transactions linked to it.')) return;
     
     setLoading(true);
@@ -330,6 +338,19 @@ export default function ChartOfAccounts() {
                       {ACCOUNT_GROUPS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
                     </select>
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Opening Balance (৳)</label>
+                  <input 
+                    type="number"
+                    step="0.01"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-mono font-bold"
+                    value={openingBalance === 0 ? '' : openingBalance}
+                    onChange={(e) => setOpeningBalance(e.target.value === '' ? 0 : Number(e.target.value))}
+                    placeholder="0.00"
+                  />
+                  <p className="text-[9px] text-slate-400 font-medium pl-1">Initial value when starting the ledger</p>
                 </div>
 
                 <div className="pt-4 flex gap-3">

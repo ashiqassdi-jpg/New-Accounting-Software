@@ -20,6 +20,9 @@ interface AuthContextType {
   loading: boolean;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  canAdd: boolean;
+  canEdit: boolean;
+  canDelete: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -90,8 +93,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile,
     session,
     loading,
-    isAdmin: profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN',
-    isSuperAdmin: profile?.role === 'SUPER_ADMIN',
+    isAdmin: user?.email === 'ashiq.assdi@gmail.com' || profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN',
+    isSuperAdmin: user?.email === 'ashiq.assdi@gmail.com',
+    canAdd: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_add !== false,
+    canEdit: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_edit !== false,
+    canDelete: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_delete !== false,
     signOut,
     refreshProfile,
   };
