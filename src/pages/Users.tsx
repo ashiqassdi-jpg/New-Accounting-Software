@@ -16,6 +16,15 @@ export default function UserManagement() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [inviteData, setInviteData] = useState({
+    email: '',
+    name: '',
+    role: 'MODERATOR' as UserRole,
+    designation: '',
+    companies: [] as string[]
+  });
+  const [isInviting, setIsInviting] = useState(false);
 
   const fetchProfiles = async () => {
     setLoading(true);
@@ -51,7 +60,8 @@ export default function UserManagement() {
         can_delete: editingUser.can_delete,
         name: editingUser.name,
         phone: editingUser.phone,
-        address: editingUser.address
+        address: editingUser.address,
+        designation: editingUser.designation
       })
       .eq('id', editingUser.id);
 
@@ -60,6 +70,57 @@ export default function UserManagement() {
     } else {
       setEditingUser(null);
       fetchProfiles();
+    }
+  };
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsInviting(true);
+
+    try {
+      // In a real environment with Admin SDK, we would create the user in Auth first.
+      // For this demo/preview, we create a profile record. 
+      // If the FK to auth.users is enforced, this will fail if the user doesn't exist.
+      // We'll use a temporary UUID for now to allow the Super Admin to 'add' them to the list.
+      const tempId = crypto.randomUUID();
+      
+      const { error } = await supabase
+        .from('profiles')
+        .insert([{
+          id: tempId,
+          email: inviteData.email,
+          name: inviteData.name,
+          role: inviteData.role,
+          designation: inviteData.designation,
+          companies: inviteData.companies,
+          can_add: true,
+          can_edit: inviteData.role !== 'MODERATOR',
+          can_delete: inviteData.role === 'SUPER_ADMIN',
+          joining_date: new Date().toISOString().split('T')[0]
+        }]);
+
+      if (error) {
+        if (error.code === '23503') {
+          // Foreign key violation means the user doesn't exist in auth.users
+          alert("To add a professional, they must first have an account. Please ask them to Sign Up first, then you can manage their permissions here.");
+        } else {
+          throw error;
+        }
+      } else {
+        setIsInviteModalOpen(false);
+        setInviteData({
+          email: '',
+          name: '',
+          role: 'MODERATOR',
+          designation: '',
+          companies: []
+        });
+        fetchProfiles();
+      }
+    } catch (err: any) {
+      alert(err.message || "Failed to invite professional");
+    } finally {
+      setIsInviting(false);
     }
   };
 
@@ -89,6 +150,7 @@ export default function UserManagement() {
           </p>
         </div>
         <button 
+          onClick={() => setIsInviteModalOpen(true)}
           className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95"
         >
           <UserPlus size={20} />
@@ -135,6 +197,7 @@ export default function UserManagement() {
             <div className="space-y-1">
               <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{p.name}</h3>
               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{p.designation || 'Specialist'}</p>
+              {p.email && <p className="text-[10px] text-indigo-500 font-mono mt-1">{p.email}</p>}
             </div>
             
             <div className="mt-8 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">
@@ -161,7 +224,102 @@ export default function UserManagement() {
         ))}
       </div>
 
-      {/* Permissions Modal */}
+      {/* Invite Modal */}
+      <AnimatePresence>
+        {isInviteModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden"
+            >
+              <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between bg-indigo-600">
+                <div className="flex items-center gap-4 text-white">
+                  <UserPlus size={24} />
+                  <div>
+                    <h2 className="text-xl font-bold">Invite Professional</h2>
+                    <p className="text-xs font-bold text-indigo-100 uppercase tracking-widest">Add a new elite member</p>
+                  </div>
+                </div>
+                <button onClick={() => setIsInviteModalOpen(false)} className="text-indigo-100 hover:text-white transition-colors">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleInvite} className="p-10 space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Professional Email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input 
+                        type="email"
+                        required
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        placeholder="professional@company.com"
+                        value={inviteData.email}
+                        onChange={(e) => setInviteData({ ...inviteData, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Full Name</label>
+                    <input 
+                      required
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                      placeholder="e.g. John Doe"
+                      value={inviteData.name}
+                      onChange={(e) => setInviteData({ ...inviteData, name: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Designation</label>
+                    <input 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                      placeholder="e.g. Audit Manager"
+                      value={inviteData.designation}
+                      onChange={(e) => setInviteData({ ...inviteData, designation: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Assigned Role</label>
+                    <select 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
+                      value={inviteData.role}
+                      onChange={(e) => setInviteData({ ...inviteData, role: e.target.value as UserRole })}
+                    >
+                      <option value="MODERATOR">Moderator</option>
+                      <option value="ADMIN">Administrator</option>
+                      <option value="SUPER_ADMIN">System Architect</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-slate-50 flex gap-4">
+                  <button 
+                    type="button"
+                    onClick={() => setIsInviteModalOpen(false)}
+                    className="flex-1 px-8 py-4 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={isInviting}
+                    className="flex-1 px-12 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95 disabled:opacity-50"
+                  >
+                    {isInviting ? 'Sending...' : 'Invite Now'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       <AnimatePresence>
         {editingUser && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">

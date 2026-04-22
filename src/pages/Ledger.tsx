@@ -4,20 +4,24 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
+import { useAuth } from '../hooks/useAuth';
 import { formatBDT } from '../constants';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
+import VoucherPrintPreview from '../components/VoucherPrintPreview';
 
 export default function Ledger() {
+  const { profile } = useAuth();
   const { selectedCompany } = useCompany();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [viewingVoucher, setViewingVoucher] = useState<any>(null);
 
   useEffect(() => {
     if (selectedCompany) {
@@ -119,7 +123,15 @@ export default function Ledger() {
                     {t.debit > 0 ? formatBDT(t.debit) : '-'}
                   </td>
                   <td className="px-10 py-5 text-sm font-mono font-black text-emerald-600 text-right pr-12">
-                    {t.credit > 0 ? formatBDT(t.credit) : '-'}
+                    <div className="flex items-center justify-end gap-3">
+                      {t.credit > 0 ? formatBDT(t.credit) : '-'}
+                      <button 
+                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                        onClick={() => setViewingVoucher(t.voucher)}
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -134,6 +146,16 @@ export default function Ledger() {
           </table>
         </div>
       </div>
+      <AnimatePresence>
+        {viewingVoucher && (
+          <VoucherPrintPreview 
+            voucher={viewingVoucher}
+            company={selectedCompany}
+            profile={profile}
+            onClose={() => setViewingVoucher(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

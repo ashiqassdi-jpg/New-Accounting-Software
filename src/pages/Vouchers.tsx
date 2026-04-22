@@ -10,16 +10,20 @@ import { useCompany } from '../hooks/useCompany';
 import { Voucher, VoucherType } from '../types';
 import { formatBDT, VOUCHER_TYPES } from '../constants';
 import VoucherForm from '../components/VoucherForm';
+import VoucherPrintPreview from '../components/VoucherPrintPreview';
+import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 
 export default function Vouchers() {
+  const { user, profile } = useAuth();
   const { selectedCompany } = useCompany();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFormType, setActiveFormType] = useState<VoucherType | null>(null);
   const [search, setSearch] = useState('');
+  const [viewingVoucher, setViewingVoucher] = useState<Voucher | null>(null);
 
   const fetchVouchers = async () => {
     if (!selectedCompany) return;
@@ -159,7 +163,10 @@ export default function Vouchers() {
                               {formatBDT(v.amount)}
                               <button 
                                 className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                                onClick={(e) => { e.stopPropagation(); /* Logic to open view */ }}
+                                onClick={(e) => { 
+                                  e.stopPropagation(); 
+                                  setViewingVoucher(v);
+                                }}
                               >
                                 <Eye size={16} />
                               </button>
@@ -180,6 +187,16 @@ export default function Vouchers() {
               </div>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {viewingVoucher && (
+          <VoucherPrintPreview 
+            voucher={viewingVoucher}
+            company={selectedCompany}
+            profile={profile}
+            onClose={() => setViewingVoucher(null)}
+          />
         )}
       </AnimatePresence>
     </div>

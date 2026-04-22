@@ -13,7 +13,8 @@ import {
   Filter,
   Search,
   ChevronRight,
-  Printer
+  Printer,
+  Eye
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { supabase } from '../lib/supabase';
@@ -26,6 +27,8 @@ import { useAuth } from '../hooks/useAuth';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+
+import VoucherPrintPreview from '../components/VoucherPrintPreview';
 
 type ReportTab = 'TRIAL_BALANCE' | 'BALANCE_SHEET' | 'LEDGER_REPORT';
 
@@ -411,10 +414,13 @@ function BalanceRow({ label, value, bold }: any) {
 }
 
 function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+  const { profile } = useAuth();
+  const { selectedCompany } = useCompany();
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [accounts, setAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [viewingVoucher, setViewingVoucher] = useState<any>(null);
 
   useEffect(() => {
     if (companyId) {
@@ -489,7 +495,7 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
                 <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voucher #</th>
                 <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
                 <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Debit</th>
-                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Credit</th>
+                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest pr-12">Credit</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -503,7 +509,17 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
                   <td className="px-8 py-4 text-sm font-mono font-bold text-slate-900">{t.voucher?.voucher_no}</td>
                   <td className="px-8 py-4 text-sm font-medium text-slate-500">{t.voucher?.narration}</td>
                   <td className="px-8 py-4 text-sm font-mono font-black text-rose-600 text-right">{t.debit > 0 ? formatBDT(t.debit) : '-'}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-black text-emerald-600 text-right">{t.credit > 0 ? formatBDT(t.credit) : '-'}</td>
+                  <td className="px-8 py-4 text-sm font-mono font-black text-emerald-600 text-right pr-12">
+                    <div className="flex items-center justify-end gap-3 text-right">
+                      {t.credit > 0 ? formatBDT(t.credit) : '-'}
+                      <button 
+                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                        onClick={() => setViewingVoucher(t.voucher)}
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
               {transactions.length === 0 && (
@@ -522,6 +538,16 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           <p className="text-slate-400 text-sm font-medium">Select a ledger from the cockpit above to analyze historical flows.</p>
         </div>
       )}
+      <AnimatePresence>
+        {viewingVoucher && (
+          <VoucherPrintPreview 
+            voucher={viewingVoucher}
+            company={selectedCompany}
+            profile={profile}
+            onClose={() => setViewingVoucher(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

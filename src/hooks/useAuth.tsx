@@ -35,18 +35,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (u: User) => {
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
-      .eq('id', userId)
+      .eq('id', u.id)
       .single();
 
     if (error) {
       console.error('Error fetching profile:', error);
+      // If it's the super admin, create a profile automatically if missing
+      if (u.email === 'ashiq.assdi@gmail.com') {
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .insert([{
+            id: u.id,
+            name: 'Super Admin',
+            role: 'SUPER_ADMIN',
+            can_add: true,
+            can_edit: true,
+            can_delete: true
+          }])
+          .select()
+          .single();
+        return newProfile ? { ...newProfile, email: u.email } as UserProfile : null;
+      }
       return null;
     }
-    return data as UserProfile;
+    return { ...data, email: u.email } as UserProfile;
   };
 
   useEffect(() => {
@@ -57,7 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        fetchProfile(session.user).then(setProfile);
       }
       setLoading(false);
     });
@@ -67,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id).then(setProfile);
+        fetchProfile(session.user).then(setProfile);
       } else {
         setProfile(null);
       }
@@ -83,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      const p = await fetchProfile(user.id);
+      const p = await fetchProfile(user);
       setProfile(p);
     }
   };
@@ -94,7 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     session,
     loading,
     isAdmin: user?.email === 'ashiq.assdi@gmail.com' || profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN',
-    isSuperAdmin: user?.email === 'ashiq.assdi@gmail.com',
+    isSuperAdmin: user?.email === 'ashiq.assdi@gmail.com' || profile?.role === 'SUPER_ADMIN',
     canAdd: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_add !== false,
     canEdit: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_edit !== false,
     canDelete: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_delete !== false,
