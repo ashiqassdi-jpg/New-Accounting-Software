@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { UserProfile, UserRole } from '../types';
+import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 
@@ -26,13 +27,25 @@ export default function UserManagement() {
   });
   const [isInviting, setIsInviting] = useState(false);
 
+  const { isSuperAdmin } = useAuth();
+
   const fetchProfiles = async () => {
+    if (!isSuperAdmin) return;
+    
     setLoading(true);
-    const { data } = await supabase
+    // Explicitly fetching all profiles. If you see only your own, 
+    // please ensure Supabase RLS policies for 'profiles' table allow 
+    // SUPER_ADMINs or all users to SELECT records.
+    const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .order('name');
-    setProfiles(data || []);
+
+    if (error) {
+      console.error('Error fetching global profiles:', error);
+    } else {
+      setProfiles(data || []);
+    }
     setLoading(false);
   };
 

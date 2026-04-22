@@ -42,26 +42,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .eq('id', u.id)
       .single();
 
+    if (error && error.code === 'PGRST116') { // No record found
+      console.log('Profile missing, creating automatic profile for user:', u.email);
+      
+      const isInitialSuperAdmin = u.email === 'ashiq.assdi@gmail.com';
+      
+      const { data: newProfile, error: insertError } = await supabase
+        .from('profiles')
+        .insert([{
+          id: u.id,
+          name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'New User',
+          email: u.email,
+          role: isInitialSuperAdmin ? 'SUPER_ADMIN' : 'MODERATOR',
+          can_add: true,
+          can_edit: isInitialSuperAdmin,
+          can_delete: isInitialSuperAdmin,
+          joining_date: new Date().toISOString().split('T')[0]
+        }])
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error('Error creating automatic profile:', insertError);
+        return null;
+      }
+      
+      return { ...newProfile, email: u.email } as UserProfile;
+    }
+
     if (error) {
       console.error('Error fetching profile:', error);
-      // If it's the super admin, create a profile automatically if missing
-      if (u.email === 'ashiq.assdi@gmail.com') {
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .insert([{
-            id: u.id,
-            name: 'Super Admin',
-            role: 'SUPER_ADMIN',
-            can_add: true,
-            can_edit: true,
-            can_delete: true
-          }])
-          .select()
-          .single();
-        return newProfile ? { ...newProfile, email: u.email } as UserProfile : null;
-      }
       return null;
     }
+    
     return { ...data, email: u.email } as UserProfile;
   };
 
