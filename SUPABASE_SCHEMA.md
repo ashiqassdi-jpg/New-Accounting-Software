@@ -10,6 +10,10 @@ CREATE TABLE companies (
   address TEXT,
   tax_id TEXT,
   bin TEXT,
+  opening_cash DECIMAL(15,2) DEFAULT 0,
+  opening_bank DECIMAL(15,2) DEFAULT 0,
+  opening_bkash DECIMAL(15,2) DEFAULT 0,
+  opening_nagad DECIMAL(15,2) DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id)
 );
@@ -21,6 +25,7 @@ CREATE TABLE profiles (
   phone TEXT,
   address TEXT,
   designation TEXT,
+  joining_date DATE,
   role TEXT DEFAULT 'MODERATOR' CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'MODERATOR')),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -37,6 +42,34 @@ CREATE TABLE accounts (
   current_balance DECIMAL(15,2) DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Trigger to update account balance
+CREATE OR REPLACE FUNCTION update_account_balance()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF (TG_OP = 'INSERT') THEN
+    UPDATE accounts 
+    SET current_balance = current_balance + (NEW.debit - NEW.credit)
+    WHERE id = NEW.account_id;
+  ELSIF (TG_OP = 'DELETE') THEN
+    UPDATE accounts 
+    SET current_balance = current_balance - (OLD.debit - OLD.credit)
+    WHERE id = OLD.account_id;
+  ELSIF (TG_OP = 'UPDATE') THEN
+    UPDATE accounts 
+    SET current_balance = current_balance - (OLD.debit - OLD.credit)
+    WHERE id = OLD.account_id;
+    UPDATE accounts 
+    SET current_balance = current_balance + (NEW.debit - NEW.credit)
+    WHERE id = NEW.account_id;
+  END IF;
+  RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_balance
+AFTER INSERT OR UPDATE OR DELETE ON transactions
+FOR EACH ROW EXECUTE FUNCTION update_account_balance();
 
 -- Vouchers Table
 CREATE TABLE vouchers (
@@ -72,32 +105,41 @@ ALTER TABLE vouchers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 
 -- Policies (Simplified for demo - in production use more granular relational checks)
-CREATE POLICY "Users can see all companies" ON companies FOR SELECT USING (true);
-CREATE POLICY "Users can see all profiles" ON profiles FOR SELECT USING (true);
-CREATE POLICY "Users can see all accounts" ON accounts FOR SELECT USING (true);
-CREATE POLICY "Users can see all vouchers" ON vouchers FOR SELECT USING (true);
-CREATE POLICY "Users can see all transactions" ON transactions FOR SELECT USING (true);
+-- Companies
+CREATE POLICY "Enable all for all users" ON companies FOR ALL USING (true) WITH CHECK (true);
+
+-- Profiles
+CREATE POLICY "Enable all for all users" ON profiles FOR ALL USING (true) WITH CHECK (true);
+
+-- Accounts
+CREATE POLICY "Enable all for all users" ON accounts FOR ALL USING (true) WITH CHECK (true);
+
+-- Vouchers
+CREATE POLICY "Enable all for all users" ON vouchers FOR ALL USING (true) WITH CHECK (true);
+
+-- Transactions
+CREATE POLICY "Enable all for all users" ON transactions FOR ALL USING (true) WITH CHECK (true);
 
 -- Functions
 CREATE OR REPLACE FUNCTION initialize_chart_of_accounts() 
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO accounts (company_id, name, code, type, opening_balance) VALUES
-  (NEW.id, 'Cash', '1001', 'ASSET', 0),
-  (NEW.id, 'Bank', '1002', 'ASSET', 0),
-  (NEW.id, 'bKash', '1003', 'ASSET', 0),
-  (NEW.id, 'Nagad', '1004', 'ASSET', 0),
-  (NEW.id, 'Accounts Receivable', '1201', 'ASSET', 0),
-  (NEW.id, 'Inventory', '1301', 'ASSET', 0),
-  (NEW.id, 'Accounts Payable', '2001', 'LIABILITY', 0),
-  (NEW.id, 'Loan', '2101', 'LIABILITY', 0),
-  (NEW.id, 'Owner Capital', '3001', 'EQUITY', 0),
-  (NEW.id, 'Sales Revenue', '4001', 'INCOME', 0),
-  (NEW.id, 'Cost of Goods Sold', '5001', 'EXPENSE', 0),
-  (NEW.id, 'Marketing Expense', '5002', 'EXPENSE', 0),
-  (NEW.id, 'Salaries Expense', '5003', 'EXPENSE', 0),
-  (NEW.id, 'Utilities Expense', '5004', 'EXPENSE', 0),
-  (NEW.id, 'Rent Expense', '5005', 'EXPENSE', 0);
+  INSERT INTO accounts (company_id, name, code, type, opening_balance, current_balance) VALUES
+  (NEW.id, 'Cash', '1001', 'ASSET', NEW.opening_cash, NEW.opening_cash),
+  (NEW.id, 'Bank', '1002', 'ASSET', NEW.opening_bank, NEW.opening_bank),
+  (NEW.id, 'bKash', '1003', 'ASSET', NEW.opening_bkash, NEW.opening_bkash),
+  (NEW.id, 'Nagad', '1004', 'ASSET', NEW.opening_nagad, NEW.opening_nagad),
+  (NEW.id, 'Accounts Receivable', '1201', 'ASSET', 0, 0),
+  (NEW.id, 'Inventory', '1301', 'ASSET', 0, 0),
+  (NEW.id, 'Accounts Payable', '2001', 'LIABILITY', 0, 0),
+  (NEW.id, 'Loan', '2101', 'LIABILITY', 0, 0),
+  (NEW.id, 'Owner Capital', '3001', 'EQUITY', 0, 0),
+  (NEW.id, 'Sales Revenue', '4001', 'INCOME', 0, 0),
+  (NEW.id, 'Cost of Goods Sold', '5001', 'EXPENSE', 0, 0),
+  (NEW.id, 'Marketing Expense', '5002', 'EXPENSE', 0, 0),
+  (NEW.id, 'Salaries Expense', '5003', 'EXPENSE', 0, 0),
+  (NEW.id, 'Utilities Expense', '5004', 'EXPENSE', 0, 0),
+  (NEW.id, 'Rent Expense', '5005', 'EXPENSE', 0, 0);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

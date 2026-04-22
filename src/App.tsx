@@ -13,6 +13,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Pages
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import ChartOfAccounts from './pages/ChartOfAccounts';
 import Vouchers from './pages/Vouchers';
 import Ledger from './pages/Ledger';
 import Reports from './pages/Reports';
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="/" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="vouchers" element={<Vouchers />} />
+              <Route path="coa" element={<ChartOfAccounts />} />
               <Route path="ledger" element={<Ledger />} />
               <Route path="reports" element={<Reports />} />
               <Route path="companies" element={<Companies />} />

@@ -11,8 +11,9 @@ export interface UserProfile {
   phone?: string;
   address?: string;
   designation?: string;
+  joining_date?: string;
   role: UserRole;
-  companies?: string[]; // IDs of companies this user can access
+  companies?: string[];
 }
 
 export interface Company {
@@ -21,6 +22,10 @@ export interface Company {
   address?: string;
   tax_id?: string;
   bin?: string;
+  opening_cash?: number;
+  opening_bank?: number;
+  opening_bkash?: number;
+  opening_nagad?: number;
   created_at: string;
   created_by: string;
 }

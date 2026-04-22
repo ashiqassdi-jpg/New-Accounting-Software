@@ -21,20 +21,22 @@ export const PAYMENT_CHANNELS: { value: PaymentChannel; label: string }[] = [
   { value: 'NAGAD', label: 'Nagad' },
 ];
 
-export const ACCOUNT_TYPES = [
-  { value: 'ASSET', label: 'Assets' },
-  { value: 'LIABILITY', label: 'Liabilities' },
-  { value: 'EQUITY', label: 'Equity' },
-  { value: 'INCOME', label: 'Income' },
-  { value: 'EXPENSE', label: 'Expenses' },
+export const ACCOUNT_GROUPS = [
+  { value: 'ASSET', label: 'Assets', color: 'slate' },
+  { value: 'LIABILITY', label: 'Liabilities', color: 'rose' },
+  { value: 'EQUITY', label: 'Equity', color: 'amber' },
+  { value: 'INCOME', label: 'Income', color: 'emerald' },
+  { value: 'EXPENSE', label: 'Expenses', color: 'indigo' },
 ];
 
 export const BDT_FORMATTER = new Intl.NumberFormat('en-BD', {
   style: 'currency',
   currency: 'BDT',
   minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
 });
 
-export const formatBDT = (amount: number) => {
-  return BDT_FORMATTER.format(amount).replace('BDT', '৳');
+export const formatBDT = (amount: number = 0) => {
+  // Ensure we show 2 decimal places and standard separators
+  return BDT_FORMATTER.format(amount || 0).replace('BDT', '৳').trim();
 };

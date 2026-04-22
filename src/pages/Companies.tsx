@@ -10,9 +10,10 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { Company } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../lib/utils';
 
 export default function Companies() {
-  const { companies, refreshCompanies } = useCompany();
+  const { companies, refreshCompanies, setSelectedCompany, selectedCompany } = useCompany();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
@@ -23,6 +24,10 @@ export default function Companies() {
   const [address, setAddress] = useState('');
   const [taxId, setTaxId] = useState('');
   const [bin, setBin] = useState('');
+  const [openingCash, setOpeningCash] = useState(0);
+  const [openingBank, setOpeningBank] = useState(0);
+  const [openingBkash, setOpeningBkash] = useState(0);
+  const [openingNagad, setOpeningNagad] = useState(0);
 
   const openModal = (company?: Company) => {
     if (company) {
@@ -31,12 +36,20 @@ export default function Companies() {
       setAddress(company.address || '');
       setTaxId(company.tax_id || '');
       setBin(company.bin || '');
+      setOpeningCash(company.opening_cash || 0);
+      setOpeningBank(company.opening_bank || 0);
+      setOpeningBkash(company.opening_bkash || 0);
+      setOpeningNagad(company.opening_nagad || 0);
     } else {
       setEditingCompany(null);
       setName('');
       setAddress('');
       setTaxId('');
       setBin('');
+      setOpeningCash(0);
+      setOpeningBank(0);
+      setOpeningBkash(0);
+      setOpeningNagad(0);
     }
     setIsModalOpen(true);
   };
@@ -46,32 +59,48 @@ export default function Companies() {
     if (!user) return;
     setLoading(true);
 
-    const companyData = {
-      name,
-      address,
-      tax_id: taxId,
-      bin,
-      created_by: user.id,
-    };
+    try {
+      const companyData = {
+        name,
+        address,
+        tax_id: taxId,
+        bin,
+        opening_cash: openingCash,
+        opening_bank: openingBank,
+        opening_bkash: openingBkash,
+        opening_nagad: openingNagad,
+        created_by: user.id,
+      };
 
-    let error;
-    if (editingCompany) {
-      const { error: updateError } = await supabase
-        .from('companies')
-        .update(companyData)
-        .eq('id', editingCompany.id);
-      error = updateError;
-    } else {
-      const { error: insertError } = await supabase
-        .from('companies')
-        .insert([companyData]);
-      error = insertError;
+      if (editingCompany) {
+        const { error } = await supabase
+          .from('companies')
+          .update(companyData)
+          .eq('id', editingCompany.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('companies')
+          .insert([companyData]);
+        if (error) throw error;
+      }
+
+      setIsModalOpen(false);
+      await refreshCompanies();
+    } catch (error: any) {
+      alert(error.message || 'Error occurred while saving company.');
+    } finally {
+      setLoading(false);
     }
+  };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this company? All associated data (accounts, vouchers, transactions) will be permanently deleted.')) return;
+    setLoading(true);
+    const { error } = await supabase.from('companies').delete().eq('id', id);
     if (error) {
       alert(error.message);
     } else {
-      setIsModalOpen(false);
       refreshCompanies();
     }
     setLoading(false);
@@ -81,61 +110,89 @@ export default function Companies() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 font-sans tracking-tight">
-            Companies
+          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
+            Business Portfolio
           </h1>
-          <p className="text-gray-500 mt-1">
-            Manage your multiple business entities
+          <p className="text-slate-500 mt-1 font-medium">
+            Manage multiple organizational entities from a single cockpit
           </p>
         </div>
         <button 
           onClick={() => openModal()}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-all active:scale-95"
+          className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
         >
           <Plus size={20} />
-          <span>Add Company</span>
+          <span>Incorporate New</span>
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {companies.map((company) => (
           <motion.div 
             key={company.id}
             layout
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative group"
+            className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="bg-indigo-50 p-3 rounded-xl">
-                <Building2 className="text-indigo-600" size={24} />
+            <div className="flex items-start justify-between mb-8">
+              <div className="bg-indigo-50 p-4 rounded-2xl shadow-inner group-hover:bg-indigo-600 transition-all duration-500">
+                <Building2 className="text-indigo-600 group-hover:text-white transition-colors" size={28} />
               </div>
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button 
-                  onClick={() => openModal(company)}
-                  className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                >
-                  <Edit3 size={18} />
-                </button>
-              </div>
+              <button 
+                onClick={() => openModal(company)}
+                className="p-2.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+              >
+                <Edit3 size={18} />
+              </button>
+              <button 
+                onClick={() => handleDelete(company.id)}
+                className="p-2.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+              >
+                <Trash2 size={18} />
+              </button>
             </div>
             
-            <h3 className="font-bold text-lg text-gray-900 truncate">
-              {company.name}
-            </h3>
-            <p className="text-sm text-gray-500 line-clamp-2 min-h-[40px] mt-1">
-              {company.address || 'No address specified'}
-            </p>
-            
-            <div className="mt-4 pt-4 border-t border-gray-50 flex gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-xl text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+                  {company.name}
+                </h3>
+                {selectedCompany?.id === company.id && (
+                  <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest border border-emerald-100">
+                    Active
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-slate-400 font-medium line-clamp-2 min-h-[40px]">
+                {company.address || 'Location profile not initialized'}
+              </p>
+            </div>
+
+            <div className="mt-8 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Tax ID</span>
-                <span className="text-sm font-medium text-gray-700">{company.tax_id || 'N/A'}</span>
+                <span className="text-[10px] font-bold text-slate-300 uppercase block tracking-widest mb-1">Tax ID</span>
+                <span className="text-xs font-mono font-bold text-slate-600">{company.tax_id || 'NOT SET'}</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">BIN</span>
-                <span className="text-sm font-medium text-gray-700">{company.bin || 'N/A'}</span>
+                <span className="text-[10px] font-bold text-slate-300 uppercase block tracking-widest mb-1">BIN</span>
+                <span className="text-xs font-mono font-bold text-slate-600">{company.bin || 'NOT SET'}</span>
               </div>
+            </div>
+
+            <div className="mt-8">
+              <button
+                disabled={selectedCompany?.id === company.id}
+                onClick={() => setSelectedCompany(company)}
+                className={cn(
+                  "w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2",
+                  selectedCompany?.id === company.id
+                    ? "bg-slate-50 text-slate-400 cursor-not-allowed"
+                    : "bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-sm"
+                )}
+              >
+                {selectedCompany?.id === company.id ? 'Current Active Entity' : 'Switch To Entity'}
+              </button>
             </div>
           </motion.div>
         ))}
@@ -216,6 +273,48 @@ export default function Companies() {
                       onChange={(e) => setBin(e.target.value)}
                       placeholder="Business Identification Number"
                     />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block border-b border-gray-100 pb-2">Opening Balances (Optional)</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cash</label>
+                      <input 
+                        type="number"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                        value={openingCash}
+                        onChange={(e) => setOpeningCash(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bank</label>
+                      <input 
+                        type="number"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                        value={openingBank}
+                        onChange={(e) => setOpeningBank(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">bKash</label>
+                      <input 
+                        type="number"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                        value={openingBkash}
+                        onChange={(e) => setOpeningBkash(Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nagad</label>
+                      <input 
+                        type="number"
+                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                        value={openingNagad}
+                        onChange={(e) => setOpeningNagad(Number(e.target.value))}
+                      />
+                    </div>
                   </div>
                 </div>
 
