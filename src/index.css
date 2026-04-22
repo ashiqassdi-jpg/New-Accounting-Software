@@ -34,3 +34,15 @@
     @apply bg-gray-200 rounded-full hover:bg-gray-300 transition-colors;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    @apply bg-white;
+  }
+  main {
+    @apply p-0 m-0 !overflow-visible !max-h-none !h-auto;
+  }
+}

@@ -30,6 +30,10 @@ CREATE TABLE profiles (
   designation TEXT,
   joining_date DATE,
   role TEXT DEFAULT 'MODERATOR' CHECK (role IN ('SUPER_ADMIN', 'ADMIN', 'MODERATOR')),
+  companies UUID[] DEFAULT '{}',
+  can_add BOOLEAN DEFAULT true,
+  can_edit BOOLEAN DEFAULT true,
+  can_delete BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

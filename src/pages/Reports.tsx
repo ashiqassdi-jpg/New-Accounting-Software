@@ -48,12 +48,23 @@ export default function Reports() {
     doc.setFontSize(10);
     doc.text(`Period: ${dateRange.from} to ${dateRange.to}`, 14, 42);
     
+    // Format numbers for PDF export
+    const formattedData = data.map(row => 
+      row.map((cell: any) => {
+        if (typeof cell === 'number') {
+          return new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(cell);
+        }
+        return cell;
+      })
+    );
+    
     autoTable(doc, {
       head: [columns],
-      body: data,
+      body: formattedData,
       startY: 50,
       theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241] }
+      headStyles: { fillColor: [99, 102, 241] },
+      styles: { fontSize: 8 }
     });
     
     doc.save(`${filename}.pdf`);
@@ -109,7 +120,11 @@ export default function Reports() {
             </button>
           </div>
           
-          <button className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm">
+          <button 
+            onClick={() => window.print()}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+            title="Print Report"
+          >
             <Printer size={20} />
           </button>
         </div>
@@ -154,7 +169,7 @@ export default function Reports() {
             <BalanceSheet 
               companyId={selectedCompany?.id} 
               dateRange={confirmedDateRange} 
-              onExportPDF={(data: any) => handleExportPDF(data, 'Balance Sheet', ['Account', 'Value'], 'balance_sheet')}
+              onExportPDF={(data: any) => handleExportPDF(data, 'Balance Sheet', ['Category', 'Account', 'Amount'], 'balance_sheet')}
               onExportExcel={(data: any) => handleExportExcel(data, 'balance_sheet')}
             />
           )}
@@ -256,22 +271,22 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
+      <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between no-print">
         <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Trial Balance Summary</h3>
         <div className="flex gap-2">
           <button 
             onClick={() => onExportExcel(data.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
-            className="p-2 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-lg transition-colors"
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all hover:bg-slate-100"
             title="Export to Excel"
           >
-            <Download size={18} />
+            <Download size={20} />
           </button>
           <button 
             onClick={() => onExportPDF(data.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
-            className="p-2 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-lg transition-colors"
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all hover:bg-slate-100"
             title="Export to PDF"
           >
-            <FileText size={18} />
+            <FileText size={20} />
           </button>
         </div>
       </div>
@@ -348,8 +363,44 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
 
   if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Compiling Balance Sheet...</div>;
 
+  const prepareExportData = () => {
+    return [
+      ...data.assets.filter((a: any) => a.current_balance !== 0).map((a: any) => ({ Category: 'Asset', Account: a.name, Amount: Number(a.current_balance) || 0 })),
+      { Category: 'Total Assets', Account: '', Amount: Number(totalAssets) || 0 },
+      ...data.liabilities.filter((a: any) => a.current_balance !== 0).map((a: any) => ({ Category: 'Liability', Account: a.name, Amount: Math.abs(Number(a.current_balance) || 0) })),
+      { Category: 'Total Liabilities', Account: '', Amount: Math.abs(Number(totalLiabilities) || 0) },
+      ...data.equity.filter((a: any) => a.current_balance !== 0).map((a: any) => ({ Category: 'Equity', Account: a.name, Amount: Math.abs(Number(a.current_balance) || 0) })),
+      { Category: 'Total Equity', Account: '', Amount: Math.abs(Number(totalEquity) || 0) },
+      { Category: 'Liabilities & Equity', Account: '', Amount: Math.abs(Number(totalLiabilities) || 0) + Math.abs(Number(totalEquity) || 0) }
+    ];
+  };
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="space-y-8">
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-8 flex items-center justify-between no-print">
+        <div>
+          <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Balance Sheet Overview</h3>
+          <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Statement of Financial Position</p>
+        </div>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => onExportExcel(prepareExportData())}
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all hover:bg-slate-100"
+            title="Export to Excel"
+          >
+            <Download size={20} />
+          </button>
+          <button 
+            onClick={() => onExportPDF(prepareExportData().map(row => [row.Category, row.Account, row.Amount]))}
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all hover:bg-slate-100"
+            title="Export to PDF"
+          >
+            <FileText size={20} />
+          </button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-10">
         <h3 className="font-bold text-emerald-600 uppercase text-xs tracking-widest mb-8 flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -399,6 +450,7 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
         <div className="bg-slate-900 text-white rounded-[2rem] p-10 shadow-xl shadow-slate-200">
            <BalanceRow label="Total Liabilities & Equity" value={Math.abs(totalLiabilities) + Math.abs(totalEquity)} bold />
         </div>
+      </div>
       </div>
     </div>
   );
@@ -470,18 +522,18 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           </select>
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-3 no-print">
           <button 
             onClick={() => onExportExcel(transactions.map(t => ({ Date: t.date, Voucher: t.voucher?.voucher_no, Description: t.voucher?.narration, Debit: t.debit, Credit: t.credit })))}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all border border-indigo-100"
           >
-            <Download size={14} /> Export Excel
+            <Download size={16} /> Export Excel
           </button>
           <button 
             onClick={() => onExportPDF(transactions.map(t => [t.date, t.voucher?.voucher_no, t.voucher?.narration, t.debit, t.credit]))}
-            className="flex items-center gap-2 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all"
+            className="flex items-center gap-2 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all border border-rose-100"
           >
-            <FileText size={14} /> Export PDF
+            <FileText size={16} /> Export PDF
           </button>
         </div>
       </div>

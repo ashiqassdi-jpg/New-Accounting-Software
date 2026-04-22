@@ -56,7 +56,7 @@ export default function Sidebar() {
   return (
     <aside 
       className={cn(
-        "flex flex-col bg-white border-r border-slate-100 transition-all duration-300 relative h-screen shadow-[1px_0_0_0_rgba(0,0,0,0.02)]",
+        "flex flex-col bg-white border-r border-slate-100 transition-all duration-300 relative h-screen shadow-[1px_0_0_0_rgba(0,0,0,0.02)] no-print",
         collapsed ? "w-20" : "w-72"
       )}
     >

@@ -15,7 +15,8 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
-  Coins
+  Coins,
+  Printer
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -116,7 +117,7 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="inline-flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm border-b-2">
+          <div className="inline-flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm border-b-2 no-print">
             <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl text-slate-400">
               <Calendar size={16} />
               <span className="text-[10px] font-bold uppercase tracking-wider">Date Filters</span>
@@ -143,6 +144,14 @@ export default function Dashboard() {
               Apply Filter
             </button>
           </div>
+
+          <button 
+            onClick={() => window.print()}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm no-print"
+            title="Print Dashboard"
+          >
+            <Printer size={20} />
+          </button>
         </div>
       </div>
 

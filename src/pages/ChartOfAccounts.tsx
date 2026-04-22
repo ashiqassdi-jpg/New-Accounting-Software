@@ -4,7 +4,10 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit3, Trash2, ListTree, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, Search } from 'lucide-react';
+import { 
+  Plus, Edit3, Trash2, ListTree, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, Search, 
+  Download, FileText, Printer 
+} from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
@@ -12,6 +15,10 @@ import { Account } from '../types';
 import { ACCOUNT_GROUPS, formatBDT } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import { format } from 'date-fns';
 
 export default function ChartOfAccounts() {
   const { selectedCompany } = useCompany();
@@ -116,16 +123,38 @@ export default function ChartOfAccounts() {
   const handleDelete = async (id: string) => {
     if (isModerator) return;
     
-    // Safety Rule: Check if account has a balance
     const account = accounts.find(a => a.id === id);
-    if (account && Math.abs(account.current_balance) > 0.001) {
+    if (!account) return;
+
+    if (Math.abs(account.current_balance) > 0.001) {
       alert('Critical Safety Rule: This ledger has an active balance. It cannot be deleted until the balance is cleared via reverse transactions.');
       return;
     }
 
-    if (!confirm('Are you sure you want to delete this account? It will only work if there are no transactions linked to it.')) return;
-    
+    // Check if any transactions actually exist for this account (even if balance is 0)
     setLoading(true);
+    const { count, error: countError } = await supabase
+      .from('transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('account_id', id);
+
+    if (countError) {
+      console.error(countError);
+      setLoading(false);
+      return;
+    }
+
+    if (count && count > 0) {
+      alert(`Safety Violation: This ledger (${account.name}) cannot be deleted because it has ${count} historical transactions linked to it. For data integrity, ledgers with transactional history must be preserved.`);
+      setLoading(false);
+      return;
+    }
+
+    if (!confirm(`Are you sure you want to permanently delete the ledger "${account.name}"? This action cannot be undone.`)) {
+      setLoading(false);
+      return;
+    }
+    
     const { error } = await supabase
       .from('accounts')
       .delete()
@@ -153,6 +182,55 @@ export default function ChartOfAccounts() {
       .reduce((sum, acc) => sum + (acc.opening_balance || 0), 0);
   };
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("Ashiq's Creation", 14, 15);
+    doc.setFontSize(14);
+    doc.text(selectedCompany?.name || '', 14, 25);
+    doc.setFontSize(12);
+    doc.text('Chart of Accounts', 14, 35);
+    
+    const columns = ['Type', 'Code', 'Account Name', 'Opening Balance'];
+    const body: any[] = [];
+    
+    ACCOUNT_GROUPS.forEach(group => {
+      const groupAccounts = accounts.filter(acc => acc.type === group.value);
+      groupAccounts.forEach(acc => {
+        body.push([
+          group.label,
+          acc.code,
+          acc.name,
+          new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(acc.opening_balance)
+        ]);
+      });
+    });
+
+    autoTable(doc, {
+      head: [columns],
+      body: body,
+      startY: 40,
+      theme: 'grid',
+      headStyles: { fillColor: [99, 102, 241] },
+      styles: { fontSize: 8 }
+    });
+
+    doc.save(`chart_of_accounts_${format(new Date(), 'yyyyMMdd')}.pdf`);
+  };
+
+  const handleExportExcel = () => {
+    const data = accounts.map(acc => ({
+      Type: acc.type,
+      Code: acc.code,
+      'Account Name': acc.name,
+      'Opening Balance': acc.opening_balance
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "COA");
+    XLSX.writeFile(wb, `chart_of_accounts.xlsx`);
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -164,15 +242,38 @@ export default function ChartOfAccounts() {
             Build and manage your professional ledger structure
           </p>
         </div>
-        {!isModerator && (
+        <div className="flex items-center gap-3 no-print">
           <button 
-            onClick={() => openModal()}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+            onClick={() => window.print()}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+            title="Print List"
           >
-            <Plus size={20} />
-            <span>Add Ledger</span>
+            <Printer size={20} />
           </button>
-        )}
+          <button 
+            onClick={handleExportExcel}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
+            title="Export Excel"
+          >
+            <Download size={20} />
+          </button>
+          <button 
+            onClick={handleExportPDF}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
+            title="Export PDF"
+          >
+            <FileText size={20} />
+          </button>
+          {!isModerator && (
+            <button 
+              onClick={() => openModal()}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+            >
+              <Plus size={20} />
+              <span>Add Ledger</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Search Bar */}

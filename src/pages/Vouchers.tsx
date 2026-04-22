@@ -4,7 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Receipt, ChevronRight, ArrowRight, Eye } from 'lucide-react';
+import { 
+  Plus, Search, Filter, Receipt, ChevronRight, ArrowRight, Eye, Download, FileText, Printer 
+} from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
 import { Voucher, VoucherType } from '../types';
@@ -15,6 +17,9 @@ import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 export default function Vouchers() {
   const { user, profile } = useAuth();
@@ -53,6 +58,50 @@ export default function Vouchers() {
     v.narration.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("Ashiq's Creation", 14, 15);
+    doc.setFontSize(14);
+    doc.text(selectedCompany?.name || '', 14, 25);
+    doc.setFontSize(12);
+    doc.text('Voucher Register', 14, 35);
+    
+    const columns = ['Type', 'Date', 'Voucher #', 'Narration', 'Amount'];
+    const body = filteredVouchers.map(v => [
+      v.type,
+      format(new Date(v.date), 'dd/MM/yyyy'),
+      v.voucher_no,
+      v.narration,
+      new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(v.amount)
+    ]);
+
+    autoTable(doc, {
+      head: [columns],
+      body: body,
+      startY: 45,
+      theme: 'grid',
+      headStyles: { fillColor: [99, 102, 241] },
+      styles: { fontSize: 8 }
+    });
+
+    doc.save(`vouchers_${format(new Date(), 'yyyyMMdd')}.pdf`);
+  };
+
+  const handleExportExcel = () => {
+    const data = filteredVouchers.map(v => ({
+      Type: v.type,
+      Date: format(new Date(v.date), 'dd/MM/yyyy'),
+      'Voucher No': v.voucher_no,
+      Narration: v.narration,
+      Amount: v.amount
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
+    XLSX.writeFile(wb, `vouchers.xlsx`);
+  };
+
   return (
     <div className="space-y-10 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -63,6 +112,30 @@ export default function Vouchers() {
           <p className="text-slate-500 mt-1 font-medium">
             Record entries for {selectedCompany?.name || 'Selected Entity'}
           </p>
+        </div>
+
+        <div className="flex items-center gap-3 no-print">
+          <button 
+            onClick={() => window.print()}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+            title="Print List"
+          >
+            <Printer size={20} />
+          </button>
+          <button 
+            onClick={handleExportExcel}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
+            title="Export Excel"
+          >
+            <Download size={20} />
+          </button>
+          <button 
+            onClick={handleExportPDF}
+            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
+            title="Export PDF"
+          >
+            <FileText size={20} />
+          </button>
         </div>
       </div>
 

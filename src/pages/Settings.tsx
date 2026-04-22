@@ -178,6 +178,13 @@ export default function Settings() {
       alert('Verification text mismatch. Global wipe aborted.');
       return;
     }
+
+    const firstConfirm = window.confirm("CRITICAL WARNING: You are about to initiate a TOTAL SYSTEM WIPE. This will delete all companies, users, transactions, and settings across the entire platform. Are you absolutely sure?");
+    if (!firstConfirm) return;
+
+    const secondConfirm = window.confirm("FINAL WARNING: This action is permanent and irreversible. There is no backup to restore. Are you 100% sure you want to proceed with the system-wide factory reset?");
+    if (!secondConfirm) return;
+
     setLoading(true);
 
     try {
@@ -427,14 +434,14 @@ export default function Settings() {
                     </section>
                   )}
 
-                  {/* Global Wipe */}
+                  {/* Wipe All Data Section */}
                   {isSuperAdmin && (
                     <section className="bg-white rounded-[2rem] border border-rose-100 shadow-sm overflow-hidden">
                       <div className="px-10 py-8 border-b border-rose-50 bg-rose-50/30 flex items-center gap-4">
                         <div className="bg-rose-100 p-2.5 rounded-xl">
                           <ShieldAlert className="text-rose-600" size={20} />
                         </div>
-                        <h2 className="font-bold text-rose-900 tracking-tight">Master Reset</h2>
+                        <h2 className="font-bold text-rose-900 tracking-tight">Wipe All Data</h2>
                       </div>
 
                       <div className="p-10 space-y-6">

@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye } from 'lucide-react';
+import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye, FileText, Printer } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -13,6 +13,9 @@ import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 export default function Ledger() {
   const { profile } = useAuth();
@@ -56,6 +59,52 @@ export default function Ledger() {
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 
+  const handleExportPDF = () => {
+    if (!selectedAccount) return;
+    const doc = new jsPDF();
+    doc.setFontSize(20);
+    doc.text("Ashiq's Creation", 14, 15);
+    doc.setFontSize(14);
+    doc.text(selectedCompany?.name || '', 14, 25);
+    doc.setFontSize(12);
+    doc.text(`General Ledger: ${selectedAccount.name} (${selectedAccount.code})`, 14, 35);
+    
+    const columns = ['Date', 'Ref #', 'Narration', 'Debit', 'Credit'];
+    const body = transactions.map(t => [
+      format(new Date(t.date), 'dd/MM/yyyy'),
+      t.voucher?.voucher_no || '-',
+      t.voucher?.narration || '-',
+      t.debit > 0 ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.debit) : '-',
+      t.credit > 0 ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.credit) : '-'
+    ]);
+
+    autoTable(doc, {
+      head: [columns],
+      body: body,
+      startY: 45,
+      theme: 'grid',
+      headStyles: { fillColor: [99, 102, 241] },
+      styles: { fontSize: 8 }
+    });
+
+    doc.save(`ledger_${selectedAccount.code}_${format(new Date(), 'yyyyMMdd')}.pdf`);
+  };
+
+  const handleExportExcel = () => {
+    if (!selectedAccount) return;
+    const data = transactions.map(t => ({
+      Date: format(new Date(t.date), 'dd/MM/yyyy'),
+      'Voucher No': t.voucher?.voucher_no,
+      Narration: t.voucher?.narration,
+      Debit: t.debit,
+      Credit: t.credit
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
+    XLSX.writeFile(wb, `ledger_${selectedAccount.code}.xlsx`);
+  };
+
   return (
     <div className="space-y-10 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -91,9 +140,29 @@ export default function Ledger() {
       <div className="bg-white rounded-[2rem] border border-slate-50 shadow-2xl shadow-indigo-100/10 overflow-hidden">
         <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between">
           <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Transaction History</h3>
-          <button className="text-slate-400 hover:text-indigo-600 transition-colors">
-            <Download size={20} />
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => window.print()}
+              className="p-2 text-slate-400 hover:text-indigo-600 transition-colors"
+              title="Print List"
+            >
+              <Printer size={18} />
+            </button>
+            <button 
+              onClick={handleExportExcel}
+              className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"
+              title="Export to Excel"
+            >
+              <Download size={18} />
+            </button>
+            <button 
+              onClick={handleExportPDF}
+              className="p-2 text-slate-400 hover:text-rose-600 transition-colors"
+              title="Export to PDF"
+            >
+              <FileText size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="overflow-x-auto">
