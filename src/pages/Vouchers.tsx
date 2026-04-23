@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { 
-  Plus, Search, Filter, Receipt, ChevronRight, ArrowRight, Eye, Download, FileText, Printer, Pencil, Trash2 
+  Plus, Search, Filter, Receipt, ChevronRight, ArrowRight, Eye, Download, FileText, Printer, Pencil, Trash2, X, ChevronDown 
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
@@ -31,15 +31,29 @@ export default function Vouchers() {
   const [search, setSearch] = useState('');
   const [viewingVoucher, setViewingVoucher] = useState<Voucher | null>(null);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
+  const [filterMode, setFilterMode] = useState<'RECENT' | 'ALL'>('RECENT');
+  const [filterType, setFilterType] = useState<VoucherType | 'ALL'>('ALL');
+  const [dateRange, setDateRange] = useState({ from: '', to: '' });
 
   const fetchVouchers = async () => {
     if (!selectedCompany) return;
     setLoading(true);
     
-    const { data, error } = await supabase
+    let query = supabase
       .from('vouchers')
       .select('*')
-      .eq('company_id', selectedCompany.id)
+      .eq('company_id', selectedCompany.id);
+
+    if (filterMode === 'RECENT') {
+      query = query.limit(20);
+    }
+    if (filterType !== 'ALL') {
+      query = query.eq('type', filterType);
+    }
+    if (dateRange.from) query = query.gte('date', dateRange.from);
+    if (dateRange.to) query = query.lte('date', dateRange.to);
+
+    const { data, error } = await query
       .order('date', { ascending: false })
       .order('created_at', { ascending: false });
 
@@ -53,7 +67,7 @@ export default function Vouchers() {
 
   useEffect(() => {
     fetchVouchers();
-  }, [selectedCompany]);
+  }, [selectedCompany, filterMode, filterType, dateRange.from, dateRange.to]);
 
   const filteredVouchers = vouchers.filter(v => 
     v.voucher_no.toLowerCase().includes(search.toLowerCase()) ||
@@ -229,16 +243,82 @@ export default function Vouchers() {
             )}
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-                <h2 className="text-sm font-bold text-slate-800 uppercase tracking-widest">Recent Transactions</h2>
-                <div className="relative w-full max-w-xs">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-                  <input 
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
-                    placeholder="Filter by description..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Transactions' : 'All Transactions'}</h2>
+                  <div className="flex bg-slate-100 p-1 rounded-xl">
+                    <button 
+                      onClick={() => setFilterMode('RECENT')}
+                      className={cn(
+                        "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
+                        filterMode === 'RECENT' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
+                      RECENT
+                    </button>
+                    <button 
+                      onClick={() => setFilterMode('ALL')}
+                      className={cn(
+                        "px-3 py-1.5 text-[10px] font-black rounded-lg transition-all",
+                        filterMode === 'ALL' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                      )}
+                    >
+                      ALL
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3">
+                  {/* Type Filter */}
+                  <div className="relative">
+                    <select
+                      value={filterType}
+                      onChange={(e) => setFilterType(e.target.value as any)}
+                      className="appearance-none bg-slate-50 border border-slate-200 rounded-xl pl-4 pr-10 py-2.5 text-[10px] font-black uppercase text-slate-600 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer"
+                    >
+                      <option value="ALL">ALL TYPES</option>
+                      {VOUCHER_TYPES.map(t => (
+                        <option key={t.value} value={t.value}>{t.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  </div>
+
+                  {/* Date Filter */}
+                  <div className="flex items-center bg-slate-50 border border-slate-200 rounded-xl px-2 py-1 gap-1">
+                    <input 
+                      type="date"
+                      value={dateRange.from}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                      className="bg-transparent text-[10px] font-black text-slate-600 outline-none p-1.5"
+                    />
+                    <ArrowRight size={12} className="text-slate-300" />
+                    <input 
+                      type="date"
+                      value={dateRange.to}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                      className="bg-transparent text-[10px] font-black text-slate-600 outline-none p-1.5"
+                    />
+                    {(dateRange.from || dateRange.to) && (
+                      <button 
+                        onClick={() => setDateRange({ from: '', to: '' })}
+                        className="p-1 hover:bg-slate-200 rounded-md transition-colors"
+                      >
+                        <X size={12} className="text-slate-400" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Search */}
+                  <div className="relative min-w-[200px]">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                    <input 
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-[10px] font-black uppercase text-slate-600 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300"
+                      placeholder="Search vouchers..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                  </div>
                 </div>
               </div>
 
