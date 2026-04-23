@@ -106,12 +106,12 @@ export default function Vouchers() {
 
   const handleDeleteVoucher = async (id: string, voucherNo: string) => {
     if (!canDelete) {
-      console.warn('User does not have delete permissions');
+      toast.error('Permission Denied', { description: 'You do not have permission to delete vouchers.' });
       return;
     }
     
     if (!id) {
-      console.error('No voucher ID provided for deletion');
+      toast.error('Error', { description: 'Invalid voucher ID provided.' });
       return;
     }
 
@@ -120,35 +120,24 @@ export default function Vouchers() {
 
     setLoading(true);
     try {
-      console.log(`Attempting to delete voucher: ${voucherNo} (${id})`);
-      
-      // 1. Delete associated transactions first (Double-entry lines)
-      const { error: transError } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('voucher_id', id);
-
-      if (transError) {
-        console.error('Error deleting transactions:', transError);
-        throw transError;
-      }
-
-      // 2. Delete the main voucher record
+      // We rely on ON DELETE CASCADE in the database to remove transactions
+      // This is safer and ensures single transaction atomicity
       const { error: voucherError } = await supabase
         .from('vouchers')
         .delete()
         .eq('id', id);
 
       if (voucherError) {
-        console.error('Error deleting voucher:', voucherError);
         throw voucherError;
       }
       
-      console.log('Voucher deleted successfully');
+      toast.success('Voucher Deleted', { description: `Voucher ${voucherNo} has been removed successfully.` });
       await fetchVouchers();
     } catch (err: any) {
       console.error('Operation failed:', err);
-      toast.error('Deletion Failed', { description: err.message || 'Failed to delete voucher. Please check your connection or permissions.' });
+      toast.error('Deletion Failed', { 
+        description: err.message || 'Failed to delete voucher. Please check your connection or permissions.' 
+      });
     } finally {
       setLoading(false);
     }

@@ -352,75 +352,64 @@ export default function UserManagement() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl overflow-hidden my-8"
+              className="bg-white w-full max-w-lg rounded-[1.5rem] shadow-2xl overflow-hidden my-4"
             >
-              <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-lg">
+              <div className="px-8 py-5 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base">
                     {editingUser.name.charAt(0)}
                   </div>
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900">{editingUser.name}</h2>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Policy Assignment cockpit</p>
+                    <h2 className="text-lg font-bold text-slate-900">{editingUser.name}</h2>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Policy Assignment</p>
                   </div>
                 </div>
                 <button onClick={() => setEditingUser(null)} className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
-                  <X size={24} />
+                  <X size={20} />
                 </button>
               </div>
 
-              <form onSubmit={handleUpdatePermissions} className="p-10 space-y-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <form onSubmit={handleUpdatePermissions} className="p-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* User Details */}
                   <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Personal Info</label>
-                    <div className="space-y-4">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Core Identity</label>
+                    <div className="space-y-3">
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Display Name</label>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Display Name</label>
                         <input 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                           value={editingUser.name}
                           onChange={(e) => setEditingUser({ ...editingUser, name: e.target.value })}
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Phone</label>
+                        <label className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">Phone</label>
                         <input 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                           value={editingUser.phone || ''}
                           onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
                         />
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Address</label>
-                        <textarea 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium h-20 resize-none"
-                          value={editingUser.address || ''}
-                          onChange={(e) => setEditingUser({ ...editingUser, address: e.target.value })}
-                        />
-                      </div>
                     </div>
 
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1 pt-4">Base Access Role</label>
-                    <div className="grid grid-cols-1 gap-3">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pt-2">System Role</label>
+                    <div className="grid grid-cols-1 gap-2">
                       {(['MODERATOR', 'ADMIN', 'SUPER_ADMIN'] as UserRole[]).map((r) => (
                         <button
                           key={r}
                           type="button"
                           onClick={() => setEditingUser({ ...editingUser, role: r })}
                           className={cn(
-                            "flex items-center justify-between p-4 rounded-2xl border-2 transition-all text-left",
+                            "flex items-center justify-between p-3 rounded-xl border-2 transition-all text-left",
                             editingUser.role === r 
                               ? "border-indigo-600 bg-indigo-50/30" 
                               : "border-slate-100 hover:border-slate-200"
                           )}
                         >
                           <div>
-                            <p className={cn("text-sm font-bold", editingUser.role === r ? "text-indigo-600" : "text-slate-700")}>
+                            <p className={cn("text-xs font-bold", editingUser.role === r ? "text-indigo-600" : "text-slate-700")}>
                               {r.replace('_', ' ')}
-                            </p>
-                            <p className="text-[10px] text-slate-400 font-medium">
-                              {r === 'SUPER_ADMIN' ? 'Full System Architect' : r === 'ADMIN' ? 'Business Administrator' : 'Standard Operations'}
                             </p>
                           </div>
                           {editingUser.role === r && <div className="h-2 w-2 rounded-full bg-indigo-600" />}
@@ -431,36 +420,30 @@ export default function UserManagement() {
 
                   {/* Permissions Toggles */}
                   <div className="space-y-4">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Action Constraints</label>
-                    <div className="bg-slate-50/50 p-6 rounded-3xl space-y-6 border border-slate-100">
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Action Constraints</label>
+                    <div className="bg-slate-50/50 p-4 rounded-2xl space-y-4 border border-slate-100">
                       <PermissionToggle 
-                        label="Can Add Records" 
-                        description="Ability to create new vouchers and ledgers"
-                        active={editingUser.can_add !== false}
-                        onClick={() => setEditingUser({ ...editingUser, can_add: !editingUser.can_add })}
+                        label="Records" 
+                        description="Create & Edit rights"
+                        active={editingUser.can_add !== false && editingUser.can_edit !== false}
+                        onClick={() => setEditingUser({ ...editingUser, can_add: !editingUser.can_add, can_edit: !editingUser.can_edit })}
                       />
                       <PermissionToggle 
-                        label="Can Edit Records" 
-                        description="Ability to modify historical transactions"
-                        active={editingUser.can_edit !== false}
-                        onClick={() => setEditingUser({ ...editingUser, can_edit: !editingUser.can_edit })}
-                      />
-                      <PermissionToggle 
-                        label="Can Delete Records" 
-                        description="Critical: Permanent removal of data"
+                        label="Delete" 
+                        description="Data removal"
                         active={editingUser.can_delete !== false}
                         onClick={() => setEditingUser({ ...editingUser, can_delete: !editingUser.can_delete })}
                         danger
                       />
                       <PermissionToggle 
-                        label="Can Manage Companies" 
-                        description="Ability to create or edit subsidiary entities"
+                        label="Company" 
+                        description="Manage entities"
                         active={editingUser.can_manage_companies === true}
                         onClick={() => setEditingUser({ ...editingUser, can_manage_companies: !editingUser.can_manage_companies })}
                       />
                       <PermissionToggle 
-                        label="Can Wipe Data" 
-                        description="Hazardous: Permission to perform global system reset"
+                        label="Wipe" 
+                        description="Reset system"
                         active={editingUser.can_wipe_data === true}
                         onClick={() => setEditingUser({ ...editingUser, can_wipe_data: !editingUser.can_wipe_data })}
                         danger
@@ -470,18 +453,18 @@ export default function UserManagement() {
                 </div>
 
                 {/* Company Access */}
-                <div className="space-y-4 pt-6 mt-6 border-t border-slate-50">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Organizational Purview</label>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="space-y-3 pt-4 border-t border-slate-50">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Network Purview</label>
+                  <div className="flex flex-wrap gap-2">
                     {companies.map((c) => (
                       <button
                         key={c.id}
                         type="button"
                         onClick={() => toggleCompany(c.id)}
                         className={cn(
-                          "px-4 py-3 rounded-xl border text-xs font-bold transition-all text-center",
+                          "px-3 py-1.5 rounded-lg border text-[10px] font-bold transition-all",
                           editingUser.companies?.includes(c.id)
-                            ? "bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100"
+                            ? "bg-indigo-600 border-indigo-600 text-white"
                             : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
                         )}
                       >
@@ -491,19 +474,19 @@ export default function UserManagement() {
                   </div>
                 </div>
 
-                <div className="pt-10 flex gap-4">
+                <div className="pt-6 flex gap-3">
                   <button 
                     type="button"
                     onClick={() => setEditingUser(null)}
-                    className="flex-1 px-8 py-4 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+                    className="flex-1 px-6 py-3 text-[10px] font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
                   >
-                    Cancel Changes
+                    Cancel
                   </button>
                   <button 
                     type="submit"
-                    className="flex-1 px-12 py-4 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95"
+                    className="flex-1 px-8 py-3 bg-indigo-600 text-white text-[10px] font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg active:scale-95"
                   >
-                    Apply New Policy
+                    Apply Policy
                   </button>
                 </div>
               </form>

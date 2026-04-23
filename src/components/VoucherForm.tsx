@@ -267,24 +267,24 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-[2rem] border border-slate-100 shadow-2xl overflow-hidden"
+        className="bg-white rounded-[1.5rem] border border-slate-100 shadow-2xl overflow-hidden max-w-4xl mx-auto"
       >
-      <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between">
+      <div className="px-8 py-5 border-b border-slate-50 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">{editingVoucher ? 'Edit Voucher' : 'Voucher Entry'}</h2>
-          <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-widest">{editingVoucher ? 'Modify platform history' : 'Double-Entry Simulation Mode'}</p>
+          <h2 className="text-lg font-bold text-slate-900">{editingVoucher ? 'Edit Voucher' : 'Voucher Entry'}</h2>
+          <p className="text-[10px] font-bold text-slate-400 mt-0.5 uppercase tracking-widest">{editingVoucher ? 'Modify platform history' : 'Double-Entry Simulation Mode'}</p>
         </div>
         <button onClick={onCancel} className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
-          <Trash2 size={20} />
+          <X size={20} />
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-10 space-y-10">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Voucher Type</label>
+      <form onSubmit={handleSubmit} className="p-8 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Type</label>
             <select 
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
               value={type}
               onChange={(e) => setType(e.target.value as VoucherType)}
             >
@@ -292,10 +292,10 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Payment Method</label>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Method</label>
             <select 
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
               value={channel}
               onChange={(e) => setChannel(e.target.value as PaymentChannel)}
             >
@@ -303,104 +303,104 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Entry Date</label>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Date</label>
             <input 
               type="date"
-              className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Voucher Number</label>
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Voucher #</label>
               {!manualVoucherNo && (
                 <button 
                   type="button"
                   onClick={() => setManualVoucherNo(true)}
                   className="text-[9px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-tighter"
                 >
-                  Manual Entry
+                  Manual
                 </button>
               )}
             </div>
             <input 
               className={cn(
-                "w-full border rounded-2xl px-4 py-3 text-sm outline-none transition-all font-mono",
+                "w-full border rounded-xl px-3 py-2 text-xs outline-none transition-all font-mono",
                 manualVoucherNo ? "bg-white border-slate-300 focus:ring-2 focus:ring-indigo-500/10" : "bg-slate-50 border-slate-200 text-slate-500 cursor-not-allowed"
               )}
               value={voucherNo}
               onChange={(e) => setVoucherNo(e.target.value)}
               readOnly={!manualVoucherNo}
-              placeholder="e.g. PV-001"
+              placeholder="PV-001"
             />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Description / Narration</label>
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Description</label>
           <textarea 
-            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none h-24"
+            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none h-16"
             value={narration}
             onChange={(e) => setNarration(e.target.value)}
-            placeholder="What is this transaction for?"
+            placeholder="Transaction narration..."
           />
         </div>
 
         {/* Improved Line Items */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-50">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Transaction Split</h3>
+        <div className="space-y-3">
+          <div className="flex items-center justify-between pb-1 border-b border-slate-50">
+            <h3 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider">Transaction Split</h3>
             <button 
               type="button" 
               onClick={addItem}
-              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-bold transition-colors flex items-center gap-1"
             >
-              <Plus size={14} /> Add Row
+              <Plus size={12} /> Add Row
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
             {items.map((item, index) => (
-              <div key={index} className="flex gap-4 items-end animate-in fade-in slide-in-from-top-2 duration-300">
-                <div className="flex-1 space-y-2">
-                  <label className="text-[10px] font-bold text-slate-300 uppercase block pl-1">Ledger Account</label>
+              <div key={index} className="flex gap-3 items-end">
+                <div className="flex-1 space-y-1">
+                  <label className="text-[9px] font-bold text-slate-300 uppercase block pl-1">Ledger Account</label>
                   <select 
                     required
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-700"
+                    className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-700"
                     value={item.account_id}
                     onChange={(e) => updateItem(index, 'account_id', e.target.value)}
                   >
-                    <option value="">Select Ledger from COA</option>
+                    <option value="">Select Ledger</option>
                     {ACCOUNT_GROUPS.map(group => (
                       <optgroup key={group.value} label={group.label}>
                         {accounts.filter(a => a.type === group.value).map(a => (
-                          <option key={a.id} value={a.id}>{a.name} ({a.code})</option>
+                          <option key={a.id} value={a.id}>{a.name}</option>
                         ))}
                       </optgroup>
                     ))}
                   </select>
                 </div>
                 
-                <div className="w-40 space-y-2 relative">
-                  <label className="text-[10px] font-bold text-slate-300 uppercase block pl-1">Debit (৳)</label>
+                <div className="w-28 space-y-1">
+                  <label className="text-[9px] font-bold text-slate-300 uppercase block pl-1">Debit</label>
                   <input 
                     type="number"
                     step="0.01"
-                    className="w-full bg-indigo-50/10 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono font-bold text-slate-900"
+                    className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-bold text-slate-900"
                     value={item.debit === 0 ? '' : item.debit}
                     onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
                   />
                 </div>
 
-                <div className="w-40 space-y-2 relative">
-                  <label className="text-[10px] font-bold text-slate-300 uppercase block pl-1">Credit (৳)</label>
+                <div className="w-28 space-y-1">
+                  <label className="text-[9px] font-bold text-slate-300 uppercase block pl-1">Credit</label>
                   <input 
                     type="number"
                     step="0.01"
-                    className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono font-bold text-slate-900"
+                    className="w-full bg-slate-50/50 border border-slate-200 rounded-lg px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-bold text-slate-900"
                     value={item.credit === 0 ? '' : item.credit}
                     onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
                   />
@@ -410,9 +410,9 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                   type="button" 
                   onClick={() => removeItem(index)}
                   disabled={items.length <= 2}
-                  className="p-3 text-slate-200 hover:text-rose-500 transition-colors disabled:opacity-0 mb-0.5"
+                  className="p-2 text-slate-200 hover:text-rose-500 transition-colors disabled:opacity-0 mb-0.5"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </button>
               </div>
             ))}
@@ -420,46 +420,46 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
         </div>
 
         {/* Footer Summary */}
-        <div className="pt-10 border-t border-slate-50 flex flex-col md:flex-row items-center justify-between gap-10">
-          <div className="flex gap-10 bg-slate-50/50 p-6 rounded-3xl border border-slate-100">
+        <div className="pt-6 border-t border-slate-50 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex gap-6 bg-slate-50/50 px-5 py-3 rounded-2xl border border-slate-100">
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Total Debit</span>
-              <span className="text-2xl font-bold text-slate-900 font-mono tracking-tighter">{formatBDT(totalDebit)}</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase block">Total Debit</span>
+              <span className="text-lg font-bold text-slate-900 font-mono tracking-tighter">{formatBDT(totalDebit)}</span>
             </div>
-            <div className="w-px h-10 bg-slate-200 my-auto" />
+            <div className="w-px h-8 bg-slate-200 my-auto" />
             <div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase block mb-1">Total Credit</span>
-              <span className="text-2xl font-bold text-slate-900 font-mono tracking-tighter">{formatBDT(totalCredit)}</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase block">Total Credit</span>
+              <span className="text-lg font-bold text-slate-900 font-mono tracking-tighter">{formatBDT(totalCredit)}</span>
             </div>
             
-            <div className="flex items-center ml-4">
+            <div className="flex items-center ml-2">
               {isBalanced ? (
-                <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
-                  <CheckCircle2 size={16} /> Balanced
+                <div className="flex items-center gap-1.5 text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider border border-emerald-100">
+                  <CheckCircle2 size={12} /> Balanced
                 </div>
               ) : (
-                <div className="flex items-center gap-2 text-rose-600 bg-rose-50 px-4 py-2 rounded-2xl text-[10px] font-bold uppercase tracking-wider border border-rose-100">
-                  <AlertCircle size={16} /> Unbalanced
+                <div className="flex items-center gap-1.5 text-rose-600 bg-rose-50 px-3 py-1.5 rounded-xl text-[9px] font-bold uppercase tracking-wider border border-rose-100">
+                  <AlertCircle size={12} /> Unbalanced
                 </div>
               )}
             </div>
           </div>
 
-          <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex gap-2 w-full md:w-auto">
             <button 
               type="button"
               onClick={onCancel}
-              className="flex-1 md:flex-none px-8 py-3.5 text-xs font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+              className="flex-1 md:flex-none px-6 py-2.5 text-[10px] font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all"
             >
               Discard
             </button>
             <button 
               disabled={loading || !isBalanced}
               type="submit"
-              className="flex-1 md:flex-none items-center justify-center gap-2 px-12 py-3.5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+              className="flex-1 md:flex-none items-center justify-center gap-2 px-8 py-2.5 bg-indigo-600 text-white text-[10px] font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg active:scale-95 disabled:opacity-50"
             >
-              <Save size={18} />
-              {loading ? 'Processing...' : (editingVoucher ? 'Update Voucher' : 'Post Voucher')}
+              <Save size={14} />
+              {loading ? 'Wait...' : (editingVoucher ? 'Update' : 'Post Voucher')}
             </button>
           </div>
         </div>
