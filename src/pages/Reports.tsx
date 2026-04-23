@@ -16,28 +16,61 @@ import {
   Printer,
   Eye,
   ChevronDown,
-  X
+  X,
+  Pencil,
+  Trash2,
+  Receipt,
+  ArrowRight,
+  ChevronUp,
+  FileDown
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
+import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
-import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES } from '../constants';
+import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES, PAYMENT_CHANNELS } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { cn } from '../lib/utils';
-
-import { useAuth } from '../hooks/useAuth';
+import { toast } from 'sonner';
+import VoucherForm from '../components/VoucherForm';
+import VoucherPrintPreview from '../components/VoucherPrintPreview';
+import { Voucher, VoucherType } from '../types';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-
-import VoucherPrintPreview from '../components/VoucherPrintPreview';
 
 type ReportTab = 'TRIAL_BALANCE' | 'DAYBOOK' | 'LEDGER_REPORT';
 
 export default function Reports() {
   const { selectedCompany } = useCompany();
-  const { profile } = useAuth();
+  const { profile, canEdit, canDelete } = useAuth();
   const [activeTab, setActiveTab] = useState<ReportTab>('DAYBOOK');
+  const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
+  const [dateRange, setDateRange] = useState({
+    from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
+    to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
+  });
+  const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    accountType: '',
+    accountId: '',
+    voucherType: '',
+    searchQuery: '',
+    minAmount: '',
+    maxAmount: ''
+  });
+
+  const resetFilters = () => {
+    setFilters({
+      accountType: '',
+      accountId: '',
+      voucherType: '',
+      searchQuery: '',
+      minAmount: '',
+      maxAmount: ''
+    });
+  };
 
   const handleExportPDF = (data: any[], title: string, columns: string[], filename: string) => {
     const doc = new jsPDF();
@@ -78,286 +111,246 @@ export default function Reports() {
     XLSX.utils.book_append_sheet(wb, ws, "Report");
     XLSX.writeFile(wb, `${filename}.xlsx`);
   };
-  const [dateRange, setDateRange] = useState({
-    from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
-    to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
-  });
-  const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    accountType: '',
-    accountId: '',
-    voucherType: ''
-  });
-
-  const resetFilters = () => {
-    setFilters({
-      accountType: '',
-      accountId: '',
-      voucherType: ''
-    });
-  };
 
   return (
     <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none">
-            Reports
-          </h1>
-          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none">
-            Compliance & Financial Insights
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400">
-              <Calendar size={12} />
-              <span className="text-[9px] font-black uppercase tracking-wider">Range</span>
-            </div>
-            <div className="flex items-center gap-1.5 pr-1">
-              <input 
-                type="date" 
-                value={dateRange.from}
-                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
-              />
-              <span className="text-slate-300 text-[10px]">/</span>
-              <input 
-                type="date" 
-                value={dateRange.to}
-                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
-              />
-            </div>
-            <button 
-              onClick={() => setConfirmedDateRange(dateRange)}
-              className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md shadow-slate-100"
-            >
-              Sync
-            </button>
-          </div>
-          
-          <button 
-            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className={cn(
-              "px-3 py-2 rounded-xl transition-all shadow-sm border flex items-center gap-2",
-              showAdvancedFilters 
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
-            )}
-            title="Advanced Filters"
-          >
-            <Filter size={16} />
-            <span className="text-[11px] font-bold uppercase tracking-widest hidden sm:inline">Filters</span>
-          </button>
-
-          <button 
-            onClick={() => window.print()}
-            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm no-print"
-            title="Print Report"
-          >
-            <Printer size={16} />
-          </button>
-        </div>
-      </div>
-
-      {/* Active Filter Chips */}
-      <AnimatePresence>
-        {(filters.accountType || filters.voucherType) && (
+      <AnimatePresence mode="wait">
+        {editingVoucher ? (
+          <VoucherForm 
+            editingVoucher={editingVoucher}
+            onSuccess={() => {
+              setEditingVoucher(null);
+            }}
+            onCancel={() => setEditingVoucher(null)}
+          />
+        ) : (
           <motion.div 
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="flex flex-wrap gap-2 px-1 no-print"
+            className="space-y-6"
           >
-            {filters.accountType && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
-                Account: {ACCOUNT_GROUPS.find(g => g.value === filters.accountType)?.label}
-                <button onClick={() => setFilters(prev => ({ ...prev, accountType: '' }))} className="hover:text-indigo-800">
-                  <X size={12} />
+            {/* Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none">
+                  Financial Reports
+                </h1>
+                <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none">
+                  Governance & Audit Protocols
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400 border border-slate-100">
+                    <Calendar size={12} />
+                    <span className="text-[9px] font-black uppercase tracking-wider">Audit Range</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 pr-1">
+                    <input 
+                      type="date" 
+                      value={dateRange.from}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                      className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
+                    />
+                    <span className="text-slate-300 text-[10px]">/</span>
+                    <input 
+                      type="date" 
+                      value={dateRange.to}
+                      onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                      className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
+                    />
+                  </div>
+                  <button 
+                    onClick={() => setConfirmedDateRange(dateRange)}
+                    className="bg-slate-900 text-white px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md shadow-slate-100"
+                  >
+                    Load
+                  </button>
+                </div>
+                
+                <button 
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className={cn(
+                    "px-4 py-2.5 rounded-xl transition-all shadow-sm border flex items-center gap-2",
+                    showAdvancedFilters 
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
+                      : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                  )}
+                >
+                  <Filter size={16} />
+                  <span className="text-[11px] font-black uppercase tracking-widest">Deep Filter</span>
                 </button>
               </div>
-            )}
-            {filters.voucherType && (
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-50 border border-rose-100 rounded-lg text-[10px] font-bold text-rose-600 uppercase tracking-wider">
-                Voucher: {VOUCHER_TYPES.find(v => v.value === filters.voucherType)?.label}
-                <button onClick={() => setFilters(prev => ({ ...prev, voucherType: '' }))} className="hover:text-rose-800">
-                  <X size={12} />
-                </button>
-              </div>
-            )}
-            <button 
-              onClick={resetFilters}
-              className="text-[10px] font-bold text-slate-400 hover:text-slate-600 underline underline-offset-4 px-2"
-            >
-              Reset All
-            </button>
+            </div>
+
+            {/* Advanced Filters Modal (Enhanced) */}
+            <AnimatePresence>
+              {showAdvancedFilters && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowAdvancedFilters(false)}
+                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+                  >
+                    <div className="p-10 space-y-8">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <Filter className="text-indigo-600" size={20} />
+                            Analytical Parameters
+                          </h2>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining financial visibility</p>
+                        </div>
+                        <button 
+                          onClick={() => setShowAdvancedFilters(false)}
+                          className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Voucher Identification</label>
+                          <div className="relative">
+                            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                            <input 
+                              placeholder="Search Narrative or #..."
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold"
+                              value={filters.searchQuery}
+                              onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Value Thresholds (৳)</label>
+                          <div className="flex gap-2">
+                            <input 
+                              placeholder="Min"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-bold"
+                              value={filters.minAmount}
+                              onChange={(e) => setFilters(prev => ({ ...prev, minAmount: e.target.value }))}
+                            />
+                            <input 
+                              placeholder="Max"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-bold"
+                              value={filters.maxAmount}
+                              onChange={(e) => setFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Document Category</label>
+                          <div className="flex flex-wrap gap-2">
+                            {VOUCHER_TYPES.map(v => (
+                              <button 
+                                key={v.value}
+                                onClick={() => setFilters(prev => ({ ...prev, voucherType: prev.voucherType === v.value ? '' : v.value }))}
+                                className={cn(
+                                  "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
+                                  filters.voucherType === v.value 
+                                    ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200 scale-105" 
+                                    : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100"
+                                )}
+                              >
+                                {v.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-6 flex gap-4">
+                        <button 
+                          onClick={resetFilters}
+                          className="px-8 py-4 text-xs font-black text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
+                        >
+                          Reset
+                        </button>
+                        <button 
+                          onClick={() => setShowAdvancedFilters(false)}
+                          className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
+                        >
+                          Execute Analysis
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+
+            {/* Tabs */}
+            <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
+              <TabButton 
+                active={activeTab === 'DAYBOOK'} 
+                onClick={() => setActiveTab('DAYBOOK')}
+                label="Daybook"
+              />
+              <TabButton 
+                active={activeTab === 'LEDGER_REPORT'} 
+                onClick={() => setActiveTab('LEDGER_REPORT')}
+                label="Ledger Statement"
+              />
+              <TabButton 
+                active={activeTab === 'TRIAL_BALANCE'} 
+                onClick={() => setActiveTab('TRIAL_BALANCE')}
+                label="Trial Balance"
+              />
+            </div>
+
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                {activeTab === 'DAYBOOK' && (
+                  <Daybook 
+                    companyId={selectedCompany?.id} 
+                    dateRange={confirmedDateRange} 
+                    filters={filters}
+                    onEdit={setEditingVoucher}
+                    onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Date', 'Voucher #', 'Main Account', 'Type', 'Description', 'Amount'], 'daybook')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
+                  />
+                )}
+                {activeTab === 'LEDGER_REPORT' && (
+                  <LedgerReport 
+                    companyId={selectedCompany?.id} 
+                    dateRange={confirmedDateRange} 
+                    filters={filters}
+                    onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'], 'ledger_statement')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement')}
+                  />
+                )}
+                {activeTab === 'TRIAL_BALANCE' && (
+                  <TrialBalance 
+                    companyId={selectedCompany?.id} 
+                    dateRange={confirmedDateRange} 
+                    filters={filters}
+                    onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
+                  />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         )}
-      </AnimatePresence>
-
-      {/* Advanced Filters Modal */}
-      <AnimatePresence>
-        {showAdvancedFilters && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowAdvancedFilters(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] no-print"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-[15%] md:left-1/2 md:-translate-x-1/2 md:max-w-lg bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-100 no-print overflow-hidden"
-            >
-              <div className="p-8 space-y-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Advanced Filtering</h2>
-                    <p className="text-sm text-slate-500 font-medium">Refine your report parameters</p>
-                  </div>
-                  <button 
-                    onClick={() => setShowAdvancedFilters(false)}
-                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block pl-1">Primary Ledger Group</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <button 
-                        onClick={() => setFilters(prev => ({ ...prev, accountType: '' }))}
-                        className={cn(
-                          "px-4 py-3 rounded-2xl text-xs font-bold transition-all border",
-                          filters.accountType === '' 
-                            ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200" 
-                            : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
-                        )}
-                      >
-                        All Types
-                      </button>
-                      {ACCOUNT_GROUPS.map(g => (
-                        <button 
-                          key={g.value}
-                          onClick={() => setFilters(prev => ({ ...prev, accountType: g.value }))}
-                          className={cn(
-                            "px-4 py-3 rounded-2xl text-xs font-bold transition-all border",
-                            filters.accountType === g.value 
-                              ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100" 
-                              : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
-                          )}
-                        >
-                          {g.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block pl-1">Voucher Category</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {VOUCHER_TYPES.map(v => (
-                        <button 
-                          key={v.value}
-                          onClick={() => setFilters(prev => ({ ...prev, voucherType: prev.voucherType === v.value ? '' : v.value }))}
-                          className={cn(
-                            "px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border",
-                            filters.voucherType === v.value 
-                              ? "bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-100" 
-                              : "bg-slate-50 text-slate-500 border-slate-100 hover:bg-slate-100"
-                          )}
-                        >
-                          {v.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 flex gap-3">
-                  <button 
-                    onClick={resetFilters}
-                    className="flex-1 py-4 text-xs font-bold text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
-                  >
-                    Reset Filters
-                  </button>
-                  <button 
-                    onClick={() => setShowAdvancedFilters(false)}
-                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
-                  >
-                    Show Results
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Tabs */}
-      <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
-        <TabButton 
-          active={activeTab === 'DAYBOOK'} 
-          onClick={() => setActiveTab('DAYBOOK')}
-          label="Daybook"
-        />
-        <TabButton 
-          active={activeTab === 'LEDGER_REPORT'} 
-          onClick={() => setActiveTab('LEDGER_REPORT')}
-          label="Ledger Statement"
-        />
-        <TabButton 
-          active={activeTab === 'TRIAL_BALANCE'} 
-          onClick={() => setActiveTab('TRIAL_BALANCE')}
-          label="Trial Balance"
-        />
-      </div>
-
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={activeTab}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.2 }}
-        >
-          {activeTab === 'DAYBOOK' && (
-            <Daybook 
-              companyId={selectedCompany?.id} 
-              dateRange={confirmedDateRange} 
-              filters={filters}
-              onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Voucher #', 'Ledger', 'Type', 'Method', 'Description', 'Amount'], 'daybook')}
-              onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
-            />
-          )}
-          {activeTab === 'LEDGER_REPORT' && (
-            <LedgerReport 
-              companyId={selectedCompany?.id} 
-              dateRange={confirmedDateRange} 
-              filters={filters}
-              onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'], 'ledger_statement')}
-              onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement')}
-            />
-          )}
-          {activeTab === 'TRIAL_BALANCE' && (
-            <TrialBalance 
-              companyId={selectedCompany?.id} 
-              dateRange={confirmedDateRange} 
-              filters={filters}
-              onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
-              onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
-            />
-          )}
-        </motion.div>
       </AnimatePresence>
     </div>
   );
@@ -529,18 +522,19 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
   );
 }
 
-function Daybook({ companyId, dateRange, filters, onExportPDF, onExportExcel }: any) {
+function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportExcel }: any) {
+  const { profile, canEdit, canDelete } = useAuth();
+  const { selectedCompany } = useCompany();
   const [vouchers, setVouchers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState('');
+  const [expandedVoucherId, setExpandedVoucherId] = useState<string | null>(null);
+  const [viewingVoucher, setViewingVoucher] = useState<any>(null);
 
   useEffect(() => {
     if (companyId) {
       fetchDaybook();
-      supabase.from('accounts').select('id, name').eq('company_id', companyId).then(({ data }) => setAccounts(data || []));
     }
-  }, [companyId, dateRange, filters.voucherType, selectedAccountId]);
+  }, [companyId, dateRange, filters]);
 
   const fetchDaybook = async () => {
     setLoading(true);
@@ -550,7 +544,7 @@ function Daybook({ companyId, dateRange, filters, onExportPDF, onExportExcel }: 
         *,
         transactions (
           *,
-          account:accounts(name)
+          account:accounts(*)
         )
       `)
       .eq('company_id', companyId)
@@ -561,112 +555,263 @@ function Daybook({ companyId, dateRange, filters, onExportPDF, onExportExcel }: 
       query = query.eq('type', filters.voucherType);
     }
 
-    const { data, error } = await query.order('date', { ascending: true }).order('voucher_no', { ascending: true });
+    if (filters.searchQuery) {
+      query = query.or(`voucher_no.ilike.%${filters.searchQuery}%,narration.ilike.%${filters.searchQuery}%`);
+    }
+
+    if (filters.minAmount) {
+      query = query.gte('amount', filters.minAmount);
+    }
+    if (filters.maxAmount) {
+      query = query.lte('amount', filters.maxAmount);
+    }
+
+    const { data, error } = await query.order('date', { ascending: false }).order('created_at', { ascending: false });
 
     if (error) {
       console.error(error);
     } else {
-      let filtered = data || [];
-      if (selectedAccountId) {
-        filtered = filtered.filter(v => v.transactions.some((t: any) => t.account_id === selectedAccountId));
-      }
-      setVouchers(filtered);
+      setVouchers(data || []);
     }
     setLoading(false);
   };
 
-  const daybookData = vouchers.flatMap(v => 
-    v.transactions.map((t: any) => ({
-      voucher_no: v.voucher_no,
-      ledger_name: t.account?.name,
-      type: v.type,
-      payment_method: v.payment_channel,
-      description: v.narration,
-      amount: t.debit > 0 ? t.debit : (t.credit * -1)
-    }))
-  );
+  const handleDelete = async (id: string, voucherNo: string) => {
+    if (!canDelete) {
+      toast.error('Permission Denied', { description: 'Contact admin for deletion rights.' });
+      return;
+    }
+    const confirmed = window.confirm(`Confirm destructive deletion of Voucher ${voucherNo}?`);
+    if (!confirmed) return;
 
-  const totalAmount = vouchers.reduce((sum, v) => 
-    sum + v.transactions.reduce((vSum: number, t: any) => vSum + (Number(t.debit) || 0), 0)
-  , 0);
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('vouchers').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Voucher Liquidated', { description: `${voucherNo} has been removed from records.` });
+      fetchDaybook();
+    } catch (err: any) {
+      toast.error('Deletion Failed', { description: err.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Scanning the Daybook...</div>;
+  const getOppositeAccount = (v: any) => {
+    // If it's a payment, we want the debit accounts (not the cash/bank)
+    // If it's a receipt, we want the credit accounts
+    const isPayment = v.type === 'PAYMENT';
+    const isReceipt = v.type === 'RECEIPT';
+    
+    const candidates = v.transactions.filter((t: any) => {
+      // Logic: Only show accounts that are NOT in the standard payment channel groups if possible
+      // or find the one that balance the voucher type.
+      if (isPayment) return t.debit > 0;
+      if (isReceipt) return t.credit > 0;
+      return true; // For others, show anything
+    });
+
+    if (candidates.length === 0) return 'Multiple Ledgers';
+    if (candidates.length === 1) return candidates[0].account?.name;
+    return `${candidates[0].account?.name} & ${candidates.length - 1} more`;
+  };
+
+  const exportData = vouchers.map(v => ({
+    Date: format(new Date(v.date), 'dd-MM-yyyy'),
+    'Voucher No': v.voucher_no,
+    'Main Account': getOppositeAccount(v),
+    Type: v.type,
+    Narration: v.narration,
+    Amount: v.amount
+  }));
+
+  if (loading) return <div className="p-20 text-center text-slate-400 font-black animate-pulse uppercase tracking-[0.2em] text-[10px]">Synchronizing Audit Trail...</div>;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-8 py-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
-        <div className="flex items-center gap-4 flex-1">
-          <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest whitespace-nowrap">Daybook</h3>
-          <div className="max-w-xs w-full">
-            <select 
-              value={selectedAccountId}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-[11px] font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
-            >
-              <option value="">Filter by Specific Account...</option>
-              {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
-          </div>
+      <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between no-print">
+        <div>
+          <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest">Daybook Register</h3>
+          <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">Chronological sequence of all financial events</p>
         </div>
         <div className="flex gap-2">
           <button 
-            onClick={() => onExportExcel(daybookData)}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"
-            title="Export to Excel"
+            onClick={() => onExportExcel(exportData)}
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100"
           >
-            <Download size={20} />
+            <FileDown size={20} />
           </button>
           <button 
-            onClick={() => onExportPDF(daybookData.map(d => [d.voucher_no, d.ledger_name, d.type, d.payment_method, d.description, d.amount]))}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all"
-            title="Export to PDF"
+            onClick={() => onExportPDF(exportData.map(d => Object.values(d)))}
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100"
           >
-            <FileText size={20} />
+            <Printer size={20} />
           </button>
         </div>
       </div>
+
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-50/50">
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voucher No</th>
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ledger Name</th>
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Method</th>
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
-              <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+            <tr className="bg-slate-900 text-white">
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Voucher / Ref</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Main Ledger</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Category</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right">Debit / Credit</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest pr-10 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
-            {vouchers.map(v => v.transactions.map((t: any, idx: number) => (
-              <tr key={`${v.id}-${idx}`} className="hover:bg-slate-50 transition-colors">
-                <td className="px-8 py-4 text-sm font-mono font-bold text-slate-900">{v.voucher_no}</td>
-                <td className="px-8 py-4 text-sm font-semibold text-slate-700">{t.account?.name}</td>
-                <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.type}</td>
-                <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.payment_channel}</td>
-                <td className="px-8 py-4 text-sm font-medium text-slate-500">{v.narration}</td>
-                <td className={cn(
-                  "px-8 py-4 text-sm font-mono font-black text-right",
-                  t.debit > 0 ? "text-rose-600" : "text-emerald-600"
+          <tbody className="divide-y divide-slate-100">
+            {vouchers.map((v) => (
+              <React.Fragment key={v.id}>
+                <tr className={cn(
+                  "hover:bg-slate-50/80 transition-all cursor-pointer group",
+                  expandedVoucherId === v.id && "bg-slate-50"
                 )}>
-                  {formatBDT(t.debit > 0 ? t.debit : t.credit)}
-                </td>
-              </tr>
-            )))}
+                  <td className="px-10 py-6" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-1 h-8 rounded-full",
+                        v.type === 'PAYMENT' && "bg-rose-500",
+                        v.type === 'RECEIPT' && "bg-emerald-500",
+                        v.type === 'CONTRA' && "bg-indigo-500",
+                        v.type === 'JOURNAL' && "bg-amber-500",
+                      )} />
+                      <div>
+                        <p className="text-xs font-black text-slate-900 font-mono tracking-tighter">{v.voucher_no}</p>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{format(new Date(v.date), 'dd MMM yyyy')}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-10 py-6" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
+                    <p className="text-[11px] font-black text-slate-700 uppercase tracking-tight">{getOppositeAccount(v)}</p>
+                    <p className="text-[10px] text-slate-400 font-bold truncate max-w-[200px] mt-1">{v.narration}</p>
+                  </td>
+                  <td className="px-10 py-6">
+                    <span className={cn(
+                      "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest",
+                      v.type === 'PAYMENT' && "bg-rose-50 text-rose-600 border border-rose-100",
+                      v.type === 'RECEIPT' && "bg-emerald-50 text-emerald-600 border border-emerald-100",
+                      v.type === 'CONTRA' && "bg-indigo-50 text-indigo-600 border border-indigo-100",
+                      v.type === 'JOURNAL' && "bg-amber-50 text-amber-600 border border-amber-100",
+                      v.type === 'SALES' && "bg-sky-50 text-sky-600 border border-sky-100",
+                      v.type === 'PURCHASE' && "bg-slate-100 text-slate-600 border border-slate-200",
+                    )}>
+                      {v.type}
+                    </span>
+                  </td>
+                  <td className="px-10 py-6 text-right">
+                    <p className="text-sm font-black text-slate-900 font-mono tabular-nums">{formatBDT(v.amount).replace(/[^0-9.,]/g, '')}</p>
+                  </td>
+                  <td className="px-10 py-6 text-right pr-10">
+                    <div className="flex items-center justify-end gap-1">
+                      <button 
+                        onClick={() => setViewingVoucher(v)}
+                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
+                        title="Print View"
+                      >
+                        <Printer size={16} />
+                      </button>
+                      <button 
+                         onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}
+                         className="p-2 text-slate-300 hover:text-slate-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
+                         title="Detailed Audit"
+                      >
+                        <Eye size={16} />
+                      </button>
+                      {canEdit && (
+                        <button 
+                          onClick={() => onEdit(v)}
+                          className="p-2 text-slate-300 hover:text-amber-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
+                          title="Modify Record"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button 
+                          onClick={() => handleDelete(v.id, v.voucher_no)}
+                          className="p-2 text-slate-300 hover:text-rose-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100"
+                          title="Expunge Entry"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+                <AnimatePresence>
+                  {expandedVoucherId === v.id && (
+                    <motion.tr
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="bg-slate-50/50"
+                    >
+                      <td colSpan={5} className="p-0">
+                        <div className="px-20 py-8 border-y border-slate-100 space-y-4">
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Technical Ledger Distribution</h4>
+                            <div className="flex gap-4 text-[9px] font-bold text-slate-400">
+                              <span>Ref: {v.voucher_no}</span>
+                              <span>Method: {v.payment_channel || 'N/A'}</span>
+                            </div>
+                          </div>
+                          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                            <table className="w-full text-left">
+                              <thead>
+                                <tr className="bg-slate-100/50">
+                                  <th className="px-6 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">Account Name</th>
+                                  <th className="px-6 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Debit</th>
+                                  <th className="px-6 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Credit</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-slate-100">
+                                {v.transactions.map((t: any, tIdx: number) => (
+                                  <tr key={tIdx}>
+                                    <td className="px-6 py-3 text-[11px] font-bold text-slate-600 uppercase italic pl-10 border-l-4 border-indigo-500/20">{t.account?.name}</td>
+                                    <td className="px-6 py-3 text-[11px] font-mono font-black text-right text-rose-500">
+                                      {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
+                                    </td>
+                                    <td className="px-6 py-3 text-[11px] font-mono font-black text-right text-emerald-500">
+                                      {t.credit > 0 ? formatBDT(t.credit).replace(/[^0-9.,]/g, '') : '-'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </td>
+                    </motion.tr>
+                  )}
+                </AnimatePresence>
+              </React.Fragment>
+            ))}
             {vouchers.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-20 text-center text-slate-300 font-medium italic">No transactions recorded matching the criteria.</td>
+                <td colSpan={5} className="py-32 text-center">
+                  <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                    <Receipt className="text-slate-200" size={32} />
+                  </div>
+                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Temporal vacuum: No financial events discovered</p>
+                </td>
               </tr>
             )}
           </tbody>
-          <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-black">
-            <tr>
-              <td colSpan={5} className="px-8 py-6 text-sm text-slate-900 text-right uppercase tracking-widest">Total Transaction Value</td>
-              <td className="px-8 py-6 text-sm font-mono text-indigo-600 text-right">{formatBDT(totalAmount)}</td>
-            </tr>
-          </tfoot>
         </table>
       </div>
+
+      <AnimatePresence>
+        {viewingVoucher && (
+          <VoucherPrintPreview 
+            voucher={viewingVoucher}
+            company={selectedCompany}
+            profile={profile}
+            onClose={() => setViewingVoucher(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }
