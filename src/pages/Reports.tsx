@@ -14,11 +14,13 @@ import {
   Search,
   ChevronRight,
   Printer,
-  Eye
+  Eye,
+  ChevronDown,
+  X
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { supabase } from '../lib/supabase';
-import { formatBDT, ACCOUNT_GROUPS } from '../constants';
+import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { cn } from '../lib/utils';
@@ -81,57 +83,228 @@ export default function Reports() {
     to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
   });
   const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    accountType: '',
+    accountId: '',
+    voucherType: ''
+  });
+
+  const resetFilters = () => {
+    setFilters({
+      accountType: '',
+      accountId: '',
+      voucherType: ''
+    });
+  };
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-6 pb-20">
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
-            Financial Reports
+          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none">
+            Reports
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">Standard Compliance Reporting</p>
+          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none">
+            Compliance & Financial Insights
+          </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="inline-flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm">
-            <div className="flex items-center gap-2 pl-3">
-              <Calendar size={16} className="text-slate-400" />
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400">
+              <Calendar size={12} />
+              <span className="text-[9px] font-black uppercase tracking-wider">Range</span>
             </div>
-            <div className="flex items-center gap-2 pr-2">
+            <div className="flex items-center gap-1.5 pr-1">
               <input 
                 type="date" 
                 value={dateRange.from}
                 onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="text-xs font-bold text-slate-700 outline-none border-none bg-transparent"
+                className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
               />
-              <span className="text-slate-300">→</span>
+              <span className="text-slate-300 text-[10px]">/</span>
               <input 
                 type="date" 
                 value={dateRange.to}
                 onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="text-xs font-bold text-slate-700 outline-none border-none bg-transparent"
+                className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
               />
             </div>
             <button 
               onClick={() => setConfirmedDateRange(dateRange)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+              className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md shadow-slate-100"
             >
-              Apply Filter
+              Sync
             </button>
           </div>
           
           <button 
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+            className={cn(
+              "px-3 py-2 rounded-xl transition-all shadow-sm border flex items-center gap-2",
+              showAdvancedFilters 
+                ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
+                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+            )}
+            title="Advanced Filters"
+          >
+            <Filter size={16} />
+            <span className="text-[11px] font-bold uppercase tracking-widest hidden sm:inline">Filters</span>
+          </button>
+
+          <button 
             onClick={() => window.print()}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm no-print"
             title="Print Report"
           >
-            <Printer size={20} />
+            <Printer size={16} />
           </button>
         </div>
       </div>
 
+      {/* Active Filter Chips */}
+      <AnimatePresence>
+        {(filters.accountType || filters.voucherType) && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="flex flex-wrap gap-2 px-1 no-print"
+          >
+            {filters.accountType && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 border border-indigo-100 rounded-lg text-[10px] font-bold text-indigo-600 uppercase tracking-wider">
+                Account: {ACCOUNT_GROUPS.find(g => g.value === filters.accountType)?.label}
+                <button onClick={() => setFilters(prev => ({ ...prev, accountType: '' }))} className="hover:text-indigo-800">
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+            {filters.voucherType && (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-rose-50 border border-rose-100 rounded-lg text-[10px] font-bold text-rose-600 uppercase tracking-wider">
+                Voucher: {VOUCHER_TYPES.find(v => v.value === filters.voucherType)?.label}
+                <button onClick={() => setFilters(prev => ({ ...prev, voucherType: '' }))} className="hover:text-rose-800">
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+            <button 
+              onClick={resetFilters}
+              className="text-[10px] font-bold text-slate-400 hover:text-slate-600 underline underline-offset-4 px-2"
+            >
+              Reset All
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Advanced Filters Modal */}
+      <AnimatePresence>
+        {showAdvancedFilters && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowAdvancedFilters(false)}
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] no-print"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-x-4 top-[15%] md:left-1/2 md:-translate-x-1/2 md:max-w-lg bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-100 no-print overflow-hidden"
+            >
+              <div className="p-8 space-y-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900 tracking-tight">Advanced Filtering</h2>
+                    <p className="text-sm text-slate-500 font-medium">Refine your report parameters</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowAdvancedFilters(false)}
+                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block pl-1">Primary Ledger Group</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button 
+                        onClick={() => setFilters(prev => ({ ...prev, accountType: '' }))}
+                        className={cn(
+                          "px-4 py-3 rounded-2xl text-xs font-bold transition-all border",
+                          filters.accountType === '' 
+                            ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200" 
+                            : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
+                        )}
+                      >
+                        All Types
+                      </button>
+                      {ACCOUNT_GROUPS.map(g => (
+                        <button 
+                          key={g.value}
+                          onClick={() => setFilters(prev => ({ ...prev, accountType: g.value }))}
+                          className={cn(
+                            "px-4 py-3 rounded-2xl text-xs font-bold transition-all border",
+                            filters.accountType === g.value 
+                              ? "bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-100" 
+                              : "bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100"
+                          )}
+                        >
+                          {g.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] block pl-1">Voucher Category</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {VOUCHER_TYPES.map(v => (
+                        <button 
+                          key={v.value}
+                          onClick={() => setFilters(prev => ({ ...prev, voucherType: prev.voucherType === v.value ? '' : v.value }))}
+                          className={cn(
+                            "px-3 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border",
+                            filters.voucherType === v.value 
+                              ? "bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-100" 
+                              : "bg-slate-50 text-slate-500 border-slate-100 hover:bg-slate-100"
+                          )}
+                        >
+                          {v.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-3">
+                  <button 
+                    onClick={resetFilters}
+                    className="flex-1 py-4 text-xs font-bold text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
+                  >
+                    Reset Filters
+                  </button>
+                  <button 
+                    onClick={() => setShowAdvancedFilters(false)}
+                    className="flex-[2] py-4 bg-slate-900 text-white rounded-2xl font-bold text-xs uppercase tracking-[0.2em] hover:bg-slate-800 transition-all shadow-xl shadow-slate-200"
+                  >
+                    Show Results
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       {/* Tabs */}
-      <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100">
+      <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
         <TabButton 
           active={activeTab === 'DAYBOOK'} 
           onClick={() => setActiveTab('DAYBOOK')}
@@ -161,6 +334,7 @@ export default function Reports() {
             <Daybook 
               companyId={selectedCompany?.id} 
               dateRange={confirmedDateRange} 
+              filters={filters}
               onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Voucher #', 'Ledger', 'Type', 'Method', 'Description', 'Amount'], 'daybook')}
               onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
             />
@@ -169,6 +343,7 @@ export default function Reports() {
             <LedgerReport 
               companyId={selectedCompany?.id} 
               dateRange={confirmedDateRange} 
+              filters={filters}
               onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'], 'ledger_statement')}
               onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement')}
             />
@@ -177,6 +352,7 @@ export default function Reports() {
             <TrialBalance 
               companyId={selectedCompany?.id} 
               dateRange={confirmedDateRange} 
+              filters={filters}
               onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
               onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
             />
@@ -204,9 +380,10 @@ function TabButton({ active, onClick, label }: any) {
 }
 
 // Sub-components for Reports
-function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExcel }: any) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (companyId) fetchTrialBalance();
@@ -215,10 +392,16 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
   const fetchTrialBalance = async () => {
     setLoading(true);
     // Fetch accounts and their transaction sums within the range
-    const { data: accounts, error: accError } = await supabase
+    let accQuery = supabase
       .from('accounts')
       .select('*')
       .eq('company_id', companyId);
+    
+    if (filters.accountType) {
+      accQuery = accQuery.eq('type', filters.accountType);
+    }
+
+    const { data: accounts, error: accError } = await accQuery;
 
     if (accError) {
       console.error(accError);
@@ -261,25 +444,42 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
     setLoading(false);
   };
 
-  const totalDebit = data.reduce((sum, acc) => sum + acc.debit, 0);
-  const totalCredit = data.reduce((sum, acc) => sum + acc.credit, 0);
+  const filteredData = data.filter(acc => 
+    acc.name.toLowerCase().includes(search.toLowerCase()) ||
+    acc.code.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalDebit = filteredData.reduce((sum, acc) => sum + acc.debit, 0);
+  const totalCredit = filteredData.reduce((sum, acc) => sum + acc.credit, 0);
 
   if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Calculating Ledger Equilibrium...</div>;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between no-print">
-        <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Trial Balance Summary</h3>
+      <div className="px-8 py-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+        <div className="flex items-center gap-4 flex-1">
+          <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest whitespace-nowrap">Trial Balance</h3>
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+            <input 
+              type="text"
+              placeholder="Search account name or code..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full bg-slate-50/50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-[11px] font-medium outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+            />
+          </div>
+        </div>
         <div className="flex gap-2">
           <button 
-            onClick={() => onExportExcel(data.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
+            onClick={() => onExportExcel(filteredData.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
             className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all hover:bg-slate-100"
             title="Export to Excel"
           >
             <Download size={20} />
           </button>
           <button 
-            onClick={() => onExportPDF(data.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
+            onClick={() => onExportPDF(filteredData.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
             className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all hover:bg-slate-100"
             title="Export to PDF"
           >
@@ -298,7 +498,7 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">
-            {data.map(acc => (
+            {filteredData.map(acc => (
               <tr key={acc.id} className="hover:bg-slate-50 transition-colors">
                 <td className="px-8 py-4 text-sm font-mono text-slate-400">{acc.code}</td>
                 <td className="px-8 py-4 text-sm font-semibold text-slate-700">{acc.name}</td>
@@ -310,7 +510,7 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
                 </td>
               </tr>
             ))}
-            {data.length === 0 && (
+            {filteredData.length === 0 && (
               <tr>
                 <td colSpan={4} className="py-20 text-center text-slate-300 font-medium italic">No ledger activity found for this period.</td>
               </tr>
@@ -329,17 +529,22 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
   );
 }
 
-function Daybook({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+function Daybook({ companyId, dateRange, filters, onExportPDF, onExportExcel }: any) {
   const [vouchers, setVouchers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<any[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState('');
 
   useEffect(() => {
-    if (companyId) fetchDaybook();
-  }, [companyId, dateRange]);
+    if (companyId) {
+      fetchDaybook();
+      supabase.from('accounts').select('id, name').eq('company_id', companyId).then(({ data }) => setAccounts(data || []));
+    }
+  }, [companyId, dateRange, filters.voucherType, selectedAccountId]);
 
   const fetchDaybook = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('vouchers')
       .select(`
         *,
@@ -349,17 +554,23 @@ function Daybook({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
         )
       `)
       .eq('company_id', companyId)
-      // Since it's a "Daybook", usually it shows ONE day. 
-      // But we can use dateRange.from as the specific date if from == to, 
-      // or show the range. The prompt says "transactions recorded on a specific date".
       .gte('date', dateRange.from)
-      .lte('date', dateRange.to)
-      .order('voucher_no', { ascending: true });
+      .lte('date', dateRange.to);
+    
+    if (filters.voucherType) {
+      query = query.eq('type', filters.voucherType);
+    }
+
+    const { data, error } = await query.order('date', { ascending: true }).order('voucher_no', { ascending: true });
 
     if (error) {
       console.error(error);
     } else {
-      setVouchers(data || []);
+      let filtered = data || [];
+      if (selectedAccountId) {
+        filtered = filtered.filter(v => v.transactions.some((t: any) => t.account_id === selectedAccountId));
+      }
+      setVouchers(filtered);
     }
     setLoading(false);
   };
@@ -369,22 +580,34 @@ function Daybook({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
       voucher_no: v.voucher_no,
       ledger_name: t.account?.name,
       type: v.type,
-      payment_method: v.payment_method,
+      payment_method: v.payment_channel,
       description: v.narration,
-      amount: t.debit > 0 ? t.debit : (t.credit * -1) // This is for display, but prompt asks for "Amount"
+      amount: t.debit > 0 ? t.debit : (t.credit * -1)
     }))
   );
 
   const totalAmount = vouchers.reduce((sum, v) => 
-    sum + v.transactions.reduce((vSum: number, t: any) => vSum + (t.debit > 0 ? t.debit : 0), 0)
+    sum + v.transactions.reduce((vSum: number, t: any) => vSum + (Number(t.debit) || 0), 0)
   , 0);
 
   if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Scanning the Daybook...</div>;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between no-print">
-        <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Daybook: {dateRange.from}</h3>
+      <div className="px-8 py-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+        <div className="flex items-center gap-4 flex-1">
+          <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest whitespace-nowrap">Daybook</h3>
+          <div className="max-w-xs w-full">
+            <select 
+              value={selectedAccountId}
+              onChange={(e) => setSelectedAccountId(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-[11px] font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+            >
+              <option value="">Filter by Specific Account...</option>
+              {accounts.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+            </select>
+          </div>
+        </div>
         <div className="flex gap-2">
           <button 
             onClick={() => onExportExcel(daybookData)}
@@ -420,7 +643,7 @@ function Daybook({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
                 <td className="px-8 py-4 text-sm font-mono font-bold text-slate-900">{v.voucher_no}</td>
                 <td className="px-8 py-4 text-sm font-semibold text-slate-700">{t.account?.name}</td>
                 <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.type}</td>
-                <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.payment_method}</td>
+                <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.payment_channel}</td>
                 <td className="px-8 py-4 text-sm font-medium text-slate-500">{v.narration}</td>
                 <td className={cn(
                   "px-8 py-4 text-sm font-mono font-black text-right",
@@ -432,7 +655,7 @@ function Daybook({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
             )))}
             {vouchers.length === 0 && (
               <tr>
-                <td colSpan={6} className="py-20 text-center text-slate-300 font-medium italic">No transactions recorded for this day.</td>
+                <td colSpan={6} className="py-20 text-center text-slate-300 font-medium italic">No transactions recorded matching the criteria.</td>
               </tr>
             )}
           </tbody>
@@ -457,7 +680,7 @@ function BalanceRow({ label, value, bold }: any) {
   );
 }
 
-function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExcel }: any) {
   const { profile } = useAuth();
   const { selectedCompany } = useCompany();
   const [selectedAccountId, setSelectedAccountId] = useState('');
@@ -481,7 +704,7 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
       setTransactions([]);
       setOpeningBalance(0);
     }
-  }, [selectedAccountId, dateRange]);
+  }, [selectedAccountId, dateRange, filters.voucherType]);
 
   const fetchLedger = async () => {
     setLoading(true);
@@ -497,7 +720,7 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
     setOpeningBalance(opening);
 
     // 2. Fetch current period transactions
-    const { data, error } = await supabase
+    let query = supabase
       .from('transactions')
       .select(`
         *,
@@ -505,12 +728,20 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
       `)
       .eq('account_id', selectedAccountId)
       .gte('date', dateRange.from)
-      .lte('date', dateRange.to)
+      .lte('date', dateRange.to);
+    
+    const { data, error } = await query
       .order('date', { ascending: true })
       .order('created_at', { ascending: true });
     
     if (error) console.error(error);
-    setTransactions(data || []);
+    
+    let filteredData = data || [];
+    if (filters.voucherType) {
+      filteredData = filteredData.filter(t => t.voucher?.type === filters.voucherType);
+    }
+
+    setTransactions(filteredData);
     setLoading(false);
   };
 

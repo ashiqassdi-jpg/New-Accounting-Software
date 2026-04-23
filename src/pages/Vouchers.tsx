@@ -144,38 +144,38 @@ export default function Vouchers() {
   };
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
             Voucher Management
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">
-            Record entries for {selectedCompany?.name || 'Selected Entity'}
+          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none text-center md:text-left">
+            Vanguard Entries for {selectedCompany?.name || 'Vanguard'}
           </p>
         </div>
 
-        <div className="flex items-center gap-3 no-print">
+        <div className="flex items-center justify-center md:justify-end gap-2 no-print">
           <button 
             onClick={() => window.print()}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
             title="Print List"
           >
-            <Printer size={20} />
+            <Printer size={16} />
           </button>
           <button 
             onClick={handleExportExcel}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
+            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
             title="Export Excel"
           >
-            <Download size={20} />
+            <Download size={16} />
           </button>
           <button 
             onClick={handleExportPDF}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
+            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
             title="Export PDF"
           >
-            <FileText size={20} />
+            <FileText size={16} />
           </button>
         </div>
       </div>

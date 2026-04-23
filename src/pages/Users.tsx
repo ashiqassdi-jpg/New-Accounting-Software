@@ -423,10 +423,16 @@ export default function UserManagement() {
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Action Constraints</label>
                     <div className="bg-slate-50/50 p-4 rounded-2xl space-y-4 border border-slate-100">
                       <PermissionToggle 
-                        label="Records" 
-                        description="Create & Edit rights"
-                        active={editingUser.can_add !== false && editingUser.can_edit !== false}
-                        onClick={() => setEditingUser({ ...editingUser, can_add: !editingUser.can_add, can_edit: !editingUser.can_edit })}
+                        label="Add Records" 
+                        description="Voucher entry creation"
+                        active={editingUser.can_add !== false}
+                        onClick={() => setEditingUser({ ...editingUser, can_add: !editingUser.can_add })}
+                      />
+                      <PermissionToggle 
+                        label="Edit Records" 
+                        description="Modify existing data"
+                        active={editingUser.can_edit !== false}
+                        onClick={() => setEditingUser({ ...editingUser, can_edit: !editingUser.can_edit })}
                       />
                       <PermissionToggle 
                         label="Delete" 

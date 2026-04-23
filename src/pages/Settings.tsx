@@ -87,7 +87,7 @@ export default function Settings() {
           phone,
           address,
           designation,
-          joining_date: joiningDate
+          joining_date: joiningDate || null
         })
         .eq('id', profile.id);
 
@@ -274,6 +274,15 @@ export default function Settings() {
                         className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                         value={designation}
                         onChange={(e) => setDesignation(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Joining Date</label>
+                      <input 
+                        type="date"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        value={joiningDate}
+                        onChange={(e) => setJoiningDate(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">

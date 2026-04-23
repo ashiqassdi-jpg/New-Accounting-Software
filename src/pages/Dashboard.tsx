@@ -78,16 +78,16 @@ export default function Dashboard() {
       const grouped: { [key: string]: number } = {};
       transactions.forEach((t: any) => {
         const name = t.accounts.name;
-        grouped[name] = (grouped[name] || 0) + (t.debit - t.credit);
+        grouped[name] = (grouped[name] || 0) + (Number(t.debit) || 0) - (Number(t.credit) || 0);
       });
 
       const formatted = Object.keys(grouped).map(name => ({
         name,
         value: Math.max(0, grouped[name])
-      })).sort((a, b) => b.value - a.value).slice(0, 5);
+      })).filter(e => e.value > 0).sort((a, b) => b.value - a.value).slice(0, 5);
 
       setExpenseDistribution(formatted.length > 0 ? formatted : [
-        { name: 'No Expenses', value: 0 }
+        { name: 'N/A', value: 0 }
       ]);
     } catch (err) {
       console.error(err);
@@ -96,7 +96,6 @@ export default function Dashboard() {
 
   const fetchChartData = async () => {
     try {
-      // Get monthly totals for the last 6 months or current range
       const { data: transactions } = await supabase
         .from('transactions')
         .select('date, debit, credit, accounts!inner(type)')
@@ -113,9 +112,9 @@ export default function Dashboard() {
         if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0 };
         
         if (t.accounts.type === 'INCOME') {
-          monthlyData[month].revenue += (t.credit - t.debit);
+          monthlyData[month].revenue += (Number(t.credit) || 0) - (Number(t.debit) || 0);
         } else if (t.accounts.type === 'EXPENSE') {
-          monthlyData[month].expenses += (t.debit - t.credit);
+          monthlyData[month].expenses += (Number(t.debit) || 0) - (Number(t.credit) || 0);
         }
       });
 
@@ -125,7 +124,10 @@ export default function Dashboard() {
         expenses: Math.max(0, monthlyData[month].expenses)
       }));
 
-      setChartData(formatted.length > 0 ? formatted : [
+      setChartData(formatted.length > 0 ? formatted.sort((a, b) => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        return months.indexOf(a.name) - months.indexOf(b.name);
+      }) : [
         { name: 'N/A', revenue: 0, expenses: 0 }
       ]);
     } catch (err) {
@@ -180,44 +182,44 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-6 pb-20">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
-            Financial Dashboard
+          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none">
+            Dashboard
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">
-            Overview of {selectedCompany?.name || 'Your Company'}
+          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest">
+            {selectedCompany?.name || 'Vanguard Entity'}
           </p>
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="inline-flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-slate-200 shadow-sm border-b-2 no-print">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl text-slate-400">
-              <Calendar size={16} />
-              <span className="text-[10px] font-bold uppercase tracking-wider">Date Filters</span>
+          <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400">
+              <Calendar size={12} />
+              <span className="text-[9px] font-black uppercase tracking-wider">Period</span>
             </div>
-            <div className="flex items-center gap-2 pr-2">
+            <div className="flex items-center gap-1.5 pr-1">
               <input 
                 type="date" 
                 value={dateRange.from}
                 onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="text-xs outline-none border-none bg-transparent font-bold text-slate-700 w-28"
+                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-24"
               />
-              <span className="text-slate-300">→</span>
+              <span className="text-slate-300 text-[10px]">/</span>
               <input 
                 type="date" 
                 value={dateRange.to}
                 onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="text-xs outline-none border-none bg-transparent font-bold text-slate-700 w-28"
+                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-24"
               />
             </div>
             <button 
               onClick={() => setConfirmedDateRange(dateRange)}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
+              className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md shadow-slate-100"
             >
-              Apply Filter
+              Sync
             </button>
           </div>
 
@@ -334,28 +336,25 @@ export default function Dashboard() {
 
 function StatCard({ title, value, icon: Icon, color }: any) {
   const colorMap: any = {
-    indigo: 'bg-indigo-50/50 text-indigo-600 border-indigo-100',
-    emerald: 'bg-emerald-50/50 text-emerald-600 border-emerald-100',
-    rose: 'bg-rose-50/50 text-rose-600 border-rose-100',
-    amber: 'bg-amber-50/50 text-amber-600 border-amber-100',
-    slate: 'bg-slate-50/50 text-slate-600 border-slate-100',
+    indigo: 'text-indigo-600',
+    emerald: 'text-emerald-600',
+    rose: 'text-rose-600',
+    amber: 'text-amber-600',
+    slate: 'text-slate-600',
   };
 
   return (
     <motion.div 
-      whileHover={{ y: -4, shadow: '0 20px 25px -5px rgb(0 0 0 / 0.05)' }}
-      className={cn(
-        "bg-white p-8 rounded-3xl border border-slate-100 shadow-sm transition-all duration-300 relative overflow-hidden group",
-      )}
+      whileHover={{ y: -2 }}
+      className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)] transition-all duration-300 relative group"
     >
-      <div className={cn("absolute top-0 right-0 w-32 h-32 -mr-16 -mt-16 rounded-full opacity-[0.03] transition-transform group-hover:scale-110", colorMap[color])} />
-      <div className="flex items-center justify-between mb-6">
-        <div className={cn("p-4 rounded-2xl border transition-colors", colorMap[color])}>
-          <Icon size={24} />
+      <div className="flex items-center gap-3 mb-4">
+        <div className={cn("p-2 rounded-lg bg-slate-50/50", colorMap[color])}>
+          <Icon size={16} />
         </div>
+        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</h3>
       </div>
-      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">{title}</h3>
-      <p className="text-2xl font-bold text-slate-900 font-mono tracking-tighter">
+      <p className="text-xl font-bold text-slate-800 font-mono tracking-tighter tabular-nums truncate">
         {formatBDT(value)}
       </p>
     </motion.div>
@@ -364,14 +363,14 @@ function StatCard({ title, value, icon: Icon, color }: any) {
 
 function ChartBox({ title, children, icon: Icon }: any) {
   return (
-    <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm relative pt-10">
-      <div className="absolute top-8 left-8 flex items-center gap-3">
-        <div className="bg-slate-50 p-2 rounded-xl text-slate-400">
-          <Icon size={16} />
+    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)] relative">
+      <div className="flex items-center gap-2.5 mb-8">
+        <div className="bg-slate-50 p-1.5 rounded-lg text-slate-400">
+          <Icon size={14} />
         </div>
-        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">{title}</h3>
+        <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">{title}</h3>
       </div>
-      <div className="mt-8">
+      <div>
         {children}
       </div>
     </div>

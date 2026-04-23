@@ -61,29 +61,29 @@ export default function Sidebar() {
         collapsed ? "w-20" : "w-72"
       )}
     >
-      <div className="flex items-center gap-3 px-8 h-24 border-b border-slate-50 overflow-hidden">
-        <div className="bg-indigo-600 p-2.5 rounded-2xl shadow-lg shadow-indigo-100 shrink-0">
-          <BookOpen className="h-6 w-6 text-white" />
+      <div className="flex items-center gap-3 px-6 h-20 border-b border-slate-50 overflow-hidden">
+        <div className="bg-slate-900 p-2 rounded-xl shadow-lg shadow-slate-100 shrink-0">
+          <BookOpen className="h-5 w-5 text-white" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="font-bold text-xl text-slate-900 truncate tracking-tight font-sans">
+            <span className="font-bold text-lg text-slate-900 truncate tracking-tight font-sans leading-none">
               Ashiq's Creation
             </span>
-            <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Enterprise Edition</span>
+            <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Enterprise</span>
           </div>
         )}
       </div>
 
-      <div className="px-4 py-8 flex flex-col gap-1.5 overflow-y-auto flex-1 custom-scrollbar">
+      <div className="px-3 py-6 flex flex-col gap-1 overflow-y-auto flex-1 custom-scrollbar">
         {!collapsed && companies.length > 0 && (
-          <div className="mb-6 px-4">
-            <label className="text-[10px] font-bold text-slate-300 uppercase tracking-[0.2em] mb-3 block pl-1">
-              Active Entity
+          <div className="mb-4 px-3">
+            <label className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2 block pl-1">
+              Organization
             </label>
             <div className="relative group">
               <select 
-                className="w-full bg-slate-50/50 border border-slate-100 text-sm rounded-xl px-4 py-3 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold appearance-none cursor-pointer"
+                className="w-full bg-slate-50/50 border border-slate-100 text-[11px] rounded-xl px-3 py-2.5 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all font-bold appearance-none cursor-pointer"
                 value={selectedCompany?.id || ''}
                 onChange={(e) => {
                   const company = companies.find(c => c.id === e.target.value);
@@ -106,19 +106,19 @@ export default function Sidebar() {
             key={item.path}
             to={item.path}
             className={({ isActive }) => cn(
-              "flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all relative overflow-hidden group",
+              "flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all relative overflow-hidden group",
               isActive 
-                ? "bg-slate-900 text-white font-bold shadow-2xl shadow-slate-200" 
+                ? "bg-slate-900 text-white font-bold shadow-lg shadow-slate-200" 
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
             )}
           >
             {({ isActive }) => (
               <>
                 <item.icon className={cn(
-                  "h-5 w-5 shrink-0 transition-transform duration-500 group-hover:scale-110",
+                  "h-4.5 w-4.5 shrink-0 transition-transform duration-500 group-hover:scale-110",
                   "group-hover:rotate-3"
                 )} />
-                {!collapsed && <span className="text-sm tracking-wide">{item.name}</span>}
+                {!collapsed && <span className="text-[13px] tracking-wide">{item.name}</span>}
                 {/* Active Indicator */}
                 {isActive && (
                   <motion.div 
@@ -132,13 +132,13 @@ export default function Sidebar() {
         ))}
       </div>
 
-      <div className="p-6 border-t border-slate-50 mt-auto">
+      <div className="p-4 border-t border-slate-50 mt-auto">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3.5 w-full px-4 py-4 text-rose-500 hover:bg-rose-50 rounded-2xl transition-all font-bold group"
+          className="flex items-center gap-3 w-full px-3 py-3 text-rose-500 hover:bg-rose-50 rounded-xl transition-all font-bold group"
         >
-          <LogOut className="h-5 w-5 shrink-0 group-hover:-translate-x-1 transition-transform" />
-          {!collapsed && <span className="text-sm">Terminate Session</span>}
+          <LogOut className="h-4 w-4 shrink-0 group-hover:-translate-x-1 transition-transform" />
+          {!collapsed && <span className="text-[13px]">Terminate</span>}
         </button>
       </div>
 

@@ -36,5 +36,5 @@ export const BDT_FORMATTER = new Intl.NumberFormat('en-BD', {
 });
 
 export const formatBDT = (amount: number = 0) => {
-  return `৳ ${BDT_FORMATTER.format(amount || 0)}`;
+  return `৳${BDT_FORMATTER.format(amount || 0)}`;
 };

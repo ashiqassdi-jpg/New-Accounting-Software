@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -6,32 +7,56 @@
 }
 
 @layer base {
+  html {
+    font-size: 15px; /* Slightly smaller base for compactness */
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-[#F9FAFB] text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Compact form controls */
+  input, select, textarea {
+    @apply text-[13px] leading-tight transition-all duration-200 border border-slate-100 bg-white rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-400;
+  }
+
+  button {
+    @apply active:scale-95 transition-transform duration-100 cursor-pointer;
   }
 }
 
 @layer components {
   /* Italic serif column headers—humanizes the data */
   .col-header {
-    @apply font-serif italic text-[11px] opacity-70 uppercase tracking-widest;
+    @apply font-sans font-bold text-[10px] text-slate-400 uppercase tracking-[0.15em];
   }
 
   /* Monospace for data values—signals precision */
   .data-value {
-    @apply font-mono tracking-tighter;
+    @apply font-mono tracking-tighter tabular-nums;
   }
 
-  /* Custom Scrollbar */
+  /* Professional Currency Styling */
+  .currency-symbol {
+    @apply text-slate-300 font-sans mr-0.5 font-normal;
+  }
+
+  /* Custom Scrollbar - Cleaner, more professional */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-gray-200 rounded-full hover:bg-gray-300 transition-colors;
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  }
+
+  /* Compact card styling */
+  .card-compact {
+    @apply bg-white border border-slate-100 rounded-2xl p-4 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)];
   }
 }
 
@@ -40,9 +65,12 @@
     display: none !important;
   }
   body {
-    @apply bg-white;
+    @apply bg-white text-black text-[10pt];
   }
   main {
     @apply p-0 m-0 !overflow-visible !max-h-none !h-auto;
+  }
+  .card-compact {
+    @apply border-none shadow-none p-0;
   }
 }

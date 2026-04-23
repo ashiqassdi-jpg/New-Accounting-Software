@@ -106,22 +106,24 @@ export default function Ledger() {
   };
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
-            General Ledger
+          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
+            Ledger View
           </h1>
-          <p className="text-slate-500 mt-1 font-medium italic">Atomic transaction traceability</p>
+          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none text-center md:text-left">
+            Atomic traceability for {selectedCompany?.name || 'Vanguard'}
+          </p>
         </div>
 
-        <div className="max-w-xs w-full">
+        <div className="max-w-xs w-full no-print">
           <select 
             value={selectedAccountId}
             onChange={(e) => setSelectedAccountId(e.target.value)}
-            className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700 shadow-sm"
+            className="w-full font-bold text-slate-700"
           >
-            <option value="">Select Account Ledger</option>
+            <option value="">Choose Account Ledger</option>
             {accounts.map(a => (
               <option key={a.id} value={a.id}>{a.name} ({a.code})</option>
             ))}
