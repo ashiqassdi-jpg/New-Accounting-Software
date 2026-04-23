@@ -63,7 +63,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-white w-full max-w-[210mm] min-h-0 rounded-3xl shadow-2xl relative my-4 overflow-hidden"
+        className="bg-white w-full max-w-[850px] max-h-[90vh] rounded-3xl shadow-2xl relative my-4 overflow-y-auto scrollbar-hide"
       >
         <div className="absolute top-4 right-4 flex gap-2 z-10 no-print">
           <button 
@@ -87,121 +87,118 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
             <p className="font-bold uppercase tracking-widest text-[10px]">Assembling Voucher Data...</p>
           </div>
         ) : (
-          <div ref={componentRef} className="p-8 md:p-12 text-slate-900 bg-white">
+          <div ref={componentRef} className="p-8 text-slate-900 bg-white shadow-inner mx-auto max-w-full overflow-x-hidden">
             <style type="text/css" media="print">
               {`
-                @page { size: A4; margin: 20mm; }
-                body { -webkit-print-color-adjust: exact; }
+                @page { 
+                  size: A4 portrait; 
+                  margin: 10mm; 
+                }
+                body { 
+                  -webkit-print-color-adjust: exact; 
+                  font-family: 'Inter', sans-serif;
+                }
                 .no-print { display: none !important; }
+                .print-content {
+                  width: 190mm !important; /* A4 is 210mm, minus 10mm margins on each side */
+                  margin: 0 auto !important;
+                  padding: 0 !important;
+                }
               `}
             </style>
             
-            {/* Header */}
-            <div className="flex justify-between items-start border-b-2 border-slate-100 pb-6">
-              <div className="space-y-3">
+            <div className="print-content">
+              {/* Minimal Header */}
+              <div className="text-center space-y-1 border-b border-slate-300 pb-4">
+                <h1 className="text-xl font-black tracking-tight text-slate-800 uppercase">{company?.name}</h1>
+                <p className="text-[10px] font-medium text-slate-500">{company?.address}</p>
+                <div className="flex justify-center gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  {company?.bin && <span>BIN: {company.bin}</span>}
+                  {company?.tax_id && <span>TAX: {company.tax_id}</span>}
+                </div>
+              </div>
+
+              {/* Voucher Title & Stats Bar */}
+              <div className="mt-4 flex justify-between items-center bg-slate-50 px-4 py-2 rounded-lg border border-slate-100">
                 <div className="flex items-center gap-2">
-                  <div className="bg-indigo-600 p-1.5 rounded-lg">
-                    <BookOpen className="text-white h-4 w-4" />
-                  </div>
-                  <span className="text-lg font-black tracking-tighter">Ashiq's Creation</span>
+                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                  <h2 className="text-xs font-black text-slate-700 uppercase tracking-wider">{voucher.type} VOUCHER</h2>
                 </div>
-                <div className="space-y-0.5">
-                  <h1 className="text-base font-bold text-slate-900">{company?.name}</h1>
-                  <p className="text-xs text-slate-500 max-w-[200px] leading-relaxed">{company?.address}</p>
-                  <div className="flex gap-3 mt-1">
-                    {company?.bin && <p className="text-[10px] font-bold text-slate-400">BIN: {company.bin}</p>}
-                    {company?.tax_id && <p className="text-[10px] font-bold text-slate-400">Tax ID: {company.tax_id}</p>}
-                  </div>
+                <div className="flex gap-6 text-[10px]">
+                  <p className="font-medium text-slate-400 uppercase">No: <span className="text-slate-900 font-bold ml-1">{voucher.voucher_no}</span></p>
+                  <p className="font-medium text-slate-400 uppercase">Date: <span className="text-slate-900 font-bold ml-1">{format(new Date(voucher.date), 'dd-MM-yyyy')}</span></p>
                 </div>
               </div>
-              <div className="text-right space-y-1.5">
-                <div className="inline-block bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest mb-2">
-                  {voucher.type} VOUCHER
-                </div>
-                <div className="text-xs font-medium text-slate-500 space-y-0.5">
-                  <p>Voucher #: <span className="font-bold text-slate-900">{voucher.voucher_no}</span></p>
-                  <p>Date: <span className="font-bold text-slate-900">{format(new Date(voucher.date), 'dd MMM yyyy')}</span></p>
-                  {voucher.payment_channel && <p>Channel: <span className="font-bold text-slate-900 uppercase">{voucher.payment_channel}</span></p>}
-                </div>
-              </div>
-            </div>
 
-            {/* Body */}
-            <div className="mt-8">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-100">
-                    <th className="py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Details</th>
-                    <th className="py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Debit (৳)</th>
-                    <th className="py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Credit (৳)</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-50">
-                  {items.map((item: any, idx: number) => (
-                    <tr key={idx} className="group">
-                      <td className="py-3">
-                        <p className="text-sm font-bold text-slate-800">{item.account_name}</p>
-                        <p className="text-[10px] text-slate-400 mt-0.5 italic leading-relaxed">{voucher.narration}</p>
-                      </td>
-                      <td className="py-3 text-right font-mono text-sm font-bold text-slate-900">
-                        {item.debit > 0 ? formatBDT(item.debit).replace('৳', '') : '-'}
-                      </td>
-                      <td className="py-3 text-right font-mono text-sm font-bold text-slate-900">
-                        {item.credit > 0 ? formatBDT(item.credit).replace('৳', '') : '-'}
-                      </td>
+              {/* Compact Transaction Table */}
+              <div className="mt-4 border border-slate-200 rounded-lg overflow-hidden">
+                <table className="w-full border-collapse">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Ledger Description</th>
+                      <th className="px-4 py-2 text-right text-[9px] font-black text-slate-400 uppercase tracking-widest w-32">Debit ({formatBDT(0).split(' ')[0]})</th>
+                      <th className="px-4 py-2 text-right text-[9px] font-black text-slate-400 uppercase tracking-widest w-32">Credit ({formatBDT(0).split(' ')[0]})</th>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t-2 border-slate-100">
-                    <td className="py-4 text-xs font-black text-slate-900 uppercase tracking-widest">Grand Total</td>
-                    <td className="py-4 text-right font-mono font-black text-slate-900 text-base border-b-2 border-double border-slate-200">
-                      {formatBDT(voucher.amount).replace('৳', '')}
-                    </td>
-                    <td className="py-4 text-right font-mono font-black text-slate-900 text-base border-b-2 border-double border-slate-200">
-                      {formatBDT(voucher.amount).replace('৳', '')}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {items.map((item: any, idx: number) => (
+                      <tr key={idx}>
+                        <td className="px-4 py-3">
+                          <p className="text-[11px] font-bold text-slate-700 uppercase">{item.account_name}</p>
+                          {idx === 0 && <p className="text-[9px] text-slate-400 mt-1 italic leading-tight">Narration: {voucher.narration}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-[11px] font-bold text-slate-900">
+                          {item.debit > 0 ? formatBDT(item.debit).replace(/[^0-9.,]/g, '') : ''}
+                        </td>
+                        <td className="px-4 py-3 text-right font-mono text-[11px] font-bold text-slate-900">
+                          {item.credit > 0 ? formatBDT(item.credit).replace(/[^0-9.,]/g, '') : ''}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="bg-slate-900 text-white font-black">
+                    <tr>
+                      <td className="px-4 py-2.5 text-[10px] uppercase tracking-widest text-right">Total</td>
+                      <td className="px-4 py-2.5 text-right font-mono text-[10px]">{formatBDT(voucher.amount).replace(/[^0-9.,]/g, '')}</td>
+                      <td className="px-4 py-2.5 text-right font-mono text-[10px]">{formatBDT(voucher.amount).replace(/[^0-9.,]/g, '')}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
 
-            {/* Narration summary */}
-            <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-100">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Authorization Note</p>
-              <p className="text-xs font-medium text-slate-600 italic">"Processed in accordance with system-defined financial protocols."</p>
-            </div>
+              {/* Refined Modular Signatures */}
+              <div className="mt-16 grid grid-cols-4 gap-4">
+                <div className="flex flex-col items-center">
+                  <div className="w-full border-t border-slate-300 pt-2 text-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500">Signature</p>
+                    <p className="text-[9px] text-slate-300 mt-1 italic">(Prepared By)</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-full border-t border-slate-300 pt-2 text-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500">Pre-Verification</p>
+                    <p className="text-[9px] text-slate-300 mt-1 italic">(Account Dept)</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-full border-t border-slate-300 pt-2 text-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500">Audit</p>
+                    <p className="text-[9px] text-slate-300 mt-1 italic">(Verification)</p>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="w-full border-t border-slate-300 pt-2 text-center">
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-500">Approved</p>
+                    <p className="text-[9px] text-slate-400 font-bold mt-1 uppercase italic">{profile?.role === 'SUPER_ADMIN' ? 'Authorized Manager' : 'Approval Hub'}</p>
+                  </div>
+                </div>
+              </div>
 
-            {/* Footer Signatures */}
-            <div className="mt-16 grid grid-cols-4 gap-6">
-              <div className="text-center space-y-1.5">
-                <div className="border-t border-slate-200 pt-1.5">
-                  <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Prepared</p>
-                  <p className="text-[10px] text-slate-400 font-bold">{profile?.name || 'Authorized'}</p>
-                </div>
+              {/* Clean Footer */}
+              <div className="mt-12 pt-4 border-t border-slate-50 flex justify-between items-center text-[7px] font-bold text-slate-300 uppercase tracking-widest">
+                <span>Elite Accounting Protocol v2.5</span>
+                <span>Computer Generated Voucher • {format(new Date(), 'dd MMM yyyy HH:mm')}</span>
               </div>
-              <div className="text-center space-y-1.5">
-                <div className="border-t border-slate-200 pt-1.5">
-                  <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Checked</p>
-                </div>
-              </div>
-              <div className="text-center space-y-1.5">
-                <div className="border-t border-slate-200 pt-1.5">
-                  <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Approved</p>
-                </div>
-              </div>
-              <div className="text-center space-y-1.5">
-                <div className="border-t border-slate-200 pt-1.5">
-                  <p className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Auditor</p>
-                </div>
-              </div>
-            </div>
-
-            {/* System info */}
-            <div className="mt-12 flex justify-between items-center text-[7px] font-bold text-slate-300 uppercase tracking-[0.2em]">
-              <span>Ashiq's Creation ERP</span>
-              <span>Page 1 / 1</span>
-              <span>{format(new Date(), 'dd/MM/yyyy HH:mm')}</span>
             </div>
           </div>
         )/* Loading state handled above */}

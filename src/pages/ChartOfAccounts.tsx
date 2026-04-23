@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit3, Trash2, ListTree, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, Search, 
-  Download, FileText, Printer 
+  Download, FileText, Printer, X
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -28,7 +28,7 @@ export default function ChartOfAccounts() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE']);
+  const [activeTab, setActiveTab] = useState<string>('ASSET');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Form state
@@ -60,13 +60,7 @@ export default function ChartOfAccounts() {
     setLoading(false);
   };
 
-  const toggleGroup = (group: string) => {
-    setExpandedGroups(prev => 
-      prev.includes(group) ? prev.filter(g => g !== group) : [...prev, group]
-    );
-  };
-
-  const openModal = (account?: Account) => {
+  const openModal = (account?: Account, defaultType?: string) => {
     if (isModerator) return;
     if (account) {
       setEditingAccount(account);
@@ -76,8 +70,20 @@ export default function ChartOfAccounts() {
     } else {
       setEditingAccount(null);
       setName('');
-      setCode('');
-      setType('ASSET');
+      
+      const nextType = (defaultType || activeTab) as Account['type'];
+      setType(nextType);
+      
+      const groupPrefix = nextType === 'ASSET' ? '1' : 
+                          nextType === 'LIABILITY' ? '2' : 
+                          nextType === 'EQUITY' ? '3' : 
+                          nextType === 'INCOME' ? '4' : '5';
+      
+      const groupAccounts = accounts.filter(a => a.type === nextType);
+      const lastCode = groupAccounts.length > 0 ? [...groupAccounts].sort((a,b) => b.code.localeCompare(a.code))[0].code : `${groupPrefix}000`;
+      const nextCode = (parseInt(lastCode) + 1).toString();
+      
+      setCode(nextCode);
     }
     setIsModalOpen(true);
   };
@@ -101,11 +107,13 @@ export default function ChartOfAccounts() {
           .update(accountData)
           .eq('id', editingAccount.id);
         if (error) throw error;
+        toast.success('Ledger Refined', { description: `${name} has been updated.` });
       } else {
         const { error } = await supabase
           .from('accounts')
           .insert([accountData]);
         if (error) throw error;
+        toast.success('New Ledger Registered', { description: `Successfully added ${name} to the chart.` });
       }
 
       setIsModalOpen(false);
@@ -125,100 +133,51 @@ export default function ChartOfAccounts() {
 
     if (Math.abs(account.current_balance) > 0.001) {
       toast.warning('Account Locked', { 
-        description: 'Critical Safety Rule: This ledger has an active balance. It cannot be deleted until the balance is cleared via reverse transactions.'
+        description: 'This ledger has an active balance and cannot be purged.'
       });
       return;
     }
 
-    // Check if any transactions actually exist for this account (even if balance is 0)
     setLoading(true);
     const { count, error: countError } = await supabase
       .from('transactions')
       .select('*', { count: 'exact', head: true })
       .eq('account_id', id);
 
-    if (countError) {
-      console.error(countError);
-      setLoading(false);
-      return;
-    }
-
     if (count && count > 0) {
       toast.warning('Integrity Violation', { 
-        description: `This ledger (${account.name}) cannot be deleted because it has ${count} historical transactions linked to it.`
+        description: `This ledger has historical transactions linked to it.`
       });
       setLoading(false);
       return;
     }
 
-    if (!confirm(`Are you sure you want to permanently delete the ledger "${account.name}"? This action cannot be undone.`)) {
+    if (!confirm(`Permanently delete ledger "${account.name}"?`)) {
       setLoading(false);
       return;
     }
     
-    const { error } = await supabase
-      .from('accounts')
-      .delete()
-      .eq('id', id);
-
+    const { error } = await supabase.from('accounts').delete().eq('id', id);
     if (error) {
-      toast.error('Deletion Failed', { description: 'Cannot delete account. It might have existing transactions.' });
+      toast.error('Deletion Failed');
     } else {
-      toast.success('Ledger Removed', { description: 'The account has been deleted from your chart.' });
+      toast.success('Ledger Removed');
       fetchAccounts();
     }
     setLoading(false);
   };
 
-  const groupedAccounts = ACCOUNT_GROUPS.map(group => ({
-    ...group,
-    list: accounts.filter(acc => acc.type === group.value && (
+  const activeGroup = ACCOUNT_GROUPS.find(g => g.value === activeTab);
+  const filteredAccounts = accounts.filter(acc => 
+    acc.type === activeTab && (
       acc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       acc.code.includes(searchQuery)
-    ))
-  }));
+    )
+  );
 
-  const totalBalanceByGroup = (group: string) => {
-    return accounts
-      .filter(acc => acc.type === group)
-      .reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
-  };
-
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Ashiq's Creation", 14, 15);
-    doc.setFontSize(14);
-    doc.text(selectedCompany?.name || '', 14, 25);
-    doc.setFontSize(12);
-    doc.text('Chart of Accounts', 14, 35);
-    
-    const columns = ['Type', 'Code', 'Account Name', 'Balance'];
-    const body: any[] = [];
-    
-    ACCOUNT_GROUPS.forEach(group => {
-      const groupAccounts = accounts.filter(acc => acc.type === group.value);
-      groupAccounts.forEach(acc => {
-        body.push([
-          group.label,
-          acc.code,
-          acc.name,
-          new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(acc.current_balance)
-        ]);
-      });
-    });
-
-    autoTable(doc, {
-      head: [columns],
-      body: body,
-      startY: 40,
-      theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241] },
-      styles: { fontSize: 8 }
-    });
-
-    doc.save(`chart_of_accounts_${format(new Date(), 'yyyyMMdd')}.pdf`);
-  };
+  const totalGroupBalance = accounts
+    .filter(acc => acc.type === activeTab)
+    .reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
 
   const handleExportExcel = () => {
     const data = accounts.map(acc => ({
@@ -230,233 +189,234 @@ export default function ChartOfAccounts() {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "COA");
-    XLSX.writeFile(wb, `chart_of_accounts.xlsx`);
+    XLSX.writeFile(wb, `chart_of_accounts_${format(new Date(), 'yyyyMMdd')}.xlsx`);
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 pb-20">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
             Chart of Accounts
           </h1>
-          <p className="text-slate-500 mt-1">
-            Build and manage your professional ledger structure
+          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none text-center md:text-left">
+            Vanguard Ledger Architecture
           </p>
         </div>
-        <div className="flex items-center gap-3 no-print">
-          <button 
-            onClick={() => window.print()}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
-            title="Print List"
-          >
-            <Printer size={20} />
+
+        <div className="flex items-center justify-center md:justify-end gap-2 no-print">
+          <button onClick={() => window.print()} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm">
+            <Printer size={16} />
           </button>
-          <button 
-            onClick={handleExportExcel}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
-            title="Export Excel"
-          >
-            <Download size={20} />
-          </button>
-          <button 
-            onClick={handleExportPDF}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
-            title="Export PDF"
-          >
-            <FileText size={20} />
+          <button onClick={handleExportExcel} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm">
+            <Download size={16} />
           </button>
           {!isModerator && (
             <button 
               onClick={() => openModal()}
-              className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+              className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
             >
-              <Plus size={20} />
-              <span>Add Ledger</span>
+              <Plus size={16} /> New Ledger
             </button>
           )}
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-        <input 
-          className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm"
-          placeholder="Search by name or code..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
-      </div>
-
-      <div className="space-y-4 pb-20">
-        {groupedAccounts.map((group) => (
-          <div key={group.value} className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden transition-all">
-            <button 
-              onClick={() => toggleGroup(group.value)}
-              className="w-full px-6 py-4 flex items-center justify-between bg-slate-50/50 hover:bg-slate-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
+      {/* Navigation & Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        <aside className="space-y-4 no-print">
+          <div className="bg-white p-1 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+            {ACCOUNT_GROUPS.map((group) => (
+              <button
+                key={group.value}
+                onClick={() => setActiveTab(group.value)}
+                className={cn(
+                  "flex items-center justify-between px-4 py-3 rounded-xl transition-all",
+                  activeTab === group.value 
+                    ? "bg-slate-900 text-white shadow-xl shadow-slate-200" 
+                    : "text-slate-500 hover:bg-slate-50"
+                )}
+              >
+                <div className="flex items-center gap-3">
+                  <ListTree size={16} className={cn(activeTab === group.value ? "text-indigo-400" : "text-slate-300")} />
+                  <span className="text-[11px] font-bold uppercase tracking-wider">{group.label}</span>
+                </div>
                 <div className={cn(
-                  "p-1.5 rounded-lg",
-                  group.value === 'ASSET' && "bg-slate-100 text-slate-600",
-                  group.value === 'LIABILITY' && "bg-rose-100 text-rose-600",
-                  group.value === 'EQUITY' && "bg-amber-100 text-amber-600",
-                  group.value === 'INCOME' && "bg-emerald-100 text-emerald-600",
-                  group.value === 'EXPENSE' && "bg-indigo-100 text-indigo-600",
+                  "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                  activeTab === group.value ? "bg-white/20 text-white" : "bg-slate-100 text-slate-400"
                 )}>
-                  {expandedGroups.includes(group.value) ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  {accounts.filter(a => a.type === group.value).length}
                 </div>
-                <div className="text-left">
-                  <h3 className="font-bold text-slate-900 flex items-center gap-2">
-                    {group.label}
-                    <span className="text-[10px] font-bold bg-slate-200/50 text-slate-500 px-2 py-0.5 rounded-full uppercase tracking-widest">
-                      {group.list.length}
-                    </span>
-                  </h3>
-                  <span className="text-xs text-slate-400 font-medium">Total Balance: {formatBDT(totalBalanceByGroup(group.value))}</span>
-                </div>
-              </div>
-            </button>
-
-            <AnimatePresence>
-              {expandedGroups.includes(group.value) && (
-                <motion.div 
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: 'auto', opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <div className="p-4 border-t border-slate-50">
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead className="border-b border-slate-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Code</th>
-                            <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Name</th>
-                            <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Balance</th>
-                            {!isModerator && <th className="px-4 py-3"></th>}
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                          {group.list.map((acc) => (
-                            <tr key={acc.id} className="group hover:bg-slate-50/50 transition-colors">
-                              <td className="px-4 py-3 text-sm font-mono text-slate-400">{acc.code}</td>
-                              <td className="px-4 py-3 text-sm font-semibold text-slate-800">{acc.name}</td>
-                              <td className="px-4 py-3 text-sm font-mono text-slate-900 text-right">{formatBDT(acc.current_balance)}</td>
-                              {!isModerator && (
-                                <td className="px-4 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <div className="flex items-center justify-end gap-1">
-                                    <button 
-                                      onClick={() => openModal(acc)}
-                                      className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                                    >
-                                      <Edit3 size={16} />
-                                    </button>
-                                    <button 
-                                      onClick={() => handleDelete(acc.id)}
-                                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all"
-                                    >
-                                      <Trash2 size={16} />
-                                    </button>
-                                  </div>
-                                </td>
-                              )}
-                            </tr>
-                          ))}
-                          {group.list.length === 0 && (
-                            <tr>
-                              <td colSpan={4} className="px-4 py-10 text-center text-slate-400 text-sm italic">
-                                No ledgers found in this group
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+              </button>
+            ))}
           </div>
-        ))}
+
+          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative group">
+            <div className="flex items-center justify-between relative z-10">
+              <div className="space-y-1">
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Net Volume</p>
+                <p className={cn(
+                  "text-xl font-bold font-mono tracking-tighter leading-none pt-1",
+                  totalGroupBalance < 0 ? "text-rose-600" : "text-slate-900"
+                )}>
+                  {formatBDT(totalGroupBalance)}
+                </p>
+              </div>
+            </div>
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
+              <span className="text-4xl font-black italic">{activeGroup?.label.charAt(0)}</span>
+            </div>
+          </div>
+        </aside>
+
+        <section className="lg:col-span-3 space-y-4">
+          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
+            <div className="px-6 py-4 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="relative flex-1 max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+                <input 
+                  className="w-full bg-slate-50 border border-slate-100 rounded-lg pl-9 pr-4 py-1.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
+                  placeholder={`Search ${activeGroup?.label.toLowerCase()}...`}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Displaying All Nodes</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50/50">
+                  <tr className="text-center md:text-left">
+                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-24">Code</th>
+                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Entity Descriptor</th>
+                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Balance Pool</th>
+                    {!isModerator && <th className="px-5 py-3 w-20"></th>}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAccounts.map(acc => (
+                    <tr key={acc.id} className="group hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-0 text-center md:text-left">
+                      <td className="px-5 py-3 text-xs font-mono text-slate-400">{acc.code}</td>
+                      <td className="px-5 py-3 text-xs font-bold text-slate-800">{acc.name}</td>
+                      <td className="px-5 py-3 text-right">
+                        <span className={cn(
+                          "text-xs font-mono font-bold tabular-nums",
+                          acc.current_balance < 0 ? "text-rose-500" : "text-slate-700"
+                        )}>
+                          {formatBDT(acc.current_balance)}
+                        </span>
+                      </td>
+                      {!isModerator && (
+                        <td className="px-5 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onClick={() => openModal(acc)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                              <Edit3 size={14} />
+                            </button>
+                            <button onClick={() => handleDelete(acc.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                  {filteredAccounts.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="py-32 text-center">
+                        <div className="flex flex-col items-center">
+                          <ListTree className="text-slate-200 mb-4" size={48} />
+                          <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">Void Ledger Path</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
       </div>
 
       {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsModalOpen(false)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+              className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
             >
-              <div className="px-8 py-6 border-b border-slate-100 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {editingAccount ? 'Edit Ledger' : 'New Ledger'}
-                </h2>
-                <div className="text-slate-400 hover:text-slate-600 cursor-pointer" onClick={() => setIsModalOpen(false)}>
-                  <Plus className="rotate-45" size={24} />
+              <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <h2 className="text-lg font-black text-slate-900 leading-none">
+                    {editingAccount ? 'Refine Ledger' : 'Incorporate Ledger'}
+                  </h2>
+                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Protocol Assignment Mode</p>
                 </div>
+                <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-600 transition-colors">
+                  <X size={24} />
+                </button>
               </div>
               
               <form onSubmit={handleSave} className="p-8 space-y-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Name</label>
-                  <input 
-                    required
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Accounts Receivable"
-                  />
+                <div className="grid grid-cols-5 gap-2 mb-4">
+                  {ACCOUNT_GROUPS.map((g) => (
+                    <button
+                      key={g.value}
+                      type="button"
+                      onClick={() => setType(g.value as Account['type'])}
+                      className={cn(
+                        "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all group",
+                        type === g.value ? "border-indigo-600 bg-indigo-50/50 shadow-md" : "border-slate-50 hover:border-slate-100"
+                      )}
+                    >
+                      <ListTree size={16} className={cn(type === g.value ? "text-indigo-600 shadow-xl" : "text-slate-300 group-hover:text-slate-400")} />
+                      <span className={cn("text-[8px] font-black uppercase tracking-widest", type === g.value ? "text-indigo-700" : "text-slate-400")}>{g.label.charAt(0)}</span>
+                    </button>
+                  ))}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Code</label>
+                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Ledger Identifier (Name)</label>
                     <input 
                       required
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-mono"
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      placeholder="e.g. 1201"
+                      className="w-full"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="e.g. Accounts Receivable"
                     />
                   </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Group</label>
-                    <select 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm"
-                      value={type}
-                      onChange={(e) => setType(e.target.value as Account['type'])}
-                    >
-                      {ACCOUNT_GROUPS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
-                    </select>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Atomic Code</label>
+                      <input 
+                        required
+                        className="w-full font-mono font-bold tracking-widest text-slate-700"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        placeholder="e.g. 1201"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 <div className="pt-4 flex gap-3">
-                  <button 
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="flex-1 px-4 py-3 border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-colors"
-                  >
-                    Cancel
+                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
+                    Dismiss
                   </button>
                   <button 
                     disabled={loading}
                     type="submit"
-                    className="flex-1 px-4 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50"
+                    className="flex-1 px-4 py-3 bg-slate-900 text-white text-[10px] font-bold rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
                   >
-                    {loading ? 'Saving...' : 'Save Account'}
+                    {loading ? 'Processing...' : (editingAccount ? 'Apply Changes' : 'Register Ledger')}
                   </button>
                 </div>
               </form>

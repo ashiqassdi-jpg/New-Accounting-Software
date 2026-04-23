@@ -11,6 +11,7 @@ import { supabase } from '../lib/supabase';
 import { Company } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 export default function Companies() {
   const { companies, refreshCompanies, setSelectedCompany, selectedCompany } = useCompany();
@@ -78,16 +79,37 @@ export default function Companies() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this company? All associated data (accounts, vouchers, transactions) will be permanently deleted.')) return;
+  const handleDelete = async (id: string, name: string) => {
     setLoading(true);
-    const { error } = await supabase.from('companies').delete().eq('id', id);
-    if (error) {
-      alert(error.message);
-    } else {
+    
+    try {
+      // Check for financial data first
+      const { count, error: countError } = await supabase
+        .from('vouchers')
+        .select('*', { count: 'exact', head: true })
+        .eq('company_id', id);
+
+      if (countError) throw countError;
+
+      if (count && count > 0) {
+        toast.error('Security Breach Prevented', { 
+          description: `Company "${name}" contains ${count} active vouchers. To delete this entity, you must first wipe its financial history via "Settings > Maintenance".` 
+        });
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to delete "${name}"? This entity appears to be empty of financial records and will be permanently removed.`)) return;
+      
+      const { error } = await supabase.from('companies').delete().eq('id', id);
+      if (error) throw error;
+      
+      toast.success('Entity Decommissioned', { description: `"${name}" has been successfully removed from your portfolio.` });
       refreshCompanies();
+    } catch (err: any) {
+      toast.error('Deletion Failed', { description: err.message || 'Error occurred during deletion.' });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -134,7 +156,7 @@ export default function Companies() {
                     <Edit3 size={18} />
                   </button>
                   <button 
-                    onClick={() => handleDelete(company.id)}
+                    onClick={() => handleDelete(company.id, company.name)}
                     className="p-2.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                   >
                     <Trash2 size={18} />
