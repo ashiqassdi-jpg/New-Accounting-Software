@@ -30,12 +30,12 @@ import * as XLSX from 'xlsx';
 
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
 
-type ReportTab = 'TRIAL_BALANCE' | 'BALANCE_SHEET' | 'LEDGER_REPORT';
+type ReportTab = 'TRIAL_BALANCE' | 'DAYBOOK' | 'LEDGER_REPORT';
 
 export default function Reports() {
   const { selectedCompany } = useCompany();
   const { profile } = useAuth();
-  const [activeTab, setActiveTab] = useState<ReportTab>('TRIAL_BALANCE');
+  const [activeTab, setActiveTab] = useState<ReportTab>('DAYBOOK');
 
   const handleExportPDF = (data: any[], title: string, columns: string[], filename: string) => {
     const doc = new jsPDF();
@@ -133,19 +133,19 @@ export default function Reports() {
       {/* Tabs */}
       <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100">
         <TabButton 
-          active={activeTab === 'TRIAL_BALANCE'} 
-          onClick={() => setActiveTab('TRIAL_BALANCE')}
-          label="Trial Balance"
-        />
-        <TabButton 
-          active={activeTab === 'BALANCE_SHEET'} 
-          onClick={() => setActiveTab('BALANCE_SHEET')}
-          label="Balance Sheet"
+          active={activeTab === 'DAYBOOK'} 
+          onClick={() => setActiveTab('DAYBOOK')}
+          label="Daybook"
         />
         <TabButton 
           active={activeTab === 'LEDGER_REPORT'} 
           onClick={() => setActiveTab('LEDGER_REPORT')}
-          label="Ledger Report"
+          label="Ledger Statement"
+        />
+        <TabButton 
+          active={activeTab === 'TRIAL_BALANCE'} 
+          onClick={() => setActiveTab('TRIAL_BALANCE')}
+          label="Trial Balance"
         />
       </div>
 
@@ -157,28 +157,28 @@ export default function Reports() {
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.2 }}
         >
-          {activeTab === 'TRIAL_BALANCE' && (
-            <TrialBalance 
+          {activeTab === 'DAYBOOK' && (
+            <Daybook 
               companyId={selectedCompany?.id} 
               dateRange={confirmedDateRange} 
-              onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
-              onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
-            />
-          )}
-          {activeTab === 'BALANCE_SHEET' && (
-            <BalanceSheet 
-              companyId={selectedCompany?.id} 
-              dateRange={confirmedDateRange} 
-              onExportPDF={(data: any) => handleExportPDF(data, 'Balance Sheet', ['Category', 'Account', 'Amount'], 'balance_sheet')}
-              onExportExcel={(data: any) => handleExportExcel(data, 'balance_sheet')}
+              onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Voucher #', 'Ledger', 'Type', 'Method', 'Description', 'Amount'], 'daybook')}
+              onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
             />
           )}
           {activeTab === 'LEDGER_REPORT' && (
             <LedgerReport 
               companyId={selectedCompany?.id} 
               dateRange={confirmedDateRange} 
-              onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Report', ['Date', 'Voucher #', 'Description', 'Debit', 'Credit'], 'ledger_report')}
-              onExportExcel={(data: any) => handleExportExcel(data, 'ledger_report')}
+              onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'], 'ledger_statement')}
+              onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement')}
+            />
+          )}
+          {activeTab === 'TRIAL_BALANCE' && (
+            <TrialBalance 
+              companyId={selectedCompany?.id} 
+              dateRange={confirmedDateRange} 
+              onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
+              onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
             />
           )}
         </motion.div>
@@ -230,7 +230,6 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
       .from('transactions')
       .select('*')
       .eq('company_id', companyId)
-      .gte('date', dateRange.from)
       .lte('date', dateRange.to);
 
     if (transError) {
@@ -244,12 +243,10 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
       const totalDebit = accTransactions.reduce((sum, t) => sum + (Number(t.debit) || 0), 0);
       const totalCredit = accTransactions.reduce((sum, t) => sum + (Number(t.credit) || 0), 0);
       
-      // Calculate net balance including opening balance
-      // Logic depends on account type. Assets/Expenses are DR+, Liabilities/Equity/Income are CR+.
       let netDebit = 0;
       let netCredit = 0;
 
-      const balance = acc.opening_balance + (totalDebit - totalCredit);
+      const balance = (totalDebit - totalCredit);
       if (balance > 0) netDebit = balance;
       else if (balance < 0) netCredit = Math.abs(balance);
 
@@ -332,125 +329,120 @@ function TrialBalance({ companyId, dateRange, onExportPDF, onExportExcel }: any)
   );
 }
 
-function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
-  const [data, setData] = useState({ assets: [], liabilities: [], equity: [] });
+function Daybook({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+  const [vouchers, setVouchers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (companyId) fetchBalanceSheet();
+    if (companyId) fetchDaybook();
   }, [companyId, dateRange]);
 
-  const fetchBalanceSheet = async () => {
+  const fetchDaybook = async () => {
     setLoading(true);
-    const { data: accounts } = await supabase
-      .from('accounts')
-      .select('*')
-      .eq('company_id', companyId);
+    const { data, error } = await supabase
+      .from('vouchers')
+      .select(`
+        *,
+        transactions (
+          *,
+          account:accounts(name)
+        )
+      `)
+      .eq('company_id', companyId)
+      // Since it's a "Daybook", usually it shows ONE day. 
+      // But we can use dateRange.from as the specific date if from == to, 
+      // or show the range. The prompt says "transactions recorded on a specific date".
+      .gte('date', dateRange.from)
+      .lte('date', dateRange.to)
+      .order('voucher_no', { ascending: true });
 
-    if (accounts) {
-      const assets = accounts.filter(a => a.type === 'ASSET');
-      const liabilities = accounts.filter(a => a.type === 'LIABILITY');
-      const equity = accounts.filter(a => a.type === 'EQUITY');
-      
-      setData({ assets, liabilities, equity });
+    if (error) {
+      console.error(error);
+    } else {
+      setVouchers(data || []);
     }
     setLoading(false);
   };
 
-  const totalAssets = data.assets.reduce((sum: number, a: any) => sum + (a.current_balance || 0), 0);
-  const totalLiabilities = data.liabilities.reduce((sum: number, a: any) => sum + (a.current_balance || 0), 0);
-  const totalEquity = data.equity.reduce((sum: number, a: any) => sum + (a.current_balance || 0), 0);
+  const daybookData = vouchers.flatMap(v => 
+    v.transactions.map((t: any) => ({
+      voucher_no: v.voucher_no,
+      ledger_name: t.account?.name,
+      type: v.type,
+      payment_method: v.payment_method,
+      description: v.narration,
+      amount: t.debit > 0 ? t.debit : (t.credit * -1) // This is for display, but prompt asks for "Amount"
+    }))
+  );
 
-  if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Compiling Balance Sheet...</div>;
+  const totalAmount = vouchers.reduce((sum, v) => 
+    sum + v.transactions.reduce((vSum: number, t: any) => vSum + (t.debit > 0 ? t.debit : 0), 0)
+  , 0);
 
-  const prepareExportData = () => {
-    return [
-      ...data.assets.filter((a: any) => a.current_balance !== 0).map((a: any) => ({ Category: 'Asset', Account: a.name, Amount: Number(a.current_balance) || 0 })),
-      { Category: 'Total Assets', Account: '', Amount: Number(totalAssets) || 0 },
-      ...data.liabilities.filter((a: any) => a.current_balance !== 0).map((a: any) => ({ Category: 'Liability', Account: a.name, Amount: Math.abs(Number(a.current_balance) || 0) })),
-      { Category: 'Total Liabilities', Account: '', Amount: Math.abs(Number(totalLiabilities) || 0) },
-      ...data.equity.filter((a: any) => a.current_balance !== 0).map((a: any) => ({ Category: 'Equity', Account: a.name, Amount: Math.abs(Number(a.current_balance) || 0) })),
-      { Category: 'Total Equity', Account: '', Amount: Math.abs(Number(totalEquity) || 0) },
-      { Category: 'Liabilities & Equity', Account: '', Amount: Math.abs(Number(totalLiabilities) || 0) + Math.abs(Number(totalEquity) || 0) }
-    ];
-  };
+  if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Scanning the Daybook...</div>;
 
   return (
-    <div className="space-y-8">
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-8 flex items-center justify-between no-print">
-        <div>
-          <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Balance Sheet Overview</h3>
-          <p className="text-[10px] text-slate-400 font-medium mt-1 uppercase tracking-tight">Statement of Financial Position</p>
-        </div>
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between no-print">
+        <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest">Daybook: {dateRange.from}</h3>
         <div className="flex gap-2">
           <button 
-            onClick={() => onExportExcel(prepareExportData())}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all hover:bg-slate-100"
+            onClick={() => onExportExcel(daybookData)}
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all"
             title="Export to Excel"
           >
             <Download size={20} />
           </button>
           <button 
-            onClick={() => onExportPDF(prepareExportData().map(row => [row.Category, row.Account, row.Amount]))}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all hover:bg-slate-100"
+            onClick={() => onExportPDF(daybookData.map(d => [d.voucher_no, d.ledger_name, d.type, d.payment_method, d.description, d.amount]))}
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all"
             title="Export to PDF"
           >
             <FileText size={20} />
           </button>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-10">
-        <h3 className="font-bold text-emerald-600 uppercase text-xs tracking-widest mb-8 flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          Assets
-        </h3>
-        <div className="space-y-4">
-          {data.assets.filter((a: any) => a.current_balance !== 0).map((a: any) => (
-            <BalanceRow key={a.id} label={a.name} value={a.current_balance} />
-          ))}
-          <div className="pt-6 border-t border-slate-50 mt-10">
-            <BalanceRow label="Total Assets" value={totalAssets} bold />
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-8">
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-10">
-          <h3 className="font-bold text-indigo-600 uppercase text-xs tracking-widest mb-8 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-indigo-500" />
-            Liabilities
-          </h3>
-          <div className="space-y-4">
-            {data.liabilities.filter((a: any) => a.current_balance !== 0).map((a: any) => (
-              <BalanceRow key={a.id} label={a.name} value={Math.abs(a.current_balance)} />
-            ))}
-            <div className="pt-6 border-t border-slate-50 mt-4">
-              <BalanceRow label="Total Liabilities" value={Math.abs(totalLiabilities)} bold />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden p-10">
-          <h3 className="font-bold text-amber-600 uppercase text-xs tracking-widest mb-8 flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-amber-500" />
-            Equity
-          </h3>
-          <div className="space-y-4">
-            {data.equity.filter((a: any) => a.current_balance !== 0).map((a: any) => (
-              <BalanceRow key={a.id} label={a.name} value={Math.abs(a.current_balance)} />
-            ))}
-            <div className="pt-6 border-t border-slate-50 mt-4">
-              <BalanceRow label="Total Equity" value={Math.abs(totalEquity)} bold />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-slate-900 text-white rounded-[2rem] p-10 shadow-xl shadow-slate-200">
-           <BalanceRow label="Total Liabilities & Equity" value={Math.abs(totalLiabilities) + Math.abs(totalEquity)} bold />
-        </div>
-      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="bg-slate-50/50">
+              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voucher No</th>
+              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Ledger Name</th>
+              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
+              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Method</th>
+              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
+              <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Amount</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {vouchers.map(v => v.transactions.map((t: any, idx: number) => (
+              <tr key={`${v.id}-${idx}`} className="hover:bg-slate-50 transition-colors">
+                <td className="px-8 py-4 text-sm font-mono font-bold text-slate-900">{v.voucher_no}</td>
+                <td className="px-8 py-4 text-sm font-semibold text-slate-700">{t.account?.name}</td>
+                <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.type}</td>
+                <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{v.payment_method}</td>
+                <td className="px-8 py-4 text-sm font-medium text-slate-500">{v.narration}</td>
+                <td className={cn(
+                  "px-8 py-4 text-sm font-mono font-black text-right",
+                  t.debit > 0 ? "text-rose-600" : "text-emerald-600"
+                )}>
+                  {formatBDT(t.debit > 0 ? t.debit : t.credit)}
+                </td>
+              </tr>
+            )))}
+            {vouchers.length === 0 && (
+              <tr>
+                <td colSpan={6} className="py-20 text-center text-slate-300 font-medium italic">No transactions recorded for this day.</td>
+              </tr>
+            )}
+          </tbody>
+          <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-black">
+            <tr>
+              <td colSpan={5} className="px-8 py-6 text-sm text-slate-900 text-right uppercase tracking-widest">Total Transaction Value</td>
+              <td className="px-8 py-6 text-sm font-mono text-indigo-600 text-right">{formatBDT(totalAmount)}</td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   );
@@ -471,8 +463,10 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
   const [selectedAccountId, setSelectedAccountId] = useState('');
   const [accounts, setAccounts] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
+  const [openingBalance, setOpeningBalance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [viewingVoucher, setViewingVoucher] = useState<any>(null);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     if (companyId) {
@@ -485,12 +479,25 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
       fetchLedger();
     } else {
       setTransactions([]);
+      setOpeningBalance(0);
     }
   }, [selectedAccountId, dateRange]);
 
   const fetchLedger = async () => {
     setLoading(true);
-    const { data } = await supabase
+    
+    // 1. Fetch Opening Balance (Sum of all transactions before dateRange.from)
+    const { data: prevTransactions } = await supabase
+      .from('transactions')
+      .select('debit, credit')
+      .eq('account_id', selectedAccountId)
+      .lt('date', dateRange.from);
+    
+    const opening = (prevTransactions || []).reduce((sum, t) => sum + (t.debit - t.credit), 0);
+    setOpeningBalance(opening);
+
+    // 2. Fetch current period transactions
+    const { data, error } = await supabase
       .from('transactions')
       .select(`
         *,
@@ -499,42 +506,76 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
       .eq('account_id', selectedAccountId)
       .gte('date', dateRange.from)
       .lte('date', dateRange.to)
-      .order('date', { ascending: true });
+      .order('date', { ascending: true })
+      .order('created_at', { ascending: true });
     
+    if (error) console.error(error);
     setTransactions(data || []);
     setLoading(false);
   };
 
-  const selectedAccount = accounts.find(a => a.id === selectedAccountId);
+  // Calculate Running Balance
+  let currentBalance = openingBalance;
+  const ledgerRows = transactions.map(t => {
+    currentBalance += (t.debit - t.credit);
+    return {
+      ...t,
+      runningBalance: currentBalance
+    };
+  });
+
+  const filteredRows = ledgerRows.filter(r => 
+    r.voucher?.narration?.toLowerCase().includes(search.toLowerCase()) ||
+    r.voucher?.voucher_no?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalDebit = filteredRows.reduce((sum, r) => sum + r.debit, 0);
+  const totalCredit = filteredRows.reduce((sum, r) => sum + r.credit, 0);
+  const closingBalance = openingBalance + totalDebit - totalCredit;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="p-8 border-b border-slate-50 flex flex-col md:flex-row gap-6 md:items-end justify-between">
-        <div className="max-w-xs w-full space-y-2">
-          <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Select Ledger Account</label>
-          <select 
-            value={selectedAccountId}
-            onChange={(e) => setSelectedAccountId(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
-          >
-            <option value="">Choose an account...</option>
-            {accounts.map(a => <option key={a.id} value={a.id}>{a.name} ({a.code})</option>)}
-          </select>
-        </div>
-        
-        <div className="flex gap-3 no-print">
-          <button 
-            onClick={() => onExportExcel(transactions.map(t => ({ Date: t.date, Voucher: t.voucher?.voucher_no, Description: t.voucher?.narration, Debit: t.debit, Credit: t.credit })))}
-            className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all border border-indigo-100"
-          >
-            <Download size={16} /> Export Excel
-          </button>
-          <button 
-            onClick={() => onExportPDF(transactions.map(t => [t.date, t.voucher?.voucher_no, t.voucher?.narration, t.debit, t.credit]))}
-            className="flex items-center gap-2 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all border border-rose-100"
-          >
-            <FileText size={16} /> Export PDF
-          </button>
+      <div className="p-8 border-b border-slate-50 space-y-6">
+        <div className="flex flex-col md:flex-row gap-6 md:items-end justify-between">
+          <div className="max-w-xs w-full space-y-2">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Select Ledger Account</label>
+            <select 
+              value={selectedAccountId}
+              onChange={(e) => setSelectedAccountId(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
+            >
+              <option value="">Choose an account...</option>
+              {accounts.map(a => <option key={a.id} value={a.id}>{a.name} ({a.code})</option>)}
+            </select>
+          </div>
+
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+            <input 
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
+              placeholder="Filter by narration or voucher #..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          
+          <div className="flex gap-3 no-print">
+            <button 
+              onClick={() => onExportExcel(filteredRows.map(r => ({ Date: r.date, Narration: r.voucher?.narration, Type: r.voucher?.type, Debit: r.debit, Credit: r.credit, Balance: r.runningBalance })))}
+              className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all border border-indigo-100"
+            >
+              <Download size={16} /> Export Excel
+            </button>
+            <button 
+              onClick={() => {
+                const docData = filteredRows.map(r => [format(new Date(r.date), 'dd/MM/yyyy'), r.voucher?.narration, r.voucher?.type, r.debit, r.credit, r.runningBalance]);
+                onExportPDF(docData)
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all border border-rose-100"
+            >
+              <FileText size={16} /> Export PDF
+            </button>
+          </div>
         </div>
       </div>
 
@@ -544,29 +585,31 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
             <thead>
               <tr className="bg-slate-50/50">
                 <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
-                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Voucher #</th>
-                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Description</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Narration</th>
+                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
                 <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Debit</th>
-                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest pr-12">Credit</th>
+                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Credit</th>
+                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest pr-12">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              <tr className="bg-slate-50/20 italic">
-                <td colSpan={3} className="px-8 py-4 text-sm font-bold text-slate-500">Opening Balance forward</td>
-                <td colSpan={2} className="px-8 py-4 text-sm font-mono font-bold text-slate-900 text-right">{formatBDT(selectedAccount?.opening_balance || 0)}</td>
+              <tr className="bg-slate-50/20 italic font-bold">
+                <td colSpan={5} className="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-400">Opening Balance forward</td>
+                <td className="px-8 py-4 text-sm font-mono text-slate-900 text-right pr-12">{formatBDT(openingBalance)}</td>
               </tr>
-              {transactions.map(t => (
-                <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-8 py-4 text-sm font-bold text-slate-400">{format(new Date(t.date), 'dd/MM/yyyy')}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-bold text-slate-900">{t.voucher?.voucher_no}</td>
-                  <td className="px-8 py-4 text-sm font-medium text-slate-500">{t.voucher?.narration}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-black text-rose-600 text-right">{t.debit > 0 ? formatBDT(t.debit) : '-'}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-black text-emerald-600 text-right pr-12">
+              {filteredRows.map(r => (
+                <tr key={r.id} className="hover:bg-slate-50 transition-colors">
+                  <td className="px-8 py-4 text-sm font-bold text-slate-400">{format(new Date(r.date), 'dd/MM/yyyy')}</td>
+                  <td className="px-8 py-4 text-sm font-medium text-slate-500 whitespace-pre-wrap max-w-md">{r.voucher?.narration}</td>
+                  <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{r.voucher?.type}</td>
+                  <td className="px-8 py-4 text-sm font-mono font-black text-rose-600 text-right">{r.debit > 0 ? formatBDT(r.debit) : '-'}</td>
+                  <td className="px-8 py-4 text-sm font-mono font-black text-emerald-600 text-right">{r.credit > 0 ? formatBDT(r.credit) : '-'}</td>
+                  <td className="px-8 py-4 text-sm font-mono font-black text-indigo-600 text-right pr-12">
                     <div className="flex items-center justify-end gap-3 text-right">
-                      {t.credit > 0 ? formatBDT(t.credit) : '-'}
+                      {formatBDT(r.runningBalance)}
                       <button 
-                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                        onClick={() => setViewingVoucher(t.voucher)}
+                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all"
+                        onClick={() => setViewingVoucher(r.voucher)}
                       >
                         <Eye size={16} />
                       </button>
@@ -574,12 +617,20 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
                   </td>
                 </tr>
               ))}
-              {transactions.length === 0 && (
+              {filteredRows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="py-20 text-center text-slate-300 font-medium italic">No transactions found for the selected period.</td>
+                  <td colSpan={6} className="py-20 text-center text-slate-300 font-medium italic">No transactions found for the selected criteria.</td>
                 </tr>
               )}
             </tbody>
+            <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-black">
+              <tr>
+                <td colSpan={3} className="px-8 py-6 text-[10px] text-slate-900 text-right uppercase tracking-widest">Total For Period</td>
+                <td className="px-8 py-6 text-sm font-mono text-rose-600 text-right">{formatBDT(totalDebit)}</td>
+                <td className="px-8 py-6 text-sm font-mono text-emerald-600 text-right">{formatBDT(totalCredit)}</td>
+                <td className="px-8 py-6 text-sm font-mono text-indigo-600 text-right pr-12">Closing: {formatBDT(closingBalance)}</td>
+              </tr>
+            </tfoot>
           </table>
         </div>
       ) : (
@@ -587,7 +638,7 @@ function LedgerReport({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           <div className="inline-flex p-4 bg-slate-50 rounded-full text-slate-300">
             <Search size={32} />
           </div>
-          <p className="text-slate-400 text-sm font-medium">Select a ledger from the cockpit above to analyze historical flows.</p>
+          <p className="text-slate-400 text-sm font-medium">Select a ledger from the list to review detailed transaction statements.</p>
         </div>
       )}
       <AnimatePresence>

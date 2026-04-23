@@ -29,8 +29,10 @@ import { cn } from '../lib/utils';
 import Dashboard from './Dashboard';
 import Users from './Users';
 
+import { toast } from 'sonner';
+
 export default function Settings() {
-  const { profile, refreshProfile, isSuperAdmin } = useAuth();
+  const { profile, refreshProfile, isSuperAdmin, canWipeData, canManageCompanies } = useAuth();
   const { selectedCompany, refreshCompanies } = useCompany();
   
   const [activeTab, setActiveTab] = useState<'PROFILE' | 'COMPANY' | 'USERS'>('PROFILE');
@@ -91,11 +93,10 @@ export default function Settings() {
 
       if (error) throw error;
       
-      setSuccess('profile');
+      toast.success('Profile Updated', { description: 'Your personal information has been saved.' });
       await refreshProfile();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
-      alert(error.message);
+      toast.error('Update Failed', { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -118,11 +119,10 @@ export default function Settings() {
 
       if (error) throw error;
       
-      setSuccess('company');
+      toast.success('Company Updated', { description: 'Regional settings have been applied.' });
       await refreshCompanies();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
-      alert(error.message);
+      toast.error('Update Failed', { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -131,9 +131,10 @@ export default function Settings() {
   const handleWipeCompanyData = async () => {
     if (!selectedCompany) return;
     if (confirmCompanyReset !== selectedCompany.name) {
-      alert('Company name mismatch. Wipe aborted.');
+      toast.error('Verification Failed', { description: 'Company name mismatch. Wipe aborted.' });
       return;
     }
+    
     setLoading(true);
 
     try {
@@ -145,29 +146,16 @@ export default function Settings() {
 
       if (vError) throw vError;
       
-      // 2. We need to reset the current_balance of all accounts back to their opening_balance
-      const { data: accounts, error: aError } = await supabase
-        .from('accounts')
-        .select('id, opening_balance')
-        .eq('company_id', selectedCompany.id);
+      // 2. Since all account balances are calculated from transactions (via trigger),
+      // and we just deleted all vouchers/transactions, the current_balance 
+      // should naturally go back to 0. 
+      // All ledgers in this system are purely transactional.
       
-      if (aError) throw aError;
-
-      if (accounts && accounts.length > 0) {
-        const resetPromises = accounts.map(acc => 
-          supabase
-            .from('accounts')
-            .update({ current_balance: acc.opening_balance })
-            .eq('id', acc.id)
-        );
-        await Promise.all(resetPromises);
-      }
-
-      alert(`Financial data for ${selectedCompany.name} has been successfully purged. Ledgers have been reset to opening values.`);
+      toast.success('Data Purged', { description: `Financial data for ${selectedCompany.name} has been erased.` });
       setConfirmCompanyReset('');
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 2000);
     } catch (err: any) {
-      alert(err.message || 'Error occurred during data purge.');
+      toast.error('Wipe Failed', { description: err.message || 'Error occurred during data purge.' });
     } finally {
       setLoading(false);
     }
@@ -175,30 +163,26 @@ export default function Settings() {
 
   const handleGlobalWipe = async () => {
     if (confirmGlobalReset !== 'WIPE ENTIRE SYSTEM') {
-      alert('Verification text mismatch. Global wipe aborted.');
+      toast.error('Verification Failed', { description: 'Text mismatch. Global wipe aborted.' });
       return;
     }
 
-    const firstConfirm = window.confirm("CRITICAL WARNING: You are about to initiate a TOTAL SYSTEM WIPE. This will delete all companies, users, transactions, and settings across the entire platform. Are you absolutely sure?");
+    const firstConfirm = window.confirm("CRITICAL WARNING: You are about to initiate a TOTAL SYSTEM WIPE. This will delete all companies, users, transactions, and settings. Are you sure?");
     if (!firstConfirm) return;
-
-    const secondConfirm = window.confirm("FINAL WARNING: This action is permanent and irreversible. There is no backup to restore. Are you 100% sure you want to proceed with the system-wide factory reset?");
-    if (!secondConfirm) return;
 
     setLoading(true);
 
     try {
-      // Logic for total wipe: delete all companies. CASCADE will handle the rest.
       const { error } = await supabase
         .from('companies')
         .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete everything in simple mode
+        .neq('id', '00000000-0000-0000-0000-000000012345'); 
       
       if (error) throw error;
-      alert('The entire platform has been factory reset.');
-      window.location.reload();
+      toast.success('System Reset Successful', { description: 'Factory default state restored.' });
+      setTimeout(() => window.location.reload(), 2000);
     } catch (error: any) {
-      alert(error.message);
+      toast.error('Operation Failed', { description: error.message });
     } finally {
       setLoading(false);
     }
@@ -398,7 +382,7 @@ export default function Settings() {
 
                 <div className="space-y-8">
                   {/* Company Maintenance */}
-                  {isSuperAdmin && (
+                  {canManageCompanies && (
                     <section className="bg-white rounded-[2rem] border border-amber-100 shadow-sm overflow-hidden">
                       <div className="px-10 py-8 border-b border-amber-50 bg-amber-50/20 flex items-center gap-4">
                         <div className="bg-amber-100 p-2.5 rounded-xl">
@@ -435,7 +419,7 @@ export default function Settings() {
                   )}
 
                   {/* Wipe All Data Section */}
-                  {isSuperAdmin && (
+                  {canWipeData && (
                     <section className="bg-white rounded-[2rem] border border-rose-100 shadow-sm overflow-hidden">
                       <div className="px-10 py-8 border-b border-rose-50 bg-rose-50/30 flex items-center gap-4">
                         <div className="bg-rose-100 p-2.5 rounded-xl">

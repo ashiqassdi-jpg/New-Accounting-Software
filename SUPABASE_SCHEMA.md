@@ -10,10 +10,6 @@ CREATE TABLE companies (
   address TEXT,
   tax_id TEXT,
   bin TEXT,
-  opening_cash DECIMAL(15,2) DEFAULT 0,
-  opening_bank DECIMAL(15,2) DEFAULT 0,
-  opening_bkash DECIMAL(15,2) DEFAULT 0,
-  opening_nagad DECIMAL(15,2) DEFAULT 0,
   fiscal_year_start DATE DEFAULT '2024-01-01',
   currency_symbol TEXT DEFAULT '৳',
   financial_status TEXT DEFAULT 'ACTIVE' CHECK (financial_status IN ('ACTIVE', 'CLOSED', 'AUDITED')),
@@ -34,6 +30,8 @@ CREATE TABLE profiles (
   can_add BOOLEAN DEFAULT true,
   can_edit BOOLEAN DEFAULT true,
   can_delete BOOLEAN DEFAULT true,
+  can_manage_companies BOOLEAN DEFAULT false,
+  can_wipe_data BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -45,7 +43,6 @@ CREATE TABLE accounts (
   code TEXT NOT NULL,
   type TEXT NOT NULL CHECK (type IN ('ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE')),
   parent_id UUID REFERENCES accounts(id),
-  opening_balance DECIMAL(15,2) DEFAULT 0,
   current_balance DECIMAL(15,2) DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -131,22 +128,22 @@ CREATE POLICY "Enable all for all users" ON transactions FOR ALL USING (true) WI
 CREATE OR REPLACE FUNCTION initialize_chart_of_accounts() 
 RETURNS TRIGGER AS $$
 BEGIN
-  INSERT INTO accounts (company_id, name, code, type, opening_balance, current_balance) VALUES
-  (NEW.id, 'Cash', '1001', 'ASSET', NEW.opening_cash, NEW.opening_cash),
-  (NEW.id, 'Bank', '1002', 'ASSET', NEW.opening_bank, NEW.opening_bank),
-  (NEW.id, 'bKash', '1003', 'ASSET', NEW.opening_bkash, NEW.opening_bkash),
-  (NEW.id, 'Nagad', '1004', 'ASSET', NEW.opening_nagad, NEW.opening_nagad),
-  (NEW.id, 'Accounts Receivable', '1201', 'ASSET', 0, 0),
-  (NEW.id, 'Inventory', '1301', 'ASSET', 0, 0),
-  (NEW.id, 'Accounts Payable', '2001', 'LIABILITY', 0, 0),
-  (NEW.id, 'Loan', '2101', 'LIABILITY', 0, 0),
-  (NEW.id, 'Owner Capital', '3001', 'EQUITY', 0, 0),
-  (NEW.id, 'Sales Revenue', '4001', 'INCOME', 0, 0),
-  (NEW.id, 'Cost of Goods Sold', '5001', 'EXPENSE', 0, 0),
-  (NEW.id, 'Marketing Expense', '5002', 'EXPENSE', 0, 0),
-  (NEW.id, 'Salaries Expense', '5003', 'EXPENSE', 0, 0),
-  (NEW.id, 'Utilities Expense', '5004', 'EXPENSE', 0, 0),
-  (NEW.id, 'Rent Expense', '5005', 'EXPENSE', 0, 0);
+  INSERT INTO accounts (company_id, name, code, type, current_balance) VALUES
+  (NEW.id, 'Cash', '1001', 'ASSET', 0),
+  (NEW.id, 'Bank', '1002', 'ASSET', 0),
+  (NEW.id, 'bKash', '1003', 'ASSET', 0),
+  (NEW.id, 'Nagad', '1004', 'ASSET', 0),
+  (NEW.id, 'Accounts Receivable', '1201', 'ASSET', 0),
+  (NEW.id, 'Inventory', '1301', 'ASSET', 0),
+  (NEW.id, 'Accounts Payable', '2001', 'LIABILITY', 0),
+  (NEW.id, 'Loan', '2101', 'LIABILITY', 0),
+  (NEW.id, 'Owner Capital', '3001', 'EQUITY', 0),
+  (NEW.id, 'Sales Revenue', '4001', 'INCOME', 0),
+  (NEW.id, 'Cost of Goods Sold', '5001', 'EXPENSE', 0),
+  (NEW.id, 'Marketing Expense', '5002', 'EXPENSE', 0),
+  (NEW.id, 'Salaries Expense', '5003', 'EXPENSE', 0),
+  (NEW.id, 'Utilities Expense', '5004', 'EXPENSE', 0),
+  (NEW.id, 'Rent Expense', '5005', 'EXPENSE', 0);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

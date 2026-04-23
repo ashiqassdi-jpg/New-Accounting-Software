@@ -21,10 +21,13 @@ import Companies from './pages/Companies';
 import UserManagement from './pages/Users';
 import Settings from './pages/Settings';
 
+import { Toaster } from 'sonner';
+
 export default function App() {
   return (
     <AuthProvider>
       <CompanyProvider>
+        <Toaster position="top-right" richColors />
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />

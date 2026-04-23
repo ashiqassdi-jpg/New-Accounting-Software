@@ -15,6 +15,7 @@ import { Account } from '../types';
 import { ACCOUNT_GROUPS, formatBDT } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -34,7 +35,6 @@ export default function ChartOfAccounts() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [type, setType] = useState<Account['type']>('ASSET');
-  const [openingBalance, setOpeningBalance] = useState(0);
 
   const isModerator = profile?.role === 'MODERATOR';
 
@@ -73,13 +73,11 @@ export default function ChartOfAccounts() {
       setName(account.name);
       setCode(account.code);
       setType(account.type);
-      setOpeningBalance(account.opening_balance);
     } else {
       setEditingAccount(null);
       setName('');
       setCode('');
       setType('ASSET');
-      setOpeningBalance(0);
     }
     setIsModalOpen(true);
   };
@@ -95,7 +93,6 @@ export default function ChartOfAccounts() {
         name,
         code,
         type,
-        opening_balance: openingBalance,
       };
 
       if (editingAccount) {
@@ -114,7 +111,7 @@ export default function ChartOfAccounts() {
       setIsModalOpen(false);
       await fetchAccounts();
     } catch (error: any) {
-      alert(error.message || 'An error occurred while saving the ledger.');
+      toast.error('Sync Error', { description: error.message || 'An error occurred while saving the ledger.' });
     } finally {
       setLoading(false);
     }
@@ -127,7 +124,9 @@ export default function ChartOfAccounts() {
     if (!account) return;
 
     if (Math.abs(account.current_balance) > 0.001) {
-      alert('Critical Safety Rule: This ledger has an active balance. It cannot be deleted until the balance is cleared via reverse transactions.');
+      toast.warning('Account Locked', { 
+        description: 'Critical Safety Rule: This ledger has an active balance. It cannot be deleted until the balance is cleared via reverse transactions.'
+      });
       return;
     }
 
@@ -145,7 +144,9 @@ export default function ChartOfAccounts() {
     }
 
     if (count && count > 0) {
-      alert(`Safety Violation: This ledger (${account.name}) cannot be deleted because it has ${count} historical transactions linked to it. For data integrity, ledgers with transactional history must be preserved.`);
+      toast.warning('Integrity Violation', { 
+        description: `This ledger (${account.name}) cannot be deleted because it has ${count} historical transactions linked to it.`
+      });
       setLoading(false);
       return;
     }
@@ -161,8 +162,9 @@ export default function ChartOfAccounts() {
       .eq('id', id);
 
     if (error) {
-      alert('Cannot delete account. It might have existing transactions.');
+      toast.error('Deletion Failed', { description: 'Cannot delete account. It might have existing transactions.' });
     } else {
+      toast.success('Ledger Removed', { description: 'The account has been deleted from your chart.' });
       fetchAccounts();
     }
     setLoading(false);
@@ -179,7 +181,7 @@ export default function ChartOfAccounts() {
   const totalBalanceByGroup = (group: string) => {
     return accounts
       .filter(acc => acc.type === group)
-      .reduce((sum, acc) => sum + (acc.opening_balance || 0), 0);
+      .reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
   };
 
   const handleExportPDF = () => {
@@ -191,7 +193,7 @@ export default function ChartOfAccounts() {
     doc.setFontSize(12);
     doc.text('Chart of Accounts', 14, 35);
     
-    const columns = ['Type', 'Code', 'Account Name', 'Opening Balance'];
+    const columns = ['Type', 'Code', 'Account Name', 'Balance'];
     const body: any[] = [];
     
     ACCOUNT_GROUPS.forEach(group => {
@@ -201,7 +203,7 @@ export default function ChartOfAccounts() {
           group.label,
           acc.code,
           acc.name,
-          new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(acc.opening_balance)
+          new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(acc.current_balance)
         ]);
       });
     });
@@ -223,7 +225,7 @@ export default function ChartOfAccounts() {
       Type: acc.type,
       Code: acc.code,
       'Account Name': acc.name,
-      'Opening Balance': acc.opening_balance
+      'Balance': acc.current_balance
     }));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
@@ -312,7 +314,7 @@ export default function ChartOfAccounts() {
                       {group.list.length}
                     </span>
                   </h3>
-                  <span className="text-xs text-slate-400 font-medium">Opening sum: {formatBDT(totalBalanceByGroup(group.value))}</span>
+                  <span className="text-xs text-slate-400 font-medium">Total Balance: {formatBDT(totalBalanceByGroup(group.value))}</span>
                 </div>
               </div>
             </button>
@@ -332,7 +334,7 @@ export default function ChartOfAccounts() {
                           <tr>
                             <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Code</th>
                             <th className="px-4 py-3 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Name</th>
-                            <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opening Bal</th>
+                            <th className="px-4 py-3 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Balance</th>
                             {!isModerator && <th className="px-4 py-3"></th>}
                           </tr>
                         </thead>
@@ -341,7 +343,7 @@ export default function ChartOfAccounts() {
                             <tr key={acc.id} className="group hover:bg-slate-50/50 transition-colors">
                               <td className="px-4 py-3 text-sm font-mono text-slate-400">{acc.code}</td>
                               <td className="px-4 py-3 text-sm font-semibold text-slate-800">{acc.name}</td>
-                              <td className="px-4 py-3 text-sm font-mono text-slate-900 text-right">{formatBDT(acc.opening_balance)}</td>
+                              <td className="px-4 py-3 text-sm font-mono text-slate-900 text-right">{formatBDT(acc.current_balance)}</td>
                               {!isModerator && (
                                 <td className="px-4 py-3 text-right opacity-0 group-hover:opacity-100 transition-opacity">
                                   <div className="flex items-center justify-end gap-1">
@@ -439,19 +441,6 @@ export default function ChartOfAccounts() {
                       {ACCOUNT_GROUPS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
                     </select>
                   </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Opening Balance (৳)</label>
-                  <input 
-                    type="number"
-                    step="0.01"
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-mono font-bold"
-                    value={openingBalance === 0 ? '' : openingBalance}
-                    onChange={(e) => setOpeningBalance(e.target.value === '' ? 0 : Number(e.target.value))}
-                    placeholder="0.00"
-                  />
-                  <p className="text-[9px] text-slate-400 font-medium pl-1">Initial value when starting the ledger</p>
                 </div>
 
                 <div className="pt-4 flex gap-3">

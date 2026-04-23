@@ -51,11 +51,87 @@ export default function Dashboard() {
 
   const [loading, setLoading] = useState(true);
 
+  const [chartData, setChartData] = useState<any[]>([]);
+
+  const [expenseDistribution, setExpenseDistribution] = useState<any[]>([]);
+
   useEffect(() => {
     if (selectedCompany) {
       fetchStats();
+      fetchChartData();
+      fetchExpenseDistribution();
     }
   }, [selectedCompany, confirmedDateRange]);
+
+  const fetchExpenseDistribution = async () => {
+    try {
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('debit, credit, accounts!inner(name, type)')
+        .eq('company_id', selectedCompany!.id)
+        .eq('accounts.type', 'EXPENSE')
+        .gte('date', confirmedDateRange.from)
+        .lte('date', confirmedDateRange.to);
+
+      if (!transactions) return;
+
+      const grouped: { [key: string]: number } = {};
+      transactions.forEach((t: any) => {
+        const name = t.accounts.name;
+        grouped[name] = (grouped[name] || 0) + (t.debit - t.credit);
+      });
+
+      const formatted = Object.keys(grouped).map(name => ({
+        name,
+        value: Math.max(0, grouped[name])
+      })).sort((a, b) => b.value - a.value).slice(0, 5);
+
+      setExpenseDistribution(formatted.length > 0 ? formatted : [
+        { name: 'No Expenses', value: 0 }
+      ]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchChartData = async () => {
+    try {
+      // Get monthly totals for the last 6 months or current range
+      const { data: transactions } = await supabase
+        .from('transactions')
+        .select('date, debit, credit, accounts!inner(type)')
+        .eq('company_id', selectedCompany!.id)
+        .gte('date', confirmedDateRange.from)
+        .lte('date', confirmedDateRange.to);
+
+      if (!transactions) return;
+
+      const monthlyData: { [key: string]: { revenue: number; expenses: number } } = {};
+      
+      transactions.forEach((t: any) => {
+        const month = format(new Date(t.date), 'MMM');
+        if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0 };
+        
+        if (t.accounts.type === 'INCOME') {
+          monthlyData[month].revenue += (t.credit - t.debit);
+        } else if (t.accounts.type === 'EXPENSE') {
+          monthlyData[month].expenses += (t.debit - t.credit);
+        }
+      });
+
+      const formatted = Object.keys(monthlyData).map(month => ({
+        name: month,
+        revenue: Math.max(0, monthlyData[month].revenue),
+        expenses: Math.max(0, monthlyData[month].expenses)
+      }));
+
+      setChartData(formatted.length > 0 ? formatted : [
+        { name: 'N/A', revenue: 0, expenses: 0 }
+      ]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchStats = async () => {
     setLoading(true);
@@ -199,14 +275,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ChartBox title="Revenue vs Expenses" icon={BarChart3}>
           <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={[
-              { name: 'Jan', revenue: 4000, expenses: 2400 },
-              { name: 'Feb', revenue: 3000, expenses: 1398 },
-              { name: 'Mar', revenue: 2000, expenses: 9800 },
-              { name: 'Apr', revenue: 2780, expenses: 3908 },
-              { name: 'May', revenue: 1890, expenses: 4800 },
-              { name: 'Jun', revenue: 2390, expenses: 3800 },
-            ]}>
+            <AreaChart data={chartData}>
               <defs>
                 <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
@@ -231,19 +300,14 @@ export default function Dashboard() {
             <ResponsiveContainer width="100%" height={320}>
               <PieChart>
                 <Pie
-                  data={[
-                    { name: 'Salaries', value: 4000 },
-                    { name: 'Rent', value: 3000 },
-                    { name: 'Utilities', value: 2000 },
-                    { name: 'Marketing', value: 1000 },
-                  ]}
+                  data={expenseDistribution}
                   innerRadius={80}
                   outerRadius={110}
                   paddingAngle={8}
                   dataKey="value"
                   stroke="none"
                 >
-                  {[0,1,2,3].map((entry, index) => (
+                  {expenseDistribution.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} radius={4} />
                   ))}
                 </Pie>
@@ -254,10 +318,10 @@ export default function Dashboard() {
               </PieChart>
             </ResponsiveContainer>
             <div className="shrink-0 space-y-4 px-6 border-l border-slate-50">
-              {['Salaries', 'Rent', 'Utilities', 'Marketing'].map((name, index) => (
-                <div key={name} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index] }}></div>
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{name}</span>
+              {expenseDistribution.map((item, index) => (
+                <div key={item.name} className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
                 </div>
               ))}
             </div>

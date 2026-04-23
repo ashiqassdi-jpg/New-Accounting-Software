@@ -5,7 +5,8 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { UserProfile, UserRole } from '../types';
+import { UserProfile, UserRole, Company } from '../types';
+import { useAppStore } from '../store';
 import { Session, User } from '@supabase/supabase-js';
 import SetupRequired from '../components/SetupRequired';
 
@@ -23,6 +24,8 @@ interface AuthContextType {
   canAdd: boolean;
   canEdit: boolean;
   canDelete: boolean;
+  canManageCompanies: boolean;
+  canWipeData: boolean;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -34,6 +37,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const setProfileStore = useAppStore(state => state.setProfile);
+  const setAccessibleCompanies = useAppStore(state => state.setAccessibleCompanies);
+  const setLoadingStore = useAppStore(state => state.setLoading);
+
+  const fetchAccessibleCompanies = async (profile: UserProfile | null) => {
+    if (!profile) return [];
+    
+    let query = supabase.from('companies').select('*');
+    
+    const isSuperAdminUser = profile.role === 'SUPER_ADMIN' || profile.email === 'ashiq.assdi@gmail.com';
+
+    // If not super admin, restrict by company purview
+    if (!isSuperAdminUser) {
+      if (profile.companies && profile.companies.length > 0) {
+        query = query.in('id', profile.companies);
+      } else {
+        // If moderator/admin with no selected companies, they see nothing
+        return [];
+      }
+    }
+
+    const { data } = await query;
+    return data as Company[] || [];
+  };
 
   const fetchProfile = async (u: User) => {
     const { data, error } = await supabase
@@ -57,6 +85,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           can_add: true,
           can_edit: isInitialSuperAdmin,
           can_delete: isInitialSuperAdmin,
+          can_manage_companies: isInitialSuperAdmin,
+          can_wipe_data: isInitialSuperAdmin,
           joining_date: new Date().toISOString().split('T')[0]
         }])
         .select()
@@ -117,19 +147,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = {
-    user,
-    profile,
-    session,
-    loading,
-    isAdmin: user?.email === 'ashiq.assdi@gmail.com' || profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN',
-    isSuperAdmin: user?.email === 'ashiq.assdi@gmail.com' || profile?.role === 'SUPER_ADMIN',
-    canAdd: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_add !== false,
-    canEdit: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_edit !== false,
-    canDelete: user?.email === 'ashiq.assdi@gmail.com' || profile?.can_delete !== false,
-    signOut,
-    refreshProfile,
-  };
+  useEffect(() => {
+    const p = profile ? { ...profile } as UserProfile : null;
+    setProfileStore(p);
+    if (p) {
+      fetchAccessibleCompanies(p).then(setAccessibleCompanies);
+    } else {
+      setAccessibleCompanies([]);
+    }
+    setLoadingStore(loading);
+  }, [profile, loading]);
+
+  const value = React.useMemo(() => {
+    const isSA = user?.email === 'ashiq.assdi@gmail.com' || profile?.role === 'SUPER_ADMIN';
+    const isA = isSA || profile?.role === 'ADMIN';
+
+    return {
+      user,
+      profile,
+      session,
+      loading,
+      isAdmin: isA,
+      isSuperAdmin: isSA,
+      canAdd: isSA || profile?.can_add !== false,
+      canEdit: isSA || profile?.can_edit !== false,
+      canDelete: isSA || profile?.can_delete !== false,
+      canManageCompanies: isSA || (profile?.can_manage_companies !== false && isA),
+      canWipeData: isSA || profile?.can_wipe_data === true,
+      signOut,
+      refreshProfile,
+    };
+  }, [user, profile, session, loading]);
 
   if (!isSupabaseConfigured) {
     return <SetupRequired />;

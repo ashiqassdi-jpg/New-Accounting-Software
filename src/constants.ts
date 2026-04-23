@@ -29,17 +29,12 @@ export const ACCOUNT_GROUPS = [
   { value: 'EXPENSE', label: 'Expenses', color: 'indigo' },
 ];
 
-export const BDT_FORMATTER = new Intl.NumberFormat('en-IN', {
-  style: 'currency',
-  currency: 'BDT',
+export const BDT_FORMATTER = new Intl.NumberFormat('en-BD', {
+  style: 'decimal',
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
 
 export const formatBDT = (amount: number = 0) => {
-  // Use en-IN for South Asian comma grouping (1,00,000) and replace BDT with ৳
-  return BDT_FORMATTER.format(amount || 0)
-    .replace('BDT', '৳')
-    .replace('Tk', '৳')
-    .trim();
+  return `৳ ${BDT_FORMATTER.format(amount || 0)}`;
 };

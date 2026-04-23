@@ -10,6 +10,7 @@ import { UserProfile, UserRole } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { toast } from 'sonner';
 
 export default function UserManagement() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -63,6 +64,13 @@ export default function UserManagement() {
     e.preventDefault();
     if (!editingUser) return;
 
+    // Hardcode Super Admin protection: cannot change their own role or revoke their core permissions
+    if (editingUser.email === 'ashiq.assdi@gmail.com') {
+      toast.error('Protective Lock', { description: "System Architecture roles for the Master User are immutable and protected by root security protocols." });
+      setEditingUser(null);
+      return;
+    }
+
     const { error } = await supabase
       .from('profiles')
       .update({
@@ -71,6 +79,8 @@ export default function UserManagement() {
         can_add: editingUser.can_add,
         can_edit: editingUser.can_edit,
         can_delete: editingUser.can_delete,
+        can_manage_companies: editingUser.can_manage_companies,
+        can_wipe_data: editingUser.can_wipe_data,
         name: editingUser.name,
         phone: editingUser.phone,
         address: editingUser.address,
@@ -79,8 +89,9 @@ export default function UserManagement() {
       .eq('id', editingUser.id);
 
     if (error) {
-      alert(error.message);
+      toast.error('Sync Error', { description: error.message });
     } else {
+      toast.success('Permissions Harmonized', { description: `Access rights for ${editingUser.name} have been updated.` });
       setEditingUser(null);
       fetchProfiles();
     }
@@ -115,11 +126,12 @@ export default function UserManagement() {
       if (error) {
         if (error.code === '23503') {
           // Foreign key violation means the user doesn't exist in auth.users
-          alert("To add a professional, they must first have an account. Please ask them to Sign Up first, then you can manage their permissions here.");
+          toast.info('Onboarding Protocol', { description: "To add a professional, they must first have an account. Please ask them to Sign Up first, then you can manage their permissions here." });
         } else {
           throw error;
         }
       } else {
+        toast.success('Professional Added', { description: `${inviteData.name} has been added to the system.` });
         setIsInviteModalOpen(false);
         setInviteData({
           email: '',
@@ -131,7 +143,7 @@ export default function UserManagement() {
         fetchProfiles();
       }
     } catch (err: any) {
-      alert(err.message || "Failed to invite professional");
+      toast.error('Invite Rejected', { description: err.message || "Failed to invite professional" });
     } finally {
       setIsInviting(false);
     }
@@ -438,6 +450,19 @@ export default function UserManagement() {
                         description="Critical: Permanent removal of data"
                         active={editingUser.can_delete !== false}
                         onClick={() => setEditingUser({ ...editingUser, can_delete: !editingUser.can_delete })}
+                        danger
+                      />
+                      <PermissionToggle 
+                        label="Can Manage Companies" 
+                        description="Ability to create or edit subsidiary entities"
+                        active={editingUser.can_manage_companies === true}
+                        onClick={() => setEditingUser({ ...editingUser, can_manage_companies: !editingUser.can_manage_companies })}
+                      />
+                      <PermissionToggle 
+                        label="Can Wipe Data" 
+                        description="Hazardous: Permission to perform global system reset"
+                        active={editingUser.can_wipe_data === true}
+                        onClick={() => setEditingUser({ ...editingUser, can_wipe_data: !editingUser.can_wipe_data })}
                         danger
                       />
                     </div>

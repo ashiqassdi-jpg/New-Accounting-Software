@@ -31,13 +31,13 @@ const navItems = [
   { name: 'Ledger', path: '/ledger', icon: BookOpen },
   { name: 'Reports', path: '/reports', icon: ChartBar },
   { name: 'Companies', path: '/companies', icon: Building2 },
-  { name: 'User Access', path: '/users', icon: ShieldCheck, role: 'ADMIN' },
+  { name: 'User Access', path: '/users', icon: ShieldCheck, role: 'SUPER_ADMIN' },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const { signOut, profile } = useAuth();
+  const { signOut, profile, isSuperAdmin } = useAuth();
   const { selectedCompany, companies, setSelectedCompany } = useCompany();
   const navigate = useNavigate();
 
@@ -48,6 +48,7 @@ export default function Sidebar() {
 
   const filteredNavItems = navItems.filter(item => {
     if (!item.role) return true;
+    if (item.role === 'SUPER_ADMIN') return isSuperAdmin;
     if (!profile) return false;
     const roles = ['MODERATOR', 'ADMIN', 'SUPER_ADMIN'];
     return roles.indexOf(profile.role) >= roles.indexOf(item.role);

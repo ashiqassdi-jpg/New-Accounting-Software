@@ -6,7 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, Save, AlertCircle, CheckCircle2, Printer, X, Eye, BookOpen } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { VoucherType, PaymentChannel, Account } from '../types';
+import { VoucherType, PaymentChannel, Account, Voucher } from '../types';
 import { VOUCHER_TYPES, PAYMENT_CHANNELS, ACCOUNT_GROUPS, formatBDT } from '../constants';
 import { useAuth } from '../hooks/useAuth';
 import { useCompany } from '../hooks/useCompany';
@@ -25,9 +25,12 @@ interface VoucherFormProps {
   onSuccess: () => void;
   onCancel: () => void;
   initialType?: VoucherType;
+  editingVoucher?: Voucher | null;
 }
 
-export default function VoucherForm({ onSuccess, onCancel, initialType }: VoucherFormProps) {
+import { toast } from 'sonner';
+
+export default function VoucherForm({ onSuccess, onCancel, initialType, editingVoucher }: VoucherFormProps) {
   const { user, profile } = useAuth();
   const { selectedCompany } = useCompany();
   const [loading, setLoading] = useState(false);
@@ -46,6 +49,35 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
     { account_id: '', debit: 0, credit: 0 },
     { account_id: '', debit: 0, credit: 0 }
   ]);
+
+  useEffect(() => {
+    if (editingVoucher) {
+      setType(editingVoucher.type);
+      setChannel(editingVoucher.payment_channel || 'CASH');
+      setDate(editingVoucher.date);
+      setVoucherNo(editingVoucher.voucher_no);
+      setNarration(editingVoucher.narration || '');
+      setManualVoucherNo(true); // Preserve manual number when editing
+      fetchVoucherTransactions();
+    }
+  }, [editingVoucher]);
+
+  const fetchVoucherTransactions = async () => {
+    if (!editingVoucher) return;
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('voucher_id', editingVoucher.id)
+      .order('created_at', { ascending: true });
+
+    if (!error && data) {
+      setItems(data.map(t => ({
+        account_id: t.account_id,
+        debit: t.debit,
+        credit: t.credit
+      })));
+    }
+  };
 
   useEffect(() => {
     if (selectedCompany) {
@@ -135,38 +167,66 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
     e.preventDefault();
     if (!user || !selectedCompany) return;
     if (!isBalanced) {
-      alert('Voucher must be balanced (Total Debit = Total Credit)');
+      toast.error('Voucher unbalanced', { description: 'Total Debit must equal Total Credit' });
       return;
     }
     if (items.some(i => !i.account_id)) {
-      alert('Please select an account for all line items');
+      toast.error('Missing Account', { description: 'Please select an account for all line items' });
       return;
     }
 
     setLoading(true);
 
     try {
-      // 1. Create Voucher
-      const { data: voucher, error: vError } = await supabase
-        .from('vouchers')
-        .insert([{
-          company_id: selectedCompany.id,
-          voucher_no: voucherNo || `V-${Date.now()}`,
-          date,
-          type,
-          payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
-          narration,
-          amount: Math.max(totalDebit, totalCredit),
-          created_by: user.id
-        }])
-        .select()
-        .single();
+      let voucherId = editingVoucher?.id;
 
-      if (vError) throw vError;
+      if (editingVoucher) {
+        // Update existing voucher
+        const { error: vError } = await supabase
+          .from('vouchers')
+          .update({
+            voucher_no: voucherNo,
+            date,
+            type,
+            payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
+            narration,
+            amount: Math.max(totalDebit, totalCredit)
+          })
+          .eq('id', editingVoucher.id);
 
-      // 2. Create Transactions (Double Entry)
+        if (vError) throw vError;
+
+        // Delete old transactions to re-insert new ones (safest way to handle splits)
+        const { error: dError } = await supabase
+          .from('transactions')
+          .delete()
+          .eq('voucher_id', editingVoucher.id);
+
+        if (dError) throw dError;
+      } else {
+        // Create new voucher
+        const { data: voucher, error: vError } = await supabase
+          .from('vouchers')
+          .insert([{
+            company_id: selectedCompany.id,
+            voucher_no: voucherNo || `V-${Date.now()}`,
+            date,
+            type,
+            payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
+            narration,
+            amount: Math.max(totalDebit, totalCredit),
+            created_by: user.id
+          }])
+          .select()
+          .single();
+
+        if (vError) throw vError;
+        voucherId = voucher.id;
+      }
+
+      // Create Transactions (Double Entry)
       const transactions = items.map(item => ({
-        voucher_id: voucher.id,
+        voucher_id: voucherId,
         company_id: selectedCompany.id,
         account_id: item.account_id,
         debit: item.debit,
@@ -180,16 +240,23 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
 
       if (tError) throw tError;
 
-      setLastVoucher({
-        ...voucher,
-        items: items.map(i => ({
-          ...i,
-          account_name: accounts.find(a => a.id === i.account_id)?.name
-        }))
-      });
-      setShowPrintPreview(true);
+      toast.success(editingVoucher ? 'Voucher Updated' : 'Voucher Posted Successfully');
+
+      if (!editingVoucher) {
+        const { data: voucher } = await supabase.from('vouchers').select('*').eq('id', voucherId).single();
+        setLastVoucher({
+          ...voucher,
+          items: items.map(i => ({
+            ...i,
+            account_name: accounts.find(a => a.id === i.account_id)?.name
+          }))
+        });
+        setShowPrintPreview(true);
+      } else {
+        onSuccess();
+      }
     } catch (error: any) {
-      alert(error.message || 'Error occurred while posting voucher.');
+      toast.error('Process Failed', { description: error.message || 'Error occurred while posting voucher.' });
     } finally {
       setLoading(false);
     }
@@ -204,8 +271,8 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
       >
       <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">Voucher Entry</h2>
-          <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-widest">Double-Entry Simulation Mode</p>
+          <h2 className="text-xl font-bold text-slate-900">{editingVoucher ? 'Edit Voucher' : 'Voucher Entry'}</h2>
+          <p className="text-xs font-medium text-slate-400 mt-1 uppercase tracking-widest">{editingVoucher ? 'Modify platform history' : 'Double-Entry Simulation Mode'}</p>
         </div>
         <button onClick={onCancel} className="p-2 text-slate-300 hover:text-slate-600 transition-colors">
           <Trash2 size={20} />
@@ -392,7 +459,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType }: Vouche
               className="flex-1 md:flex-none items-center justify-center gap-2 px-12 py-3.5 bg-indigo-600 text-white font-bold rounded-2xl hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 active:scale-95 disabled:opacity-50 disabled:active:scale-100"
             >
               <Save size={18} />
-              {loading ? 'Processing...' : 'Post Voucher'}
+              {loading ? 'Processing...' : (editingVoucher ? 'Update Voucher' : 'Post Voucher')}
             </button>
           </div>
         </div>

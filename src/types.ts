@@ -18,6 +18,8 @@ export interface UserProfile {
   can_add?: boolean;
   can_edit?: boolean;
   can_delete?: boolean;
+  can_manage_companies?: boolean;
+  can_wipe_data?: boolean;
 }
 
 export interface Company {
@@ -26,10 +28,6 @@ export interface Company {
   address?: string;
   tax_id?: string;
   bin?: string;
-  opening_cash?: number;
-  opening_bank?: number;
-  opening_bkash?: number;
-  opening_nagad?: number;
   fiscal_year_start?: string;
   currency_symbol?: string;
   financial_status?: 'ACTIVE' | 'CLOSED' | 'AUDITED';
@@ -47,7 +45,6 @@ export interface Account {
   code: string;
   type: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'INCOME' | 'EXPENSE';
   parent_id?: string;
-  opening_balance: number;
   current_balance: number;
 }
 

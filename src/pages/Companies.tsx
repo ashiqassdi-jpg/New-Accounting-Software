@@ -14,7 +14,7 @@ import { cn } from '../lib/utils';
 
 export default function Companies() {
   const { companies, refreshCompanies, setSelectedCompany, selectedCompany } = useCompany();
-  const { user } = useAuth();
+  const { user, canManageCompanies, isSuperAdmin } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,10 +24,6 @@ export default function Companies() {
   const [address, setAddress] = useState('');
   const [taxId, setTaxId] = useState('');
   const [bin, setBin] = useState('');
-  const [openingCash, setOpeningCash] = useState(0);
-  const [openingBank, setOpeningBank] = useState(0);
-  const [openingBkash, setOpeningBkash] = useState(0);
-  const [openingNagad, setOpeningNagad] = useState(0);
 
   const openModal = (company?: Company) => {
     if (company) {
@@ -36,20 +32,12 @@ export default function Companies() {
       setAddress(company.address || '');
       setTaxId(company.tax_id || '');
       setBin(company.bin || '');
-      setOpeningCash(company.opening_cash || 0);
-      setOpeningBank(company.opening_bank || 0);
-      setOpeningBkash(company.opening_bkash || 0);
-      setOpeningNagad(company.opening_nagad || 0);
     } else {
       setEditingCompany(null);
       setName('');
       setAddress('');
       setTaxId('');
       setBin('');
-      setOpeningCash(0);
-      setOpeningBank(0);
-      setOpeningBkash(0);
-      setOpeningNagad(0);
     }
     setIsModalOpen(true);
   };
@@ -65,10 +53,6 @@ export default function Companies() {
         address,
         tax_id: taxId,
         bin,
-        opening_cash: openingCash,
-        opening_bank: openingBank,
-        opening_bkash: openingBkash,
-        opening_nagad: openingNagad,
         created_by: user.id,
       };
 
@@ -117,13 +101,15 @@ export default function Companies() {
             Manage multiple organizational entities from a single cockpit
           </p>
         </div>
-        <button 
-          onClick={() => openModal()}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
-        >
-          <Plus size={20} />
-          <span>Incorporate New</span>
-        </button>
+        {canManageCompanies && (
+          <button 
+            onClick={() => openModal()}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+          >
+            <Plus size={20} />
+            <span>Incorporate New</span>
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -139,18 +125,22 @@ export default function Companies() {
               <div className="bg-indigo-50 p-4 rounded-2xl shadow-inner group-hover:bg-indigo-600 transition-all duration-500">
                 <Building2 className="text-indigo-600 group-hover:text-white transition-colors" size={28} />
               </div>
-              <button 
-                onClick={() => openModal(company)}
-                className="p-2.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-              >
-                <Edit3 size={18} />
-              </button>
-              <button 
-                onClick={() => handleDelete(company.id)}
-                className="p-2.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
-              >
-                <Trash2 size={18} />
-              </button>
+              {canManageCompanies && (
+                <>
+                  <button 
+                    onClick={() => openModal(company)}
+                    className="p-2.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                  >
+                    <Edit3 size={18} />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(company.id)}
+                    className="p-2.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </>
+              )}
             </div>
             
             <div className="space-y-1">
@@ -273,48 +263,6 @@ export default function Companies() {
                       onChange={(e) => setBin(e.target.value)}
                       placeholder="Business Identification Number"
                     />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-widest block border-b border-gray-100 pb-2">Opening Balances (Optional)</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cash</label>
-                      <input 
-                        type="number"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
-                        value={openingCash}
-                        onChange={(e) => setOpeningCash(Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bank</label>
-                      <input 
-                        type="number"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
-                        value={openingBank}
-                        onChange={(e) => setOpeningBank(Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">bKash</label>
-                      <input 
-                        type="number"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
-                        value={openingBkash}
-                        onChange={(e) => setOpeningBkash(Number(e.target.value))}
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nagad</label>
-                      <input 
-                        type="number"
-                        className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
-                        value={openingNagad}
-                        onChange={(e) => setOpeningNagad(Number(e.target.value))}
-                      />
-                    </div>
                   </div>
                 </div>
 
