@@ -280,15 +280,22 @@ export default function Reports() {
                             <div 
                               onClick={() => setShowAccountSearch(!showAccountSearch)}
                               className={cn(
-                                "w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black transition-all cursor-pointer flex items-center justify-between",
+                                "w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs transition-all cursor-pointer flex items-center justify-between",
                                 showAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5 bg-white" : "hover:border-slate-300"
                               )}
                             >
-                              <span className={filters.accountId ? "text-slate-900" : "text-slate-300 font-bold uppercase tracking-widest"}>
-                                {filters.accountId 
-                                  ? accounts.find(a => a.id === filters.accountId)?.name 
-                                  : "Filter by specific ledger account..."}
-                              </span>
+                              <div className="flex flex-col overflow-hidden">
+                                <span className={cn(filters.accountId ? "text-slate-900 font-black" : "text-slate-300 font-bold uppercase tracking-widest")}>
+                                  {filters.accountId 
+                                    ? accounts.find(a => a.id === filters.accountId)?.name 
+                                    : "Filter by specific ledger account..."}
+                                </span>
+                                {filters.accountId && (
+                                  <span className="text-[9px] font-mono text-slate-400 mt-0.5 tracking-wider uppercase font-black">
+                                    CODE: {accounts.find(a => a.id === filters.accountId)?.code}
+                                  </span>
+                                )}
+                              </div>
                               <ChevronDown size={14} className={cn("transition-transform duration-300", showAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
                             </div>
 
@@ -1006,6 +1013,9 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
     r.voucher?.voucher_no?.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Reverse for display: Most recent at the top
+  const displayRows = [...filteredRows].reverse();
+
   const totalDebit = filteredRows.reduce((sum, r) => sum + r.debit, 0);
   const totalCredit = filteredRows.reduce((sum, r) => sum + r.credit, 0);
   const closingBalance = openingBalance + totalDebit - totalCredit;
@@ -1154,7 +1164,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                 <td colSpan={5} className="px-10 py-5 text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 italic">Historical Opening Balance Forward</td>
                 <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right pr-10 tabular-nums">{formatBDT(openingBalance).replace(/[^0-9.,]/g, '')}</td>
               </tr>
-              {filteredRows.map(r => (
+              {displayRows.map(r => (
                 <tr key={r.id} className="hover:bg-slate-50 transition-all group">
                   <td className="px-10 py-5 text-xs font-black text-slate-400 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
                   <td className="px-10 py-5">

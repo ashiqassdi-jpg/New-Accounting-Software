@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Trash2, Save, AlertCircle, CheckCircle2, Printer, X, Eye, BookOpen, Search } from 'lucide-react';
+import { Plus, Trash2, Save, AlertCircle, CheckCircle2, Printer, X, Eye, BookOpen, Search, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { VoucherType, PaymentChannel, Account, Voucher } from '../types';
 import { VOUCHER_TYPES, PAYMENT_CHANNELS, ACCOUNT_GROUPS, formatBDT } from '../constants';
@@ -323,26 +323,36 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
         <form onSubmit={handleSubmit} className="p-8 space-y-8">
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6 bg-slate-50 rounded-[1.5rem] border border-slate-100">
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Document Type</label>
-              <select 
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700 cursor-pointer"
-                value={type}
-                onChange={(e) => setType(e.target.value as VoucherType)}
-              >
-                {VOUCHER_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-              </select>
+              <div className="relative group">
+                <select 
+                  className="appearance-none w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-black text-slate-900 cursor-pointer uppercase tracking-tight"
+                  value={type}
+                  onChange={(e) => setType(e.target.value as VoucherType)}
+                >
+                  {VOUCHER_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 group-hover:text-indigo-500 transition-colors">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Payment Engine</label>
-              <select 
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700 cursor-pointer"
-                value={channel}
-                onChange={(e) => setChannel(e.target.value as PaymentChannel)}
-              >
-                {PAYMENT_CHANNELS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              <div className="relative group">
+                <select 
+                  className="appearance-none w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-black text-slate-900 cursor-pointer uppercase tracking-tight"
+                  value={channel}
+                  onChange={(e) => setChannel(e.target.value as PaymentChannel)}
+                >
+                  {PAYMENT_CHANNELS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 group-hover:text-indigo-500 transition-colors">
+                  <ChevronDown size={14} />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-1.5">

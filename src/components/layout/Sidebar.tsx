@@ -77,25 +77,26 @@ export default function Sidebar() {
 
       <div className="px-3 py-6 flex flex-col gap-1 overflow-y-auto flex-1 custom-scrollbar">
         {!collapsed && companies.length > 0 && (
-          <div className="mb-4 px-3">
-            <label className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2 block pl-1">
-              Organization
+          <div className="mb-6 px-3">
+            <label className="text-[9px] font-black text-slate-300 uppercase tracking-[0.25em] mb-2.5 block pl-1">
+              Active Organization
             </label>
             <div className="relative group">
-              <select 
-                className="w-full bg-slate-50/50 border border-slate-100 text-[11px] rounded-xl px-3 py-2.5 text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-400 transition-all font-bold appearance-none cursor-pointer"
-                value={selectedCompany?.id || ''}
-                onChange={(e) => {
-                  const company = companies.find(c => c.id === e.target.value);
-                  if (company) setSelectedCompany(company);
-                }}
+              <div 
+                className="w-full bg-slate-50/80 border border-slate-100 rounded-2xl px-4 py-3.5 flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all shadow-[0_2px_4px_rgba(0,0,0,0.01)] hover:shadow-lg hover:shadow-indigo-500/5 group"
+                onClick={() => navigate('/companies')}
               >
-                {companies.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 group-hover:text-indigo-500 transition-colors">
-                <ChevronRight size={14} className="rotate-90" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[11px] font-black text-slate-900 uppercase tracking-tight truncate">
+                    {selectedCompany?.name || 'No Organization'}
+                  </span>
+                  <span className="text-[8px] font-mono text-slate-400 mt-0.5 tracking-widest font-black uppercase">
+                    ID: {selectedCompany?.id.split('-')[0]}
+                  </span>
+                </div>
+                <div className="bg-white p-1.5 rounded-lg border border-slate-100 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors">
+                  <Building2 size={12} className="text-slate-400 group-hover:text-indigo-600" />
+                </div>
               </div>
             </div>
           </div>

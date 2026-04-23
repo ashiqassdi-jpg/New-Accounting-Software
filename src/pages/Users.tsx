@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X } from 'lucide-react';
+import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X, ChevronDown } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { UserProfile, UserRole } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -313,15 +313,20 @@ export default function UserManagement() {
 
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Assigned Role</label>
-                    <select 
-                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
-                      value={inviteData.role}
-                      onChange={(e) => setInviteData({ ...inviteData, role: e.target.value as UserRole })}
-                    >
-                      <option value="MODERATOR">Moderator</option>
-                      <option value="ADMIN">Administrator</option>
-                      <option value="SUPER_ADMIN">System Architect</option>
-                    </select>
+                    <div className="relative group">
+                      <select 
+                        className="appearance-none w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-700 cursor-pointer uppercase tracking-tight"
+                        value={inviteData.role}
+                        onChange={(e) => setInviteData({ ...inviteData, role: e.target.value as UserRole })}
+                      >
+                        <option value="MODERATOR">Moderator</option>
+                        <option value="ADMIN">Administrator</option>
+                        <option value="SUPER_ADMIN">System Architect</option>
+                      </select>
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 group-hover:text-indigo-500 transition-colors">
+                        <ChevronDown size={14} />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
