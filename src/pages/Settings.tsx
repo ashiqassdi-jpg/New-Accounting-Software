@@ -18,7 +18,8 @@ import {
   Globe,
   Coins,
   History,
-  AlertCircle
+  AlertCircle,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCompany } from '../hooks/useCompany';
@@ -189,46 +190,46 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-5xl space-y-12 pb-32">
+    <div className="max-w-6xl space-y-10 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 font-sans tracking-tight">
-            Control Center
+          <h1 className="text-3xl font-black text-slate-900 font-sans tracking-tight uppercase">
+            System Infrastructure
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">
-            System configuration and administrative parameters
+          <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-[0.2em]">
+            Policy configuration & core administrative parameters
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 bg-white p-1 rounded-2xl border border-slate-200 shadow-sm w-fit">
+      <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100 shadow-inner w-fit no-print">
         <button 
           onClick={() => setActiveTab('PROFILE')}
           className={cn(
-            "px-6 py-2.5 rounded-xl text-xs font-bold transition-all uppercase tracking-widest",
-            activeTab === 'PROFILE' ? "bg-slate-900 text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
+            "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
+            activeTab === 'PROFILE' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
           )}
         >
-          My Profile
+          Identity
         </button>
         <button 
           onClick={() => setActiveTab('COMPANY')}
           className={cn(
-            "px-6 py-2.5 rounded-xl text-xs font-bold transition-all uppercase tracking-widest",
-            activeTab === 'COMPANY' ? "bg-slate-900 text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
+            "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
+            activeTab === 'COMPANY' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
           )}
         >
-          Company Settings
+          Entity Config
         </button>
         {isSuperAdmin && (
           <button 
             onClick={() => setActiveTab('USERS')}
             className={cn(
-              "px-6 py-2.5 rounded-xl text-xs font-bold transition-all uppercase tracking-widest",
-              activeTab === 'USERS' ? "bg-slate-900 text-white shadow-lg" : "text-slate-500 hover:bg-slate-50"
+              "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
+              activeTab === 'USERS' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
             )}
           >
-            User Management
+            Access Control
           </button>
         )}
       </div>
@@ -237,60 +238,65 @@ export default function Settings() {
         {activeTab === 'PROFILE' && (
           <motion.div
             key="profile"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-              <section className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                <div className="px-8 py-6 border-b border-slate-50 bg-slate-50/50 flex items-center gap-3">
-                  <div className="bg-indigo-100 p-2 rounded-xl">
-                    <User className="text-indigo-600" size={18} />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+              <section className="lg:col-span-7 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-fit">
+                <div className="px-10 py-8 border-b border-slate-50 bg-slate-50/30 flex items-center gap-4">
+                  <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
+                    <User className="text-indigo-600" size={20} />
                   </div>
-                  <h2 className="font-bold text-slate-800 text-sm uppercase tracking-widest">Personal Details</h2>
+                  <div>
+                    <h2 className="font-black text-slate-900 text-xs uppercase tracking-widest">Authentication Profile</h2>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Personal Identity Verification</p>
+                  </div>
                 </div>
 
-                <form onSubmit={handleUpdateProfile} className="p-8 space-y-6">
-                  <div className="space-y-4">
+                <form onSubmit={handleUpdateProfile} className="p-10 space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Full Name</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Full Legal Name</label>
                       <input 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700 underline-offset-4 decoration-indigo-500/30"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Phone</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Contact Protocol</label>
                       <input 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        placeholder="+880 1XXX-XXXXXX"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Designation</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Organizational Title</label>
                       <input 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700 italic"
                         value={designation}
                         onChange={(e) => setDesignation(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Joining Date</label>
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Commission Entry</label>
                       <input 
                         type="date"
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700"
                         value={joiningDate}
                         onChange={(e) => setJoiningDate(e.target.value)}
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Address</label>
+                    <div className="md:col-span-2 space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Domicile Address</label>
                       <textarea 
-                        className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium resize-none h-24"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700 resize-none h-24"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
+                        placeholder="Verified headquarters or residence..."
                       />
                     </div>
                   </div>
@@ -298,13 +304,41 @@ export default function Settings() {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white py-3.5 rounded-2xl font-bold hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50"
+                    className="w-fit flex items-center justify-center gap-3 bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95 disabled:opacity-50"
                   >
-                    {success === 'profile' ? <CheckCircle2 size={18} /> : <Save size={18} />}
-                    {success === 'profile' ? 'Changes Saved' : 'Save Changes'}
+                    {success === 'profile' ? <CheckCircle2 size={16} /> : <Save size={16} />}
+                    {success === 'profile' ? 'Profile Synchronized' : 'Sync Identity Data'}
                   </button>
                 </form>
               </section>
+
+              <div className="lg:col-span-5 space-y-8">
+                <div className="bg-indigo-600 rounded-[2.5rem] p-10 text-white shadow-2xl shadow-indigo-200 overflow-hidden relative">
+                   <div className="absolute top-0 right-0 p-10 opacity-10">
+                      <Shield size={160} />
+                   </div>
+                   <div className="relative z-10">
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">Security Level</span>
+                      <h3 className="text-3xl font-black mt-2 mb-6 uppercase tracking-tighter">
+                        {isSuperAdmin ? 'Root Architect' : 'System Operator'}
+                      </h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 size={14} className="text-indigo-300" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Full Ledger Oversight</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 size={14} className="text-indigo-300" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Audit Trail Visibility</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <CheckCircle2 size={14} className="text-indigo-300" />
+                          <span className="text-[10px] font-black uppercase tracking-widest">Master Encryption Key</span>
+                        </div>
+                      </div>
+                   </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
@@ -312,160 +346,134 @@ export default function Settings() {
         {activeTab === 'COMPANY' && (
           <motion.div
             key="company"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
             className="space-y-10"
           >
             {selectedCompany ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <section className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-                  <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <section className="lg:col-span-12 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-fit">
+                  <div className="px-10 py-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="bg-emerald-50 p-3 rounded-2xl">
+                      <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
                         <Building2 className="text-emerald-600" size={24} />
                       </div>
                       <div>
-                        <h2 className="font-bold text-slate-900 text-xl tracking-tight">{selectedCompany.name}</h2>
-                        <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Company Config</p>
+                        <h2 className="font-black text-slate-900 text-sm uppercase tracking-tight">{selectedCompany.name}</h2>
+                        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-0.5">Entity Meta-Configuration</p>
                       </div>
                     </div>
                   </div>
 
-                  <form onSubmit={handleUpdateCompany} className="p-10 space-y-8">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <Globe size={12} /> Fiscal Year Start
-                        </label>
-                        <input 
-                          type="date"
-                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
-                          value={fiscalYear}
-                          onChange={(e) => setFiscalYear(e.target.value)}
-                        />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-50">
+                    <form onSubmit={handleUpdateCompany} className="bg-white p-10 space-y-10">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
+                            <Calendar size={12} /> Fiscal Baseline
+                          </label>
+                          <input 
+                            type="date"
+                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-black text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                            value={fiscalYear}
+                            onChange={(e) => setFiscalYear(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
+                            <Coins size={12} /> Unit ISO Symbol
+                          </label>
+                          <input 
+                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-black text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono"
+                            value={currency}
+                            onChange={(e) => setCurrency(e.target.value)}
+                          />
+                        </div>
+                        <div className="sm:col-span-2 space-y-1">
+                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Operational State</label>
+                          <select 
+                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                            value={status}
+                            onChange={(e) => setStatus(e.target.value)}
+                          >
+                            <option value="ACTIVE">System Active</option>
+                            <option value="CLOSED">Period Terminated</option>
+                            <option value="AUDITED">Verification Locked</option>
+                          </select>
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                          <Coins size={12} /> Base Currency Symbol
-                        </label>
-                        <input 
-                          className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-black text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
-                          value={currency}
-                          onChange={(e) => setCurrency(e.target.value)}
-                        />
-                      </div>
-                    </div>
 
-                    <div className="p-6 bg-slate-50/50 rounded-3xl border border-slate-100 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="bg-white p-2.5 rounded-xl shadow-sm">
-                          <History className="text-slate-400" size={20} />
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Financial Status</p>
-                          <p className="text-sm font-bold text-slate-700">{status}</p>
-                        </div>
-                      </div>
-                      <select 
-                        className="bg-white border border-slate-200 rounded-xl px-4 py-2 text-xs font-bold outline-none"
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
+                      <button 
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-indigo-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transform active:scale-[0.98] transition-all hover:bg-slate-900 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
                       >
-                        <option value="ACTIVE">Active</option>
-                        <option value="CLOSED">Closed</option>
-                        <option value="AUDITED">Audited</option>
-                      </select>
+                        <Save size={16} /> Apply Entity Changes
+                      </button>
+                    </form>
+
+                    <div className="bg-white p-10 flex flex-col gap-8 justify-center">
+                      <div className="space-y-8">
+                        {canManageCompanies && (
+                          <div className="bg-amber-50/30 p-8 rounded-[2rem] border border-amber-100">
+                             <div className="flex items-center gap-3 mb-6">
+                                <Trash2 size={16} className="text-amber-600" />
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-900">Selective Purge</h3>
+                             </div>
+                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-tight leading-relaxed">Reset all financial footprint for <strong>{selectedCompany.name}</strong>. All vouchers and ledgers will be erased.</p>
+                             <div className="space-y-3">
+                                <input 
+                                  className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-[11px] font-bold outline-none focus:border-amber-500 placeholder:text-amber-200"
+                                  placeholder={`Type "${selectedCompany.name}"`}
+                                  value={confirmCompanyReset}
+                                  onChange={(e) => setConfirmCompanyReset(e.target.value)}
+                                />
+                                <button 
+                                  disabled={confirmCompanyReset !== selectedCompany.name || loading}
+                                  onClick={handleWipeCompanyData}
+                                  className="w-full bg-amber-600 text-white py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-amber-700 disabled:opacity-20 transition-all shadow-lg shadow-amber-100"
+                                >
+                                  Execute Purge Protocol
+                                </button>
+                             </div>
+                          </div>
+                        )}
+
+                        {canWipeData && (
+                          <div className="bg-rose-50/30 p-8 rounded-[2rem] border border-rose-100">
+                             <div className="flex items-center gap-3 mb-6">
+                                <ShieldAlert size={16} className="text-rose-600" />
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-900">Platform Reset</h3>
+                             </div>
+                             <div className="space-y-3">
+                                <input 
+                                  className="w-full bg-white border border-rose-200 rounded-xl px-4 py-2.5 text-[11px] font-mono font-black outline-none focus:border-rose-500 uppercase placeholder:text-rose-200"
+                                  placeholder="WIPE ENTIRE SYSTEM"
+                                  value={confirmGlobalReset}
+                                  onChange={(e) => setConfirmGlobalReset(e.target.value.toUpperCase())}
+                                />
+                                <button 
+                                  disabled={confirmGlobalReset !== 'WIPE ENTIRE SYSTEM' || loading}
+                                  onClick={handleGlobalWipe}
+                                  className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-rose-900 disabled:opacity-20 transition-all shadow-lg shadow-rose-100"
+                                >
+                                  Reset Infrastructure
+                                </button>
+                             </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-
-                    <button 
-                      type="submit"
-                      disabled={loading}
-                      className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
-                    >
-                      <Save size={18} />
-                      {success === 'company' ? 'Preference Saved' : 'Save Company Settings'}
-                    </button>
-                  </form>
+                  </div>
                 </section>
-
-                <div className="space-y-8">
-                  {/* Company Maintenance */}
-                  {canManageCompanies && (
-                    <section className="bg-white rounded-[2rem] border border-amber-100 shadow-sm overflow-hidden">
-                      <div className="px-10 py-8 border-b border-amber-50 bg-amber-50/20 flex items-center gap-4">
-                        <div className="bg-amber-100 p-2.5 rounded-xl">
-                          <Trash2 className="text-amber-600" size={20} />
-                        </div>
-                        <div>
-                          <h2 className="font-bold text-amber-900">Maintenance</h2>
-                          <p className="text-[10px] font-bold text-amber-600/60 uppercase tracking-widest">Specific data erasure</p>
-                        </div>
-                      </div>
-
-                      <div className="p-10 space-y-6">
-                        <p className="text-sm text-slate-600 font-medium">
-                          Restart financial tracking for <strong>{selectedCompany.name}</strong>.
-                        </p>
-                        
-                        <div className="space-y-4">
-                          <input 
-                            className="w-full bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 text-sm font-bold outline-none focus:ring-2 focus:ring-amber-500/10 focus:border-amber-500"
-                            placeholder={`Type "${selectedCompany.name}"`}
-                            value={confirmCompanyReset}
-                            onChange={(e) => setConfirmCompanyReset(e.target.value)}
-                          />
-                          <button 
-                            disabled={confirmCompanyReset !== selectedCompany.name || loading}
-                            onClick={handleWipeCompanyData}
-                            className="w-full bg-amber-50 text-amber-600 py-4 rounded-2xl font-bold hover:bg-amber-600 hover:text-white transition-all disabled:opacity-30"
-                          >
-                            Erase All Financial Data
-                          </button>
-                        </div>
-                      </div>
-                    </section>
-                  )}
-
-                  {/* Wipe All Data Section */}
-                  {canWipeData && (
-                    <section className="bg-white rounded-[2rem] border border-rose-100 shadow-sm overflow-hidden">
-                      <div className="px-10 py-8 border-b border-rose-50 bg-rose-50/30 flex items-center gap-4">
-                        <div className="bg-rose-100 p-2.5 rounded-xl">
-                          <ShieldAlert className="text-rose-600" size={20} />
-                        </div>
-                        <h2 className="font-bold text-rose-900 tracking-tight">Wipe All Data</h2>
-                      </div>
-
-                      <div className="p-10 space-y-6">
-                        <p className="text-sm text-rose-700 font-semibold flex items-center gap-3">
-                          <AlertCircle size={18} /> Destroys ALL data platform-wide.
-                        </p>
-
-                        <div className="space-y-4">
-                          <input 
-                            className="w-full bg-white border border-rose-200 rounded-2xl px-6 py-4 text-sm font-mono tracking-widest outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-rose-500 uppercase"
-                            placeholder="WIPE ENTIRE SYSTEM"
-                            value={confirmGlobalReset}
-                            onChange={(e) => setConfirmGlobalReset(e.target.value.toUpperCase())}
-                          />
-                          <button 
-                            disabled={confirmGlobalReset !== 'WIPE ENTIRE SYSTEM' || loading}
-                            onClick={handleGlobalWipe}
-                            className="w-full bg-rose-600 text-white py-4 rounded-2xl font-bold hover:bg-rose-700 transition-all shadow-xl shadow-rose-100 disabled:opacity-30"
-                          >
-                            Wipe Entire Platform
-                          </button>
-                        </div>
-                      </div>
-                    </section>
-                  )}
-                </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-slate-400">
-                <Building2 size={48} className="mb-4 opacity-20" />
-                <p className="font-bold uppercase tracking-widest text-xs">No Company Selected</p>
+              <div className="py-40 flex flex-col items-center justify-center space-y-6">
+                <div className="p-8 bg-slate-50 rounded-full text-slate-200">
+                   <Building2 size={64} />
+                </div>
+                <p className="font-black uppercase tracking-[0.3em] text-xs text-slate-300">Entity Buffer Empty</p>
               </div>
             )}
           </motion.div>

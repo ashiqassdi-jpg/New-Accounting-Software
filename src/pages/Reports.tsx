@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   FileText, 
   BarChart3, 
@@ -22,7 +22,11 @@ import {
   Receipt,
   ArrowRight,
   ChevronUp,
-  FileDown
+  FileDown,
+  Plus,
+  Check,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -34,7 +38,7 @@ import { cn } from '../lib/utils';
 import { toast } from 'sonner';
 import VoucherForm from '../components/VoucherForm';
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
-import { Voucher, VoucherType } from '../types';
+import { Voucher, VoucherType, Account } from '../types';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
@@ -46,10 +50,29 @@ export default function Reports() {
   const { profile, canEdit, canDelete } = useAuth();
   const [activeTab, setActiveTab] = useState<ReportTab>('DAYBOOK');
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [showAccountSearch, setShowAccountSearch] = useState(false);
+  const filterSearchRef = useRef<HTMLDivElement>(null);
   const [dateRange, setDateRange] = useState({
     from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
     to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
   });
+
+  useEffect(() => {
+    if (selectedCompany) {
+      supabase.from('accounts').select('*').eq('company_id', selectedCompany.id).order('name').then(({ data }) => setAccounts(data || []));
+    }
+  }, [selectedCompany]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterSearchRef.current && !filterSearchRef.current.contains(event.target as Node)) {
+        setShowAccountSearch(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -252,6 +275,98 @@ export default function Reports() {
                         </div>
 
                         <div className="md:col-span-2 space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Primary Ledger Context</label>
+                          <div className="relative" ref={filterSearchRef}>
+                            <div 
+                              onClick={() => setShowAccountSearch(!showAccountSearch)}
+                              className={cn(
+                                "w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black transition-all cursor-pointer flex items-center justify-between",
+                                showAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5 bg-white" : "hover:border-slate-300"
+                              )}
+                            >
+                              <span className={filters.accountId ? "text-slate-900" : "text-slate-300 font-bold uppercase tracking-widest"}>
+                                {filters.accountId 
+                                  ? accounts.find(a => a.id === filters.accountId)?.name 
+                                  : "Filter by specific ledger account..."}
+                              </span>
+                              <ChevronDown size={14} className={cn("transition-transform duration-300", showAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
+                            </div>
+
+                            <AnimatePresence>
+                              {showAccountSearch && (
+                                <motion.div 
+                                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                                  className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.15)] rounded-2xl z-[150] overflow-hidden"
+                                >
+                                  <div className="p-3 border-b border-slate-50 bg-slate-50/50">
+                                    <div className="relative">
+                                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                      <input 
+                                        autoFocus
+                                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold"
+                                        placeholder="Search ledger name or numeric code..."
+                                        value={filters.searchQuery}
+                                        onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
+                                      />
+                                    </div>
+                                  </div>
+                                  <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-2">
+                                    <button
+                                      onClick={() => {
+                                        setFilters(prev => ({ ...prev, accountId: '' }));
+                                        setShowAccountSearch(false);
+                                      }}
+                                      className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-slate-50 mb-1 flex items-center justify-between group"
+                                    >
+                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Clear Selection</span>
+                                      <X size={12} className="text-slate-200 group-hover:text-rose-500" />
+                                    </button>
+                                    
+                                    {ACCOUNT_GROUPS.map(group => {
+                                      const groupAccounts = accounts.filter(a => 
+                                        a.type === group.value && 
+                                        (a.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) || 
+                                         a.code.includes(filters.searchQuery))
+                                      );
+                                      if (groupAccounts.length === 0) return null;
+                                      
+                                      return (
+                                        <div key={group.value} className="mb-3 last:mb-0">
+                                          <div className="px-4 py-1 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                                          <div className="grid grid-cols-1 gap-1">
+                                            {groupAccounts.map(a => (
+                                              <button
+                                                key={a.id}
+                                                type="button"
+                                                onClick={() => {
+                                                  setFilters(prev => ({ ...prev, accountId: a.id }));
+                                                  setShowAccountSearch(false);
+                                                }}
+                                                className={cn(
+                                                  "w-full text-left px-4 py-2.5 rounded-xl group flex items-center justify-between transition-all",
+                                                  filters.accountId === a.id ? "bg-slate-900" : "hover:bg-slate-50"
+                                                )}
+                                              >
+                                                <div className="flex flex-col">
+                                                  <span className={cn("text-[10px] font-black uppercase tracking-tight", filters.accountId === a.id ? "text-white" : "text-slate-800")}>{a.name}</span>
+                                                  <span className={cn("text-[8px] font-mono font-bold tracking-widest", filters.accountId === a.id ? "text-indigo-300" : "text-slate-400")}>{a.code}</span>
+                                                </div>
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-4">
                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Document Category</label>
                           <div className="flex flex-wrap gap-2">
                             {VOUCHER_TYPES.map(v => (
@@ -380,27 +495,15 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   useEffect(() => {
     if (companyId) fetchTrialBalance();
-  }, [companyId, dateRange]);
+  }, [companyId, dateRange, filters.accountType]);
 
   const fetchTrialBalance = async () => {
     setLoading(true);
-    // Fetch accounts and their transaction sums within the range
-    let accQuery = supabase
-      .from('accounts')
-      .select('*')
-      .eq('company_id', companyId);
-    
-    if (filters.accountType) {
-      accQuery = accQuery.eq('type', filters.accountType);
-    }
+    let accQuery = supabase.from('accounts').select('*').eq('company_id', companyId);
+    if (filters.accountType) accQuery = accQuery.eq('type', filters.accountType);
 
     const { data: accounts, error: accError } = await accQuery;
-
-    if (accError) {
-      console.error(accError);
-      setLoading(false);
-      return;
-    }
+    if (accError) { setLoading(false); return; }
 
     const { data: transactions, error: transError } = await supabase
       .from('transactions')
@@ -408,11 +511,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
       .eq('company_id', companyId)
       .lte('date', dateRange.to);
 
-    if (transError) {
-      console.error(transError);
-      setLoading(false);
-      return;
-    }
+    if (transError) { setLoading(false); return; }
 
     const trialBalance = accounts.map(acc => {
       const accTransactions = transactions.filter(t => t.account_id === acc.id);
@@ -421,16 +520,11 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
       
       let netDebit = 0;
       let netCredit = 0;
-
       const balance = (totalDebit - totalCredit);
       if (balance > 0) netDebit = balance;
       else if (balance < 0) netCredit = Math.abs(balance);
 
-      return {
-        ...acc,
-        debit: netDebit,
-        credit: netCredit
-      };
+      return { ...acc, debit: netDebit, credit: netCredit };
     }).filter(acc => acc.debit !== 0 || acc.credit !== 0);
 
     setData(trialBalance);
@@ -445,75 +539,77 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
   const totalDebit = filteredData.reduce((sum, acc) => sum + acc.debit, 0);
   const totalCredit = filteredData.reduce((sum, acc) => sum + acc.credit, 0);
 
-  if (loading) return <div className="p-20 text-center text-slate-400 font-bold animate-pulse">Calculating Ledger Equilibrium...</div>;
+  if (loading) return <div className="p-20 text-center text-slate-400 font-black animate-pulse uppercase tracking-widest text-[10px]">Calculating Ledger Equilibrium...</div>;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="px-8 py-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
-        <div className="flex items-center gap-4 flex-1">
-          <h3 className="font-bold text-slate-800 uppercase text-xs tracking-widest whitespace-nowrap">Trial Balance</h3>
+      <div className="px-10 py-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
+        <div className="flex items-center gap-6 flex-1">
+          <div>
+            <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest">Trial Balance</h3>
+            <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">Audit verification of ledger balances</p>
+          </div>
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
             <input 
-              type="text"
-              placeholder="Search account name or code..."
+              placeholder="Search Ledger or Code..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50/50 border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-[11px] font-medium outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
+              className="w-full bg-slate-50/50 border border-slate-100 rounded-xl pl-11 pr-4 py-2.5 text-[11px] font-bold outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono"
             />
           </div>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={() => onExportExcel(filteredData.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-indigo-600 rounded-xl transition-all hover:bg-slate-100"
-            title="Export to Excel"
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100"
           >
-            <Download size={20} />
+            <FileDown size={20} />
           </button>
           <button 
             onClick={() => onExportPDF(filteredData.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
-            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all hover:bg-slate-100"
-            title="Export to PDF"
+            className="p-2.5 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100"
           >
-            <FileText size={20} />
+            <Printer size={20} />
           </button>
         </div>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-50/50">
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Code</th>
-              <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Account Name</th>
-              <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Debit (৳)</th>
-              <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Credit (৳)</th>
+            <tr className="bg-slate-900 text-white">
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Code</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 whitespace-nowrap">Account Ledger</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right whitespace-nowrap">Debit (৳)</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50">
+          <tbody className="divide-y divide-slate-100">
             {filteredData.map(acc => (
-              <tr key={acc.id} className="hover:bg-slate-50 transition-colors">
-                <td className="px-8 py-4 text-sm font-mono text-slate-400">{acc.code}</td>
-                <td className="px-8 py-4 text-sm font-semibold text-slate-700">{acc.name}</td>
-                <td className="px-8 py-4 text-sm font-mono text-slate-900 text-right">
-                  {acc.debit > 0 ? formatBDT(acc.debit) : '-'}
+              <tr key={acc.id} className="hover:bg-slate-50 transition-all group">
+                <td className="px-10 py-5 text-xs font-mono font-black text-slate-400">{acc.code}</td>
+                <td className="px-10 py-5 text-[11px] font-black text-slate-700 uppercase tracking-tight group-hover:text-indigo-600 transition-colors">
+                   {acc.name}
                 </td>
-                <td className="px-8 py-4 text-sm font-mono text-slate-900 text-right">
-                  {acc.credit > 0 ? formatBDT(acc.credit) : '-'}
+                <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right tabular-nums">
+                  {acc.debit > 0 ? formatBDT(acc.debit).replace(/[^0-9.,]/g, '') : '-'}
+                </td>
+                <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right tabular-nums">
+                  {acc.credit > 0 ? formatBDT(acc.credit).replace(/[^0-9.,]/g, '') : '-'}
                 </td>
               </tr>
             ))}
             {filteredData.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-20 text-center text-slate-300 font-medium italic">No ledger activity found for this period.</td>
+                <td colSpan={4} className="py-32 text-center text-slate-300 font-black uppercase tracking-widest text-[11px] italic">No ledger activity found for this period</td>
               </tr>
             )}
           </tbody>
-          <tfoot className="bg-slate-50/80 border-t-2 border-slate-100">
+          <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-black backdrop-blur-sm sticky bottom-0">
             <tr>
-              <td colSpan={2} className="px-8 py-6 text-sm font-bold text-slate-900 text-right uppercase tracking-widest">Total</td>
-              <td className="px-8 py-6 text-sm font-mono font-black text-indigo-600 text-right">{formatBDT(totalDebit)}</td>
-              <td className="px-8 py-6 text-sm font-mono font-black text-indigo-600 text-right">{formatBDT(totalCredit)}</td>
+              <td colSpan={2} className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-black">Consolidated Total</td>
+              <td className="px-10 py-6 text-sm font-mono font-black text-indigo-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+              <td className="px-10 py-6 text-sm font-mono font-black text-indigo-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
             </tr>
           </tfoot>
         </table>
@@ -835,6 +931,18 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   const [loading, setLoading] = useState(false);
   const [viewingVoucher, setViewingVoucher] = useState<any>(null);
   const [search, setSearch] = useState('');
+  const [activeAccountSearch, setActiveAccountSearch] = useState(false);
+  const searchContainerRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setActiveAccountSearch(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (companyId) {
@@ -853,8 +961,6 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   const fetchLedger = async () => {
     setLoading(true);
-    
-    // 1. Fetch Opening Balance (Sum of all transactions before dateRange.from)
     const { data: prevTransactions } = await supabase
       .from('transactions')
       .select('debit, credit')
@@ -864,7 +970,6 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
     const opening = (prevTransactions || []).reduce((sum, t) => sum + (t.debit - t.credit), 0);
     setOpeningBalance(opening);
 
-    // 2. Fetch current period transactions
     let query = supabase
       .from('transactions')
       .select(`
@@ -890,14 +995,10 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
     setLoading(false);
   };
 
-  // Calculate Running Balance
   let currentBalance = openingBalance;
   const ledgerRows = transactions.map(t => {
     currentBalance += (t.debit - t.credit);
-    return {
-      ...t,
-      runningBalance: currentBalance
-    };
+    return { ...t, runningBalance: currentBalance };
   });
 
   const filteredRows = ledgerRows.filter(r => 
@@ -911,45 +1012,125 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="p-8 border-b border-slate-50 space-y-6">
-        <div className="flex flex-col md:flex-row gap-6 md:items-end justify-between">
-          <div className="max-w-xs w-full space-y-2">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Select Ledger Account</label>
-            <select 
-              value={selectedAccountId}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold text-slate-700"
+      <div className="p-10 border-b border-slate-50 space-y-8 no-print">
+        <div className="flex flex-col md:flex-row gap-8 md:items-end justify-between">
+          <div className="max-w-md w-full space-y-3 relative" ref={searchContainerRef}>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Primary Ledger Selection</label>
+            <div 
+              className={cn(
+                "w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs transition-all font-black flex items-center justify-between cursor-pointer",
+                activeAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5 bg-white" : "hover:border-slate-300"
+              )}
+              onClick={() => setActiveAccountSearch(!activeAccountSearch)}
             >
-              <option value="">Choose an account...</option>
-              {accounts.map(a => <option key={a.id} value={a.id}>{a.name} ({a.code})</option>)}
-            </select>
+              <div className="flex flex-col overflow-hidden">
+                <span className={cn(selectedAccountId ? "text-slate-900" : "text-slate-300 uppercase tracking-widest")}>
+                  {selectedAccountId 
+                    ? accounts.find(a => a.id === selectedAccountId)?.name 
+                    : "Awaiting selection..."}
+                </span>
+                {selectedAccountId && (
+                  <span className="text-[9px] font-mono text-slate-400 mt-0.5">
+                    CODE: {accounts.find(a => a.id === selectedAccountId)?.code}
+                  </span>
+                )}
+              </div>
+              <ChevronDown size={14} className={cn("transition-transform duration-300", activeAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
+            </div>
+
+            <AnimatePresence>
+              {activeAccountSearch && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                  className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.15)] rounded-[2rem] z-[100] no-print overflow-hidden min-w-[300px]"
+                >
+                  <div className="p-4 border-b border-slate-50 bg-slate-50/30">
+                    <div className="relative">
+                      <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input 
+                        autoFocus
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black uppercase"
+                        placeholder="Search for ledger name or code..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-3">
+                    {ACCOUNT_GROUPS.map(group => {
+                      const groupAccounts = accounts.filter(a => 
+                        a.type === group.value && 
+                        (a.name.toLowerCase().includes(search.toLowerCase()) || 
+                         a.code.includes(search))
+                      );
+                      if (groupAccounts.length === 0) return null;
+                      
+                      return (
+                        <div key={group.value} className="mb-4 last:mb-0">
+                          <div className="px-4 py-1.5 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                          <div className="grid grid-cols-1 gap-1">
+                            {groupAccounts.map(a => (
+                              <button
+                                key={a.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedAccountId(a.id);
+                                  setActiveAccountSearch(false);
+                                  setSearch(''); // Clear search after selection
+                                }}
+                                className={cn(
+                                  "w-full text-left px-5 py-3 rounded-2xl group flex items-center justify-between transition-all",
+                                  selectedAccountId === a.id ? "bg-slate-900" : "hover:bg-slate-50"
+                                )}
+                              >
+                                <div className="flex flex-col">
+                                  <span className={cn("text-[11px] font-black uppercase tracking-tight", selectedAccountId === a.id ? "text-white" : "text-slate-800")}>{a.name}</span>
+                                  <span className={cn("text-[9px] font-mono font-bold tracking-widest", selectedAccountId === a.id ? "text-indigo-300" : "text-slate-400")}>{a.code}</span>
+                                </div>
+                                {selectedAccountId === a.id && (
+                                  <div className="bg-white/10 p-1.5 rounded-lg">
+                                    <CheckCircle2 size={12} className="text-white" />
+                                  </div>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
             <input 
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
-              placeholder="Filter by narration or voucher #..."
+              placeholder="Narrative search within ledger..."
+              className="w-full bg-slate-50/50 border border-slate-100 rounded-xl pl-11 pr-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 font-bold"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           
-          <div className="flex gap-3 no-print">
+          <div className="flex gap-2">
             <button 
               onClick={() => onExportExcel(filteredRows.map(r => ({ Date: r.date, Narration: r.voucher?.narration, Type: r.voucher?.type, Debit: r.debit, Credit: r.credit, Balance: r.runningBalance })))}
-              className="flex items-center gap-2 px-6 py-3 bg-indigo-50 text-indigo-600 rounded-xl font-bold text-xs hover:bg-indigo-100 transition-all border border-indigo-100"
+              className="p-3 bg-slate-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100"
             >
-              <Download size={16} /> Export Excel
+              <FileDown size={20} />
             </button>
             <button 
               onClick={() => {
                 const docData = filteredRows.map(r => [format(new Date(r.date), 'dd/MM/yyyy'), r.voucher?.narration, r.voucher?.type, r.debit, r.credit, r.runningBalance]);
                 onExportPDF(docData)
               }}
-              className="flex items-center gap-2 px-6 py-3 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs hover:bg-rose-100 transition-all border border-rose-100"
+              className="p-3 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100"
             >
-              <FileText size={16} /> Export PDF
+              <Printer size={20} />
             </button>
           </div>
         </div>
@@ -957,35 +1138,41 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
       {selectedAccountId ? (
         <div className="overflow-x-auto">
-          <table className="w-full">
+          <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
-                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Narration</th>
-                <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
-                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Debit</th>
-                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest">Credit</th>
-                <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest pr-12">Balance</th>
+              <tr className="bg-slate-900 text-white">
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Date</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Particulars</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Vch Type</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right">Debit</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right">Credit</th>
+                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-right pr-10">Running Balance</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
-              <tr className="bg-slate-50/20 italic font-bold">
-                <td colSpan={5} className="px-8 py-4 text-[10px] uppercase tracking-widest text-slate-400">Opening Balance forward</td>
-                <td className="px-8 py-4 text-sm font-mono text-slate-900 text-right pr-12">{formatBDT(openingBalance)}</td>
+            <tbody className="divide-y divide-slate-100">
+              <tr className="bg-slate-50/50 border-b-2 border-slate-100">
+                <td colSpan={5} className="px-10 py-5 text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 italic">Historical Opening Balance Forward</td>
+                <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right pr-10 tabular-nums">{formatBDT(openingBalance).replace(/[^0-9.,]/g, '')}</td>
               </tr>
               {filteredRows.map(r => (
-                <tr key={r.id} className="hover:bg-slate-50 transition-colors">
-                  <td className="px-8 py-4 text-sm font-bold text-slate-400">{format(new Date(r.date), 'dd/MM/yyyy')}</td>
-                  <td className="px-8 py-4 text-sm font-medium text-slate-500 whitespace-pre-wrap max-w-md">{r.voucher?.narration}</td>
-                  <td className="px-8 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{r.voucher?.type}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-black text-rose-600 text-right">{r.debit > 0 ? formatBDT(r.debit) : '-'}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-black text-emerald-600 text-right">{r.credit > 0 ? formatBDT(r.credit) : '-'}</td>
-                  <td className="px-8 py-4 text-sm font-mono font-black text-indigo-600 text-right pr-12">
-                    <div className="flex items-center justify-end gap-3 text-right">
-                      {formatBDT(r.runningBalance)}
+                <tr key={r.id} className="hover:bg-slate-50 transition-all group">
+                  <td className="px-10 py-5 text-xs font-black text-slate-400 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
+                  <td className="px-10 py-5">
+                    <p className="text-[11px] font-bold text-slate-600 whitespace-pre-wrap max-w-sm italic leading-relaxed">{r.voucher?.narration}</p>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Ref: {r.voucher?.voucher_no}</p>
+                  </td>
+                  <td className="px-10 py-5">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{r.voucher?.type}</span>
+                  </td>
+                  <td className="px-10 py-5 text-sm font-mono font-black text-rose-500 text-right tabular-nums">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-10 py-5 text-sm font-mono font-black text-emerald-500 text-right tabular-nums">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-10 py-5 text-right pr-10">
+                    <div className="flex items-center justify-end gap-3">
+                      <span className="text-sm font-mono font-black text-indigo-600 tabular-nums">{formatBDT(r.runningBalance).replace(/[^0-9.,]/g, '')}</span>
                       <button 
-                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-slate-100 rounded-lg transition-all"
+                        className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 group-hover:opacity-100 opacity-0"
                         onClick={() => setViewingVoucher(r.voucher)}
+                        title="Audit Voucher"
                       >
                         <Eye size={16} />
                       </button>
@@ -995,26 +1182,31 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
               ))}
               {filteredRows.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-20 text-center text-slate-300 font-medium italic">No transactions found for the selected criteria.</td>
+                  <td colSpan={6} className="py-40 text-center">
+                     <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
+                        <Receipt className="text-slate-200" size={32} />
+                      </div>
+                      <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">No transactional footprints discovered</p>
+                  </td>
                 </tr>
               )}
             </tbody>
-            <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-black">
+            <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-black backdrop-blur-sm sticky bottom-0">
               <tr>
-                <td colSpan={3} className="px-8 py-6 text-[10px] text-slate-900 text-right uppercase tracking-widest">Total For Period</td>
-                <td className="px-8 py-6 text-sm font-mono text-rose-600 text-right">{formatBDT(totalDebit)}</td>
-                <td className="px-8 py-6 text-sm font-mono text-emerald-600 text-right">{formatBDT(totalCredit)}</td>
-                <td className="px-8 py-6 text-sm font-mono text-indigo-600 text-right pr-12">Closing: {formatBDT(closingBalance)}</td>
+                <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-black">Analytical Totals</td>
+                <td className="px-10 py-8 text-sm font-mono text-rose-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+                <td className="px-10 py-8 text-sm font-mono text-emerald-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
+                <td className="px-10 py-8 text-sm font-mono text-indigo-700 text-right pr-10 tabular-nums">CLOSING: {formatBDT(closingBalance).replace(/[^0-9.,]/g, '')}</td>
               </tr>
             </tfoot>
           </table>
         </div>
       ) : (
-        <div className="p-20 text-center space-y-4">
-          <div className="inline-flex p-4 bg-slate-50 rounded-full text-slate-300">
-            <Search size={32} />
+        <div className="p-32 text-center space-y-4">
+          <div className="inline-flex p-6 bg-slate-50 rounded-3xl text-slate-200 border border-slate-100 shadow-inner">
+            <Search size={40} />
           </div>
-          <p className="text-slate-400 text-sm font-medium">Select a ledger from the list to review detailed transaction statements.</p>
+          <p className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Awaiting Ledger Protocol Initialization</p>
         </div>
       )}
       <AnimatePresence>

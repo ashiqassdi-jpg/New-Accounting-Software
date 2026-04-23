@@ -375,155 +375,167 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
             </div>
           </div>
 
-          {/* Tabular Entry Section */}
+          {/* Block Entry Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
-                Transaction Ledger Splits
-                <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">{items.length} Nodes</span>
+                Transaction Ledger Nodes
+                <span className="text-[10px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full">{items.length} Units</span>
               </h3>
               <button 
                 type="button" 
                 onClick={addItem}
                 className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg active:scale-95"
               >
-                <Plus size={14} /> Add Line
+                <Plus size={14} /> Add Transaction
               </button>
             </div>
 
-            <div className="border border-slate-200 rounded-[1.5rem] shadow-sm bg-slate-50/30">
-              <table className="w-full border-collapse">
-                <thead className="bg-slate-100/80 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest w-12 text-center">#</th>
-                    <th className="px-6 py-3 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Account / Ledger</th>
-                    <th className="px-6 py-3 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-40">Debit Value</th>
-                    <th className="px-6 py-3 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest w-40">Credit Value</th>
-                    <th className="px-6 py-3 w-12"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {items.map((item, index) => (
-                    <tr key={index} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="px-6 py-4 text-[10px] font-mono text-slate-300 text-center">{index + 1}</td>
-                      <td className="px-6 py-4 relative z-auto" ref={activeAccountSearch?.index === index ? searchRef : null}>
-                        <div 
-                          className={cn(
-                            "w-full bg-white border rounded-xl px-4 py-2.5 text-xs transition-all font-bold cursor-pointer flex items-center justify-between",
-                            activeAccountSearch?.index === index ? "border-indigo-500 ring-4 ring-indigo-500/5 shadow-sm" : "border-slate-100 hover:border-slate-200"
-                          )}
-                          onClick={() => setActiveAccountSearch({ index, query: '' })}
-                        >
-                          <span className={cn(item.account_id ? "text-slate-900" : "text-slate-300 font-medium")}>
-                            {item.account_id 
-                              ? accounts.find(a => a.id === item.account_id)?.name 
-                              : "Search ledger account..."}
+            <div className="space-y-3">
+              {items.map((item, index) => (
+                <div key={index} className="bg-white border border-slate-200 rounded-[1.5rem] shadow-sm overflow-hidden group">
+                  {/* Ledger Row (Primary) */}
+                  <div className="p-4 bg-slate-50/50 border-b border-slate-100 relative" ref={activeAccountSearch?.index === index ? searchRef : null}>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Target Account Ledger / General Ledger</label>
+                      <span className="text-[9px] font-mono text-slate-300"># {index + 1}</span>
+                    </div>
+                    
+                    <div 
+                      className={cn(
+                        "w-full bg-white border rounded-xl px-4 py-3 text-xs transition-all font-black flex items-center justify-between cursor-pointer",
+                        activeAccountSearch?.index === index ? "border-indigo-500 ring-4 ring-indigo-500/5" : "border-slate-200 hover:border-slate-300"
+                      )}
+                      onClick={() => setActiveAccountSearch({ index, query: '' })}
+                    >
+                      <div className="flex flex-col">
+                        <span className={cn(item.account_id ? "text-slate-900" : "text-slate-300 font-bold")}>
+                          {item.account_id 
+                            ? accounts.find(a => a.id === item.account_id)?.name 
+                            : "Search and select ledger account..."}
+                        </span>
+                        {item.account_id && (
+                          <span className="text-[9px] font-mono text-slate-400 mt-0.5 tracking-wider uppercase">
+                            CODE: {accounts.find(a => a.id === item.account_id)?.code}
                           </span>
-                          <Search size={14} className={cn(activeAccountSearch?.index === index ? "text-indigo-500" : "text-slate-200")} />
-                        </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        {item.account_id && (
+                           <div className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">Selected</div>
+                        )}
+                        <Search size={14} className={cn(activeAccountSearch?.index === index ? "text-indigo-500" : "text-slate-300")} />
+                      </div>
+                    </div>
 
-                        <AnimatePresence>
-                          {activeAccountSearch?.index === index && (
-                            <motion.div 
-                              initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                              animate={{ opacity: 1, y: 0, scale: 1 }}
-                              exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                              className="absolute left-6 right-6 top-full mt-2 bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-2xl z-[999] overflow-hidden"
-                            >
-                              <div className="p-3 border-b border-slate-50 bg-slate-50/50">
-                                <div className="relative">
-                                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                  <input 
-                                    autoFocus
-                                    className="w-full bg-white border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold"
-                                    placeholder="Type Ledger Name or Atomic Code..."
-                                    value={activeAccountSearch.query}
-                                    onChange={(e) => setActiveAccountSearch({ ...activeAccountSearch, query: e.target.value })}
-                                  />
-                                </div>
-                              </div>
-                              <div className="max-h-[300px] overflow-y-auto custom-scrollbar px-2 py-2">
-                                {ACCOUNT_GROUPS.map(group => {
-                                  const groupAccounts = accounts.filter(a => 
-                                    a.type === group.value && 
-                                    (a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
-                                     a.code.includes(activeAccountSearch.query))
-                                  );
-                                  if (groupAccounts.length === 0) return null;
-                                  
-                                  return (
-                                    <div key={group.value} className="mb-3 last:mb-0">
-                                      <div className="px-3 py-1.5 text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{group.label}</div>
-                                      {groupAccounts.map(a => (
-                                        <button
-                                          key={a.id}
-                                          type="button"
-                                          onClick={() => {
-                                            updateItem(index, 'account_id', a.id);
-                                            setActiveAccountSearch(null);
-                                          }}
-                                          className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-indigo-50 group flex items-center justify-between transition-all"
-                                        >
-                                          <div className="flex flex-col">
-                                            <span className="text-[11px] font-bold text-slate-800 group-hover:text-indigo-700">{a.name}</span>
-                                            <span className="text-[10px] font-mono text-slate-400 group-hover:text-indigo-400">{a.code}</span>
-                                          </div>
-                                          <div className="w-6 h-6 rounded-lg bg-slate-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Plus size={12} className="text-indigo-600" />
-                                          </div>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  );
-                                })}
-                                {accounts.filter(a => 
-                                  a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
-                                  a.code.includes(activeAccountSearch.query)
-                                ).length === 0 && (
-                                  <div className="py-12 text-center">
-                                    <AlertCircle className="mx-auto text-slate-200 mb-2" size={32} />
-                                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">No matching ledgers</p>
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-2.5 text-xs text-right outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white transition-all font-mono font-bold text-slate-900"
-                          value={item.debit === 0 ? '' : item.debit}
-                          onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
-                        />
-                      </td>
-                      <td className="px-6 py-4">
-                        <input 
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-2.5 text-xs text-right outline-none focus:ring-2 focus:ring-indigo-500/10 focus:bg-white transition-all font-mono font-bold text-slate-900"
-                          value={item.credit === 0 ? '' : item.credit}
-                          onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
-                        />
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <button 
-                          type="button" 
-                          onClick={() => removeItem(index)}
-                          disabled={items.length <= 2}
-                          className="p-2 text-slate-200 hover:text-rose-500 transition-colors disabled:opacity-0"
+                    <AnimatePresence>
+                      {activeAccountSearch?.index === index && (
+                        <motion.div 
+                          initial={{ opacity: 0, y: 5, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 5, scale: 0.98 }}
+                          className="absolute left-4 right-4 top-full mt-1 bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-3xl z-[999] overflow-hidden"
                         >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <div className="p-4 border-b border-slate-50 bg-slate-50/50">
+                            <div className="relative">
+                              <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+                              <input 
+                                autoFocus
+                                className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black uppercase placeholder:text-slate-300"
+                                placeholder="Search ledger by name or numeric code..."
+                                value={activeAccountSearch.query}
+                                onChange={(e) => setActiveAccountSearch({ ...activeAccountSearch, query: e.target.value })}
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-[350px] overflow-y-auto custom-scrollbar px-3 py-3">
+                            {ACCOUNT_GROUPS.map(group => {
+                              const groupAccounts = accounts.filter(a => 
+                                a.type === group.value && 
+                                (a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
+                                 a.code.includes(activeAccountSearch.query))
+                              );
+                              if (groupAccounts.length === 0) return null;
+                              
+                              return (
+                                <div key={group.value} className="mb-4 last:mb-0">
+                                  <div className="px-4 py-1.5 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                                  <div className="grid grid-cols-1 gap-1">
+                                    {groupAccounts.map(a => (
+                                      <button
+                                        key={a.id}
+                                        type="button"
+                                        onClick={() => {
+                                          updateItem(index, 'account_id', a.id);
+                                          setActiveAccountSearch(null);
+                                        }}
+                                        className="w-full text-left px-5 py-3 rounded-2xl hover:bg-slate-900 group flex items-center justify-between transition-all"
+                                      >
+                                        <div className="flex flex-col">
+                                          <span className="text-[11px] font-black text-slate-800 group-hover:text-white uppercase tracking-tight">{a.name}</span>
+                                          <span className="text-[9px] font-mono text-slate-400 group-hover:text-indigo-300 font-bold tracking-widest">{a.code}</span>
+                                        </div>
+                                        <div className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all group-hover:scale-110">
+                                          <Plus size={14} className="text-slate-900" />
+                                        </div>
+                                      </button>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {activeAccountSearch.query && accounts.filter(a => 
+                              a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
+                              a.code.includes(activeAccountSearch.query)
+                            ).length === 0 && (
+                              <div className="py-16 text-center">
+                                <Search className="mx-auto text-slate-100 mb-4" size={48} />
+                                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em]">No Ledgers Discovered</p>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Value Row */}
+                  <div className="p-4 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div className="md:col-span-5 space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Debit Value (৳)</label>
+                      <input 
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="w-full bg-slate-50/30 border border-slate-100 rounded-xl px-4 py-3 text-xs text-right outline-none focus:ring-2 focus:ring-rose-500/10 focus:border-rose-300 transition-all font-mono font-black text-slate-900"
+                        value={item.debit === 0 ? '' : item.debit}
+                        onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="md:col-span-5 space-y-1">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Credit Value (৳)</label>
+                      <input 
+                        type="number"
+                        step="0.01"
+                        placeholder="0.00"
+                        className="w-full bg-slate-50/30 border border-slate-100 rounded-xl px-4 py-3 text-xs text-right outline-none focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-300 transition-all font-mono font-black text-slate-900"
+                        value={item.credit === 0 ? '' : item.credit}
+                        onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
+                      />
+                    </div>
+                    <div className="md:col-span-2 flex justify-end md:mt-5 pt-1">
+                      <button 
+                        type="button" 
+                        onClick={() => removeItem(index)}
+                        disabled={items.length <= 2}
+                        className="p-3 bg-slate-50 text-slate-300 hover:text-white hover:bg-rose-500 rounded-xl transition-all disabled:opacity-0 shadow-sm border border-slate-100 active:scale-90"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 

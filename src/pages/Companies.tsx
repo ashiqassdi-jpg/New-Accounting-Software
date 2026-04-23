@@ -134,76 +134,78 @@ export default function Companies() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {companies.map((company) => (
           <motion.div 
             key={company.id}
             layout
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group"
+            className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group relative overflow-hidden"
           >
-            <div className="flex items-start justify-between mb-8">
-              <div className="bg-indigo-50 p-4 rounded-2xl shadow-inner group-hover:bg-indigo-600 transition-all duration-500">
-                <Building2 className="text-indigo-600 group-hover:text-white transition-colors" size={28} />
-              </div>
+            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 no-print">
               {canManageCompanies && (
                 <>
                   <button 
                     onClick={() => openModal(company)}
-                    className="p-2.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                    className="p-2 text-slate-400 hover:text-indigo-600 bg-white shadow-sm border border-slate-100 rounded-lg transition-all"
                   >
-                    <Edit3 size={18} />
+                    <Edit3 size={14} />
                   </button>
                   <button 
                     onClick={() => handleDelete(company.id, company.name)}
-                    className="p-2.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
+                    className="p-2 text-slate-400 hover:text-rose-600 bg-white shadow-sm border border-slate-100 rounded-lg transition-all"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={14} />
                   </button>
                 </>
               )}
             </div>
-            
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-xl text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className={cn(
+                "w-12 h-12 rounded-2xl flex items-center justify-center transition-all duration-500 shadow-sm",
+                selectedCompany?.id === company.id ? "bg-indigo-600 text-white" : "bg-slate-50 text-indigo-600 group-hover:bg-indigo-50"
+              )}>
+                <Building2 size={24} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors truncate text-sm uppercase tracking-tight">
                   {company.name}
                 </h3>
                 {selectedCompany?.id === company.id && (
-                  <span className="flex items-center gap-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest border border-emerald-100">
-                    Active
-                  </span>
+                  <span className="text-[8px] font-black text-emerald-500 uppercase tracking-[0.2em]">Live Session</span>
                 )}
               </div>
-              <p className="text-sm text-slate-400 font-medium line-clamp-2 min-h-[40px]">
-                {company.address || 'Location profile not initialized'}
-              </p>
             </div>
+            
+            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tight line-clamp-2 min-h-[32px] mb-6">
+              {company.address || 'Address Profile Pending'}
+            </p>
 
-            <div className="mt-8 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 py-4 border-y border-slate-50">
               <div>
-                <span className="text-[10px] font-bold text-slate-300 uppercase block tracking-widest mb-1">Tax ID</span>
-                <span className="text-xs font-mono font-bold text-slate-600">{company.tax_id || 'NOT SET'}</span>
+                <span className="text-[8px] font-black text-slate-300 uppercase block tracking-[0.2em] mb-1">TIN/TAX</span>
+                <span className="text-[10px] font-mono font-black text-slate-600">{company.tax_id || '---'}</span>
               </div>
               <div>
-                <span className="text-[10px] font-bold text-slate-300 uppercase block tracking-widest mb-1">BIN</span>
-                <span className="text-xs font-mono font-bold text-slate-600">{company.bin || 'NOT SET'}</span>
+                <span className="text-[8px] font-black text-slate-300 uppercase block tracking-[0.2em] mb-1">BIN</span>
+                <span className="text-[10px] font-mono font-black text-slate-600">{company.bin || '---'}</span>
               </div>
             </div>
 
-            <div className="mt-8">
+            <div className="mt-6">
               <button
                 disabled={selectedCompany?.id === company.id}
                 onClick={() => setSelectedCompany(company)}
                 className={cn(
-                  "w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2",
+                  "w-full py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2",
                   selectedCompany?.id === company.id
-                    ? "bg-slate-50 text-slate-400 cursor-not-allowed"
-                    : "bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-sm"
+                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100 cursor-default"
+                    : "bg-slate-900 text-white hover:bg-indigo-600 shadow-lg shadow-slate-100 active:scale-95"
                 )}
               >
-                {selectedCompany?.id === company.id ? 'Current Active Entity' : 'Switch To Entity'}
+                {selectedCompany?.id === company.id ? 'Currently Active' : 'Initialize Entity'}
               </button>
             </div>
           </motion.div>

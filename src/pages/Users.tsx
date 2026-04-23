@@ -195,54 +195,55 @@ export default function UserManagement() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProfiles.map((p) => (
           <motion.div 
             key={p.id}
             initial={{ opacity: 0, y: 10 }}
             whileHover={{ y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group"
+            className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group overflow-hidden relative"
           >
-            <div className="flex items-start justify-between mb-8">
-              <div className="h-16 w-16 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold text-2xl shadow-inner group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-indigo-600 font-black text-lg transition-all duration-500 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-6">
                 {p.name.charAt(0)}
               </div>
-              <span className={cn(
-                "text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-widest flex items-center gap-1.5",
-                p.role === 'SUPER_ADMIN' ? "bg-rose-50 text-rose-600" :
-                p.role === 'ADMIN' ? "bg-indigo-50 text-indigo-600" :
-                "bg-emerald-50 text-emerald-600"
-              )}>
-                <Shield size={12} />
-                {p.role.replace('_', ' ')}
-              </span>
-            </div>
-
-            <div className="space-y-1">
-              <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">{p.name}</h3>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{p.designation || 'Specialist'}</p>
-              {p.email && <p className="text-[10px] text-indigo-500 font-mono mt-1">{p.email}</p>}
-            </div>
-            
-            <div className="mt-8 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-300 uppercase block tracking-widest">Access Level</span>
-                <span className="text-xs font-bold text-slate-600">{p.role === 'SUPER_ADMIN' ? 'Tier 1' : p.role === 'ADMIN' ? 'Tier 2' : 'Tier 3'}</span>
-              </div>
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-slate-300 uppercase block tracking-widest">Network ID</span>
-                <span className="text-xs font-mono text-slate-400">#{p.id.substring(0, 4)}</span>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-black text-slate-900 group-hover:text-indigo-600 transition-colors truncate text-sm uppercase tracking-tight">{p.name}</h3>
+                <span className={cn(
+                  "text-[8px] font-black px-2 py-0.5 rounded-lg uppercase tracking-widest",
+                  p.role === 'SUPER_ADMIN' ? "bg-rose-50 text-rose-600" :
+                  p.role === 'ADMIN' ? "bg-indigo-50 text-indigo-600" :
+                  "bg-emerald-50 text-emerald-600"
+                )}>
+                  {p.role.replace('_', ' ')}
+                </span>
               </div>
             </div>
 
-            <div className="mt-8 space-y-3">
-              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block pl-1">Configuration</label>
+            <div className="space-y-4">
+              <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 group-hover:border-indigo-100 transition-all">
+                <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1">Designation</p>
+                <p className="text-[11px] text-slate-700 font-black italic">{p.designation || 'Specialist'}</p>
+                {p.email && <p className="text-[9px] text-indigo-400 font-mono mt-2 truncate font-black">{p.email}</p>}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="pl-1">
+                  <span className="text-[8px] font-black text-slate-300 uppercase block tracking-widest">Tier</span>
+                  <span className="text-[11px] font-black text-slate-600">{p.role === 'SUPER_ADMIN' ? 'Root' : p.role === 'ADMIN' ? 'Manager' : 'User'}</span>
+                </div>
+                <div className="pl-1 text-right">
+                  <span className="text-[8px] font-black text-slate-300 uppercase block tracking-widest">ID Hash</span>
+                  <span className="text-[11px] font-mono font-black text-slate-400">#{p.id.substring(0, 4)}</span>
+                </div>
+              </div>
+
               <button 
                 onClick={() => setEditingUser(p)}
-                className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl font-bold text-xs hover:bg-indigo-600 transition-all shadow-lg shadow-slate-100"
+                className="w-full flex items-center justify-center gap-2 bg-slate-900 text-white px-4 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg shadow-slate-100 active:scale-95"
               >
-                <Shield size={14} /> Manage Access
+                <Shield size={14} /> Update Access Pool
               </button>
             </div>
           </motion.div>

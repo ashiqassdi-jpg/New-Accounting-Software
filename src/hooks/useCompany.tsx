@@ -19,6 +19,8 @@ interface CompanyContextType {
 
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
+const SELECTED_COMPANY_KEY = 'selected_company_id';
+
 export function CompanyProvider({ children }: { children: React.ReactNode }) {
   const { user, profile, refreshProfile } = useAuth();
   const accessibleCompanies = useAppStore(state => state.accessibleCompanies);
@@ -26,24 +28,41 @@ export function CompanyProvider({ children }: { children: React.ReactNode }) {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   useEffect(() => {
-    // Auto-select first company if none selected and companies changed
-    if (accessibleCompanies.length > 0 && !selectedCompany) {
-      setSelectedCompany(accessibleCompanies[0]);
-    } else if (accessibleCompanies.length > 0 && selectedCompany) {
-      // Check if selected company is still in accessible list
-      const stillAccessible = accessibleCompanies.find(c => c.id === selectedCompany.id);
-      if (!stillAccessible) {
-        setSelectedCompany(accessibleCompanies[0]);
+    // Persistent Selection Logic
+    if (accessibleCompanies.length > 0) {
+      const savedCompanyId = localStorage.getItem(SELECTED_COMPANY_KEY);
+      
+      if (!selectedCompany) {
+        // First load or refresh: try to find the saved company
+        const savedCompany = accessibleCompanies.find(c => c.id === savedCompanyId);
+        setSelectedCompany(savedCompany || accessibleCompanies[0]);
+      } else {
+        // Check if current selection is still valid in the (possibly updated) accessible list
+        const stillAccessible = accessibleCompanies.find(c => c.id === selectedCompany.id);
+        if (!stillAccessible) {
+          // If not accessible anymore, fall back to saved one (if valid) or first available
+          const savedCompany = accessibleCompanies.find(c => c.id === savedCompanyId);
+          setSelectedCompany(savedCompany || accessibleCompanies[0]);
+        }
       }
     } else if (accessibleCompanies.length === 0) {
       setSelectedCompany(null);
     }
-  }, [accessibleCompanies]);
+  }, [accessibleCompanies, selectedCompany?.id]);
+
+  const handleSetSelectedCompany = (company: Company | null) => {
+    setSelectedCompany(company);
+    if (company) {
+      localStorage.setItem(SELECTED_COMPANY_KEY, company.id);
+    } else {
+      localStorage.removeItem(SELECTED_COMPANY_KEY);
+    }
+  };
 
   const value = {
     companies: accessibleCompanies,
     selectedCompany,
-    setSelectedCompany,
+    setSelectedCompany: handleSetSelectedCompany,
     loading: loadingStore,
     refreshCompanies: async () => {
       await refreshProfile();
