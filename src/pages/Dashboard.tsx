@@ -24,6 +24,7 @@ import {
   PieChart, Pie, Cell,
   BarChart, Bar
 } from 'recharts';
+import { DateRangeFilter } from '../components/DateRangeFilter';
 import { motion } from 'motion/react';
 import { formatBDT } from '../constants';
 import { useCompany } from '../hooks/useCompany';
@@ -211,31 +212,7 @@ export default function Dashboard() {
               <span className="text-[9px] font-semibold uppercase tracking-wider">Period</span>
             </div>
             <div className="flex items-center gap-1.5 pr-1">
-              <input 
-                type="date" 
-                value={dateRange.from}
-                onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-[100px]"
-              />
-              <span className="text-slate-300 text-[10px]">/</span>
-              <input 
-                type="date" 
-                value={dateRange.to}
-                onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-[100px]"
-              />
-              {(dateRange.from || dateRange.to) && (
-                <button
-                  onClick={() => {
-                    setDateRange({ from: '', to: '' });
-                    setConfirmedDateRange({ from: '', to: '' });
-                  }}
-                  className="ml-1 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
-                  title="Clear Date Filter"
-                >
-                  <X size={12} />
-                </button>
-              )}
+              <DateRangeFilter value={dateRange} onChange={setDateRange} compact />
             </div>
             <button 
               onClick={() => setConfirmedDateRange(dateRange)}

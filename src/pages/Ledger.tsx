@@ -15,6 +15,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { DateRangeFilter } from '../components/DateRangeFilter';
 import * as XLSX from 'xlsx';
 
 export default function Ledger() {
@@ -31,8 +32,8 @@ export default function Ledger() {
   const [narrationSearch, setNarrationSearch] = useState('');
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [dateRange, setDateRange] = useState({
-    from: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
-    to: format(new Date(), 'yyyy-MM-dd')
+    from: '',
+    to: ''
   });
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -332,20 +333,8 @@ export default function Ledger() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
                     <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
-                    <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[46px]">
-                      <input 
-                        type="date"
-                        value={dateRange.from}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                        className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
-                      />
-                      <ArrowRight size={12} className="text-slate-300" />
-                      <input 
-                        type="date"
-                        value={dateRange.to}
-                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                        className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
-                      />
+                    <div className="pt-1">
+                      <DateRangeFilter value={dateRange} onChange={setDateRange} />
                     </div>
                   </div>
 

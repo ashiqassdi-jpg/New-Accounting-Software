@@ -13,6 +13,7 @@ import { Voucher, VoucherType } from '../types';
 import { formatBDT, VOUCHER_TYPES } from '../constants';
 import VoucherForm from '../components/VoucherForm';
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
+import { DateRangeFilter } from '../components/DateRangeFilter';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
@@ -231,14 +232,14 @@ export default function Vouchers() {
           <button 
             onClick={() => setShowDeepFilter(!showDeepFilter)}
             className={cn(
-              "px-4 py-2.5 rounded-xl transition-all shadow-sm border flex items-center gap-2",
+              "px-3 py-2.5 rounded-lg transition-all shadow-sm border flex items-center gap-2",
               showDeepFilter 
                 ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
             )}
           >
             <Filter size={16} />
-            <span className="text-[11px] font-semibold uppercase tracking-widest">Deep Filter</span>
+            <span className="text-sm font-medium">Deep Filter</span>
           </button>
           <div className="w-px h-8 bg-slate-100 mx-1 hidden md:block" />
           <button 
@@ -345,34 +346,11 @@ export default function Vouchers() {
                     />
                   </div>
 
-                  <div className="flex items-center bg-white border border-slate-100 rounded-xl px-1.5 py-0.5 gap-1 h-8 shadow-sm shrink-0">
-                    <input 
-                      type="date"
-                      value={dateRange.from}
-                      onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                      className="bg-transparent text-[9px] font-medium text-slate-600 outline-none w-[90px]"
-                    />
-                    <ArrowRight size={10} className="text-slate-300" />
-                    <input 
-                      type="date"
-                      value={dateRange.to}
-                      onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                      className="bg-transparent text-[9px] font-medium text-slate-600 outline-none w-[90px]"
-                    />
-                    {(dateRange.from || dateRange.to) && (
-                      <button
-                        onClick={() => {
-                          setDateRange({ from: '', to: '' });
-                          setConfirmedDateRange({ from: '', to: '' });
-                          fetchVouchers();
-                        }}
-                        className="ml-1 p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-rose-500 transition-colors"
-                        title="Clear Date Filter"
-                      >
-                        <X size={12} />
-                      </button>
-                    )}
-                  </div>
+                  <DateRangeFilter 
+                    value={dateRange}
+                    onChange={setDateRange}
+                    compact
+                  />
 
                   <button 
                     onClick={() => {
@@ -388,14 +366,14 @@ export default function Vouchers() {
                   <button 
                     onClick={() => setShowDeepFilter(!showDeepFilter)}
                     className={cn(
-                      "px-3 py-2 rounded-xl transition-all shadow-sm border flex items-center gap-1.5 shrink-0",
+                      "px-3 py-2 rounded-lg transition-all shadow-sm border flex items-center gap-1.5 shrink-0",
                       showDeepFilter 
                         ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                        : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                        : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                     )}
                   >
-                    <Filter size={12} />
-                    <span className="text-[9px] font-semibold uppercase tracking-wider">Deep Filter</span>
+                    <Filter size={16} />
+                    <span className="text-sm font-medium">Deep Filter</span>
                   </button>
                 </div>
               </div>
@@ -408,81 +386,78 @@ export default function Vouchers() {
                   className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
                 />
                 <div
-                  className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+                  className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-2xl bg-white rounded-2xl shadow-xl z-[101] border border-slate-200 no-print overflow-hidden"
                 >
-                  <div className="p-10 space-y-8">
-                    <div className="flex items-center justify-between">
+                  <div className="p-6 md:p-8 space-y-6">
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                       <div>
-                        <h2 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                          <Filter className="text-indigo-600" size={20} />
+                        <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+                          <Filter className="text-indigo-600" size={18} />
                           Deep Search Protocols
                         </h2>
-                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Refining transactional architecture</p>
                       </div>
                       <button 
                         onClick={() => setShowDeepFilter(false)}
-                        className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
                       >
                         <X size={20} />
                       </button>
                     </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
-                      <div className="md:col-span-2 space-y-4">
-                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Analytical Account Lead</label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="block text-sm font-medium text-slate-700">Analytical Account Lead</label>
                         <div className="relative" ref={accountSearchRef}>
                           <div 
                             onClick={() => setIsAccountSearchOpen(!isAccountSearchOpen)}
                             className={cn(
-                              "flex items-center gap-2 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:border-indigo-500 transition-all group",
-                              isAccountSearchOpen && "border-indigo-500 ring-4 ring-indigo-500/5 bg-white"
+                              "flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-300 rounded-lg shadow-sm cursor-pointer hover:border-slate-400 transition-colors group",
+                              isAccountSearchOpen && "border-indigo-500 ring-2 ring-indigo-500/20"
                             )}
                           >
-                            <div className={cn(
-                              "w-5 h-5 rounded-lg flex items-center justify-center transition-colors",
-                              filterAccountId ? "bg-indigo-600 text-white" : "bg-slate-200 text-slate-400 group-hover:bg-slate-300"
-                            )}>
-                              <Search size={10} />
-                            </div>
+                            <Search size={16} className={cn(
+                              "transition-colors",
+                              filterAccountId ? "text-indigo-600" : "text-slate-400"
+                            )} />
                             <span className={cn(
-                              "text-[10px] font-semibold uppercase tracking-widest truncate",
-                              filterAccountId ? "text-slate-900" : "text-slate-300"
+                              "text-sm truncate flex-1",
+                              filterAccountId ? "text-slate-900 font-medium" : "text-slate-500"
                             )}>
                               {filterAccountId 
                                 ? accounts.find(a => a.id === filterAccountId)?.name 
                                 : "Select Ledger Account..."}
                             </span>
-                            <ChevronDown size={14} className={cn("ml-auto text-slate-300 transition-transform duration-300", isAccountSearchOpen && "rotate-180 text-indigo-500")} />
+                            <ChevronDown size={16} className={cn("text-slate-400 transition-transform duration-200", isAccountSearchOpen && "rotate-180")} />
                           </div>
 
                           {isAccountSearchOpen && (
                             <div 
-                              className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-2xl rounded-2xl z-[150] overflow-hidden"
+                              className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-lg rounded-lg z-[150] overflow-hidden"
                             >
-                              <div className="p-3 border-b border-slate-50 bg-slate-50/50">
+                              <div className="p-2 border-b border-slate-100 bg-slate-50">
                                 <div className="relative">
                                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                   <input 
                                     autoFocus
-                                    className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold uppercase placeholder:text-slate-300"
-                                    placeholder="Scan ledger index..."
+                                    className="w-full bg-white border border-slate-300 rounded-md pl-8 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+                                    placeholder="Search accounts..."
                                     value={accountSearchQuery}
                                     onChange={(e) => setAccountSearchQuery(e.target.value)}
                                   />
                                 </div>
                               </div>
-                              <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-2 space-y-1">
+                              <div className="max-h-[240px] overflow-y-auto p-1 space-y-0.5">
                                 <button
                                   onClick={() => {
                                     setFilterAccountId(null);
                                     setIsAccountSearchOpen(false);
                                   }}
                                   className={cn(
-                                    "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all font-semibold text-[10px] uppercase tracking-widest",
-                                    !filterAccountId ? "bg-indigo-50 text-indigo-700" : "hover:bg-slate-50 text-slate-400"
+                                    "w-full text-left px-3 py-2 text-sm rounded-md transition-colors",
+                                    !filterAccountId ? "bg-indigo-50 text-indigo-700 font-medium" : "hover:bg-slate-50 text-slate-600"
                                   )}
                                 >
-                                  Reset Account Focus
+                                  Reset Account Selection
                                 </button>
                                 {accounts.filter(a => a.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) || a.code.includes(accountSearchQuery)).map(a => (
                                   <button
@@ -493,14 +468,14 @@ export default function Vouchers() {
                                       setAccountSearchQuery('');
                                     }}
                                     className={cn(
-                                      "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group",
+                                      "w-full text-left px-3 py-2 rounded-md flex items-center justify-between transition-colors",
                                       filterAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
                                     )}
                                   >
-                                    <div className="flex flex-col">
-                                      <span className={cn("text-[10px] font-semibold uppercase tracking-tight", filterAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
-                                      <span className={cn("text-[8px] font-mono font-semibold tracking-[0.2em] mt-0.5 text-slate-400")}>{a.code}</span>
+                                    <div className="flex flex-col truncate pr-2">
+                                      <span className={cn("text-sm truncate", filterAccountId === a.id ? "text-indigo-900 font-medium" : "text-slate-700")}>{a.name}</span>
                                     </div>
+                                    <span className={cn("text-xs font-mono shrink-0", filterAccountId === a.id ? "text-indigo-500" : "text-slate-400")}>{a.code}</span>
                                   </button>
                                 ))}
                               </div>
@@ -509,59 +484,49 @@ export default function Vouchers() {
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Voucher Category</label>
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-700">Voucher Category</label>
                         <div className="relative group">
                           <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value as any)}
-                            className="appearance-none w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-semibold uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer tracking-widest"
+                            className="appearance-none w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm cursor-pointer"
                           >
-                            <option value="ALL">ALL TYPES</option>
+                            <option value="ALL">All Types</option>
                             {VOUCHER_TYPES.map(t => (
-                              <option key={t.value} value={t.value}>{t.label}</option>
+                               <option key={t.value} value={t.value}>{t.label}</option>
                             ))}
                           </select>
-                          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-500 transition-colors" />
+                          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-slate-600 transition-colors" />
                         </div>
                       </div>
 
-                      <div className="space-y-4">
-                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Date Boundary</label>
-                        <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[46px]">
-                          <input 
-                            type="date"
-                            value={dateRange.from}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                            className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
-                          />
-                          <ArrowRight size={12} className="text-slate-300" />
-                          <input 
-                            type="date"
-                            value={dateRange.to}
-                            onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                            className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
-                          />
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-slate-700">Date Boundary</label>
+                        <div className="pt-1">
+                          <DateRangeFilter value={dateRange} onChange={setDateRange} />
                         </div>
                       </div>
 
-                      <div className="md:col-span-2 space-y-4">
-                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Value Thresholds (৳)</label>
+                      <div className="md:col-span-2 space-y-2">
+                        <label className="block text-sm font-medium text-slate-700">Value Thresholds (৳)</label>
                         <div className="flex gap-4">
-                          <div className="flex-1 space-y-1">
-                            <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Minimum</label>
+                          <div className="flex-1 space-y-1.5">
+                            <label className="block text-xs text-slate-500">Minimum</label>
                             <input 
+                              type="number"
                               placeholder="0.00"
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-medium"
+                              className="w-full bg-white border border-slate-300 shadow-sm rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                               value={amountRange.min}
                               onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
                             />
                           </div>
-                          <div className="flex-1 space-y-1">
-                            <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Maximum</label>
+                          <div className="flex-1 space-y-1.5">
+                            <label className="block text-xs text-slate-500">Maximum</label>
                             <input 
+                              type="number"
                               placeholder="∞"
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-medium"
+                              className="w-full bg-white border border-slate-300 shadow-sm rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
                               value={amountRange.max}
                               onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
                             />
@@ -570,7 +535,7 @@ export default function Vouchers() {
                       </div>
                     </div>
 
-                    <div className="pt-8 border-t border-slate-50 flex gap-4">
+                    <div className="pt-6 border-t border-slate-100 flex gap-3 justify-end items-center">
                       <button 
                         onClick={() => {
                           setFilterType('ALL');
@@ -578,7 +543,7 @@ export default function Vouchers() {
                           setAmountRange({ min: '', max: '' });
                           setSearch('');
                         }}
-                        className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                        className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                       >
                         Reset Logic
                       </button>
@@ -587,7 +552,7 @@ export default function Vouchers() {
                           setConfirmedDateRange(dateRange);
                           setShowDeepFilter(false);
                         }}
-                        className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                        className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500/50 outline-none"
                       >
                         Execute Scan
                       </button>
