@@ -26,7 +26,8 @@ import {
   Plus,
   Check,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  BookOpen
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -1022,53 +1023,61 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      <div className="p-10 border-b border-slate-50 space-y-8 no-print">
-        <div className="flex flex-col md:flex-row gap-8 md:items-end justify-between">
-          <div className="max-w-md w-full space-y-3 relative" ref={searchContainerRef}>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Primary Ledger Selection</label>
+      <div className="p-10 border-b border-slate-50 space-y-10 no-print">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-end">
+          <div className="lg:col-span-2 space-y-3 relative" ref={searchContainerRef}>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Target Analytical Ledger</label>
             <div 
               className={cn(
-                "w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs transition-all font-black flex items-center justify-between cursor-pointer",
-                activeAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5 bg-white" : "hover:border-slate-300"
+                "w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm transition-all font-black flex items-center justify-between cursor-pointer group shadow-sm",
+                activeAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5" : "hover:border-slate-300"
               )}
               onClick={() => setActiveAccountSearch(!activeAccountSearch)}
             >
-              <div className="flex flex-col overflow-hidden">
-                <span className={cn(selectedAccountId ? "text-slate-900" : "text-slate-300 uppercase tracking-widest")}>
-                  {selectedAccountId 
-                    ? accounts.find(a => a.id === selectedAccountId)?.name 
-                    : "Awaiting selection..."}
-                </span>
-                {selectedAccountId && (
-                  <span className="text-[9px] font-mono text-slate-400 mt-0.5">
-                    CODE: {accounts.find(a => a.id === selectedAccountId)?.code}
+              <div className="flex items-center gap-4 overflow-hidden">
+                <div className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center transition-colors shadow-sm",
+                  selectedAccountId ? "bg-indigo-600 text-white" : "bg-slate-50 text-slate-400"
+                )}>
+                  <BookOpen size={18} />
+                </div>
+                <div className="flex flex-col">
+                  <span className={cn(selectedAccountId ? "text-slate-900 text-lg tracking-tight" : "text-slate-300 uppercase tracking-[0.2em]")}>
+                    {selectedAccountId 
+                      ? accounts.find(a => a.id === selectedAccountId)?.name 
+                      : "Awaiting selection..."}
                   </span>
-                )}
+                  {selectedAccountId && (
+                    <span className="text-[10px] font-mono text-slate-400 mt-0.5 font-bold uppercase tracking-widest">
+                      Ledger ID: {accounts.find(a => a.id === selectedAccountId)?.code}
+                    </span>
+                  )}
+                </div>
               </div>
-              <ChevronDown size={14} className={cn("transition-transform duration-300", activeAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
+              <ChevronDown size={20} className={cn("transition-transform duration-300", activeAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
             </div>
 
             <AnimatePresence>
               {activeAccountSearch && (
                 <motion.div 
-                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                  className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.15)] rounded-[2rem] z-[100] no-print overflow-hidden min-w-[300px]"
+                  exit={{ opacity: 0, y: 15, scale: 0.98 }}
+                  className="absolute left-0 right-0 top-full mt-3 bg-white border border-slate-100 shadow-2xl rounded-[2.5rem] z-[100] no-print overflow-hidden min-w-[400px]"
                 >
-                  <div className="p-4 border-b border-slate-50 bg-slate-50/30">
+                  <div className="p-5 border-b border-slate-50 bg-slate-50/30">
                     <div className="relative">
-                      <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
                         autoFocus
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black uppercase"
-                        placeholder="Search for ledger name or code..."
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-4 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-black uppercase placeholder:text-slate-300"
+                        placeholder="Search by name or reference ID..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
                     </div>
                   </div>
-                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar p-3">
+                  <div className="max-h-[350px] overflow-y-auto custom-scrollbar p-3 space-y-1">
                     {ACCOUNT_GROUPS.map(group => {
                       const groupAccounts = accounts.filter(a => 
                         a.type === group.value && 
@@ -1079,7 +1088,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                       
                       return (
                         <div key={group.value} className="mb-4 last:mb-0">
-                          <div className="px-4 py-1.5 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                          <div className="px-5 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">{group.label}</div>
                           <div className="grid grid-cols-1 gap-1">
                             {groupAccounts.map(a => (
                               <button
@@ -1088,20 +1097,20 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                                 onClick={() => {
                                   setSelectedAccountId(a.id);
                                   setActiveAccountSearch(false);
-                                  setSearch(''); // Clear search after selection
+                                  setSearch('');
                                 }}
                                 className={cn(
-                                  "w-full text-left px-5 py-3 rounded-2xl group flex items-center justify-between transition-all",
-                                  selectedAccountId === a.id ? "bg-slate-900" : "hover:bg-slate-50"
+                                  "w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all",
+                                  selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
                                 )}
                               >
                                 <div className="flex flex-col">
-                                  <span className={cn("text-[11px] font-black uppercase tracking-tight", selectedAccountId === a.id ? "text-white" : "text-slate-800")}>{a.name}</span>
-                                  <span className={cn("text-[9px] font-mono font-bold tracking-widest", selectedAccountId === a.id ? "text-indigo-300" : "text-slate-400")}>{a.code}</span>
+                                  <span className={cn("text-xs font-black uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
+                                  <span className={cn("text-[9px] font-mono font-black tracking-[0.2em] mt-0.5", selectedAccountId === a.id ? "text-indigo-400" : "text-slate-400")}>{a.code}</span>
                                 </div>
                                 {selectedAccountId === a.id && (
-                                  <div className="bg-white/10 p-1.5 rounded-lg">
-                                    <CheckCircle2 size={12} className="text-white" />
+                                  <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
+                                    <CheckCircle2 size={14} />
                                   </div>
                                 )}
                               </button>
@@ -1116,31 +1125,38 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             </AnimatePresence>
           </div>
 
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
-            <input 
-              placeholder="Narrative search within ledger..."
-              className="w-full bg-slate-50/50 border border-slate-100 rounded-xl pl-11 pr-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 font-bold"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
+          <div className="space-y-3">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">In-Period Search</label>
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={18} />
+              <input 
+                placeholder="Audit description / narrative..."
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-4 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold placeholder:text-slate-300 h-[62px]"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex gap-3 justify-end h-[62px]">
             <button 
               onClick={() => onExportExcel(filteredRows.map(r => ({ Date: r.date, Narration: r.voucher?.narration, Type: r.voucher?.type, Debit: r.debit, Credit: r.credit, Balance: r.runningBalance })))}
-              className="p-3 bg-slate-50 text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100"
+              className="px-6 bg-white text-slate-400 hover:text-emerald-600 rounded-2xl transition-all border border-slate-200 shadow-sm flex items-center gap-2"
+              title="Export to Excel"
             >
               <FileDown size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">Excel</span>
             </button>
             <button 
               onClick={() => {
                 const docData = filteredRows.map(r => [format(new Date(r.date), 'dd/MM/yyyy'), r.voucher?.narration, r.voucher?.type, r.debit, r.credit, r.runningBalance]);
                 onExportPDF(docData)
               }}
-              className="p-3 bg-slate-50 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100"
+              className="px-6 bg-slate-900 text-white rounded-2xl transition-all shadow-xl shadow-slate-100 flex items-center gap-2 hover:bg-indigo-600"
+              title="Generate PDF Report"
             >
-              <Printer size={20} />
+              <FileText size={20} />
+              <span className="text-[10px] font-black uppercase tracking-widest">PDF Report</span>
             </button>
           </div>
         </div>

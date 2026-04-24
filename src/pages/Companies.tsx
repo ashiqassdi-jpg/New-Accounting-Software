@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { Plus, Edit3, Trash2, Building2, AlertCircle } from 'lucide-react';
+import { Plus, Edit3, Trash2, Building2, AlertCircle, Search, Filter, X } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
@@ -19,6 +19,17 @@ export default function Companies() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showDeepFilter, setShowDeepFilter] = useState(false);
+  const [filterAddress, setFilterAddress] = useState('');
+
+  const filteredCompanies = companies.filter(c => {
+    const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         c.tax_id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         c.bin?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesAddress = !filterAddress || c.address?.toLowerCase().includes(filterAddress.toLowerCase());
+    return matchesSearch && matchesAddress;
+  });
   
   // Form state
   const [name, setName] = useState('');
@@ -123,19 +134,112 @@ export default function Companies() {
             Manage multiple organizational entities from a single cockpit
           </p>
         </div>
-        {canManageCompanies && (
+        <div className="flex items-center gap-2">
           <button 
-            onClick={() => openModal()}
-            className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+            onClick={() => setShowDeepFilter(!showDeepFilter)}
+            className={cn(
+              "px-6 py-3 rounded-2xl transition-all shadow-sm border flex items-center gap-2",
+              showDeepFilter 
+                ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
+                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+            )}
           >
-            <Plus size={20} />
-            <span>Incorporate New</span>
+            <Filter size={20} />
+            <span className="text-sm font-bold uppercase tracking-widest">Deep Filter</span>
           </button>
-        )}
+          {canManageCompanies && (
+            <button 
+              onClick={() => openModal()}
+              className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 whitespace-nowrap"
+            >
+              <Plus size={20} />
+              <span>Incorporate New</span>
+            </button>
+          )}
+        </div>
       </div>
 
+      <div className="relative">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+        <input 
+          className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-3.5 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-sm font-medium shadow-sm"
+          placeholder="Filter portfolio by entity name, TIN, or BIN..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      <AnimatePresence>
+        {showDeepFilter && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeepFilter(false)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+            >
+              <div className="p-10 space-y-8 text-left">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                      <Filter className="text-indigo-600" size={20} />
+                      Portfolio Diagnostics
+                    </h2>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining entity visibility</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowDeepFilter(false)}
+                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Geographic Boundary (Address)</label>
+                  <div className="relative group">
+                    <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                    <input 
+                      className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                      placeholder="Search specific location..."
+                      value={filterAddress}
+                      onChange={(e) => setFilterAddress(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-slate-50 flex gap-4">
+                  <button 
+                    onClick={() => {
+                      setSearchQuery('');
+                      setFilterAddress('');
+                    }}
+                    className="flex-1 px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                  >
+                    Reset
+                  </button>
+                  <button 
+                    onClick={() => setShowDeepFilter(false)}
+                    className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                  >
+                    Apply Analysis
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {companies.map((company) => (
+        {filteredCompanies.map((company) => (
           <motion.div 
             key={company.id}
             layout

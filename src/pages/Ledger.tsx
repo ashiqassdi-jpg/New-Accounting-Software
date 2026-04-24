@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye, FileText, Printer, FileDown, Filter, ChevronDown, Check, X, ArchiveX, BookOpen } from 'lucide-react';
+import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye, FileText, Printer, FileDown, Filter, ChevronDown, Check, X, ArchiveX, BookOpen, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -26,7 +26,10 @@ export default function Ledger() {
   const [loading, setLoading] = useState(false);
   const [viewingVoucher, setViewingVoucher] = useState<any>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [showDeepFilter, setShowDeepFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [narrationSearch, setNarrationSearch] = useState('');
+  const [amountRange, setAmountRange] = useState({ min: '', max: '' });
   const [dateRange, setDateRange] = useState({
     from: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
     to: format(new Date(), 'yyyy-MM-dd')
@@ -57,7 +60,7 @@ export default function Ledger() {
     if (selectedAccountId) {
       fetchTransactions();
     }
-  }, [selectedAccountId]);
+  }, [selectedAccountId, dateRange.from, dateRange.to, amountRange.min, amountRange.max, narrationSearch]);
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -75,9 +78,16 @@ export default function Ledger() {
       
       if (error) throw error;
       
+      let filteredData = data || [];
+      if (amountRange.min) filteredData = filteredData.filter(t => (t.debit || t.credit) >= parseFloat(amountRange.min));
+      if (amountRange.max) filteredData = filteredData.filter(t => (t.debit || t.credit) <= parseFloat(amountRange.max));
+      if (narrationSearch) {
+        filteredData = filteredData.filter(t => t.voucher?.narration?.toLowerCase().includes(narrationSearch.toLowerCase()));
+      }
+
       // Calculate running balance starting from 0 or opening balance logic
       let runningBalance = 0;
-      const transactionsWithBalance = (data || []).map(t => {
+      const transactionsWithBalance = filteredData.map(t => {
         runningBalance += (t.debit - t.credit);
         return { ...t, balance: runningBalance };
       });
@@ -171,7 +181,7 @@ export default function Ledger() {
               onClick={() => setIsSearchOpen(!isSearchOpen)}
               className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl px-5 py-3 text-xs font-bold text-slate-700 cursor-pointer flex items-center justify-between hover:bg-white hover:border-indigo-500 transition-all shadow-sm"
             >
-              <span className={selectedAccount ? "text-slate-900" : "text-slate-400"}>
+              <span className={cn("truncate", selectedAccount ? "text-slate-900" : "text-slate-400")}>
                 {selectedAccount ? `${selectedAccount.name} (${selectedAccount.code})` : "Select Account Ledger..."}
               </span>
               <ChevronDown size={14} className={cn("text-slate-400 transition-transform", isSearchOpen && "rotate-180")} />
@@ -228,35 +238,169 @@ export default function Ledger() {
             </AnimatePresence>
           </div>
 
-          {/* Date Filter */}
-          <div className="flex items-center gap-2 bg-slate-50/50 border border-slate-100 rounded-2xl p-2 shadow-sm">
-            <div className="flex items-center px-3 gap-2 border-r border-slate-200">
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-1">
+            <div className="flex items-center px-2 gap-2">
               <Calendar size={14} className="text-slate-400" />
               <input 
                 type="date"
-                className="bg-transparent text-[10px] font-black text-slate-700 outline-none uppercase"
+                className="bg-transparent text-[10px] font-bold text-slate-600 outline-none uppercase"
                 value={dateRange.from}
                 onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
               />
             </div>
-            <div className="flex items-center px-3 gap-2 border-r border-slate-200">
-              <span className="text-[10px] font-black text-slate-300 uppercase">to</span>
+            <div className="w-px h-4 bg-slate-200" />
+            <div className="flex items-center px-2">
               <input 
                 type="date"
-                className="bg-transparent text-[10px] font-black text-slate-700 outline-none uppercase"
+                className="bg-transparent text-[10px] font-bold text-slate-600 outline-none uppercase"
                 value={dateRange.to}
                 onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
               />
             </div>
-            <button 
-              onClick={fetchTransactions}
-              className="px-4 py-1.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-all active:scale-95"
-            >
-              Filter
-            </button>
           </div>
+
+          <button 
+            onClick={fetchTransactions}
+            className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all shadow-lg active:scale-95"
+          >
+            Audit
+          </button>
+          
+          <button 
+            onClick={() => setShowDeepFilter(!showDeepFilter)}
+            className={cn(
+              "p-2.5 rounded-xl transition-all shadow-sm border",
+              showDeepFilter 
+                ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
+                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+            )}
+          >
+            <Filter size={16} />
+          </button>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showDeepFilter && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeepFilter(false)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+            >
+              <div className="p-10 space-y-8 text-left">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                      <Filter className="text-indigo-600" size={20} />
+                      Ledger Analytical Parameters
+                    </h2>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining financial traceability</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowDeepFilter(false)}
+                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
+                    <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[46px]">
+                      <input 
+                        type="date"
+                        value={dateRange.from}
+                        onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                        className="bg-transparent text-[10px] font-black text-slate-600 outline-none p-1.5"
+                      />
+                      <ArrowRight size={12} className="text-slate-300" />
+                      <input 
+                        type="date"
+                        value={dateRange.to}
+                        onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                        className="bg-transparent text-[10px] font-black text-slate-600 outline-none p-1.5"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Narration Search</label>
+                    <div className="relative group">
+                      <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input 
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                        placeholder="Search narration..."
+                        value={narrationSearch}
+                        onChange={(e) => setNarrationSearch(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Transaction Value Thresholds (৳)</label>
+                    <div className="flex gap-4">
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Minimum Amount</label>
+                        <input 
+                          placeholder="0.00"
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                          value={amountRange.min}
+                          onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Maximum Amount</label>
+                        <input 
+                          placeholder="∞"
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                          value={amountRange.max}
+                          onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-slate-50 flex gap-4">
+                  <button 
+                    onClick={() => {
+                      setDateRange({
+                        from: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
+                        to: format(new Date(), 'yyyy-MM-dd')
+                      });
+                      setAmountRange({ min: '', max: '' });
+                      setNarrationSearch('');
+                      fetchTransactions();
+                    }}
+                    className="flex-1 px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                  >
+                    Reset Parameters
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowDeepFilter(false);
+                      fetchTransactions();
+                    }}
+                    className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                  >
+                    Execute Analysis
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {selectedAccount ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">

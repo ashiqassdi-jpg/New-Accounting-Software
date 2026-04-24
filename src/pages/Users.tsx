@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X, ChevronDown } from 'lucide-react';
+import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X, ChevronDown, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { UserProfile, UserRole } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -19,6 +19,9 @@ export default function UserManagement() {
   const [search, setSearch] = useState('');
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [showDeepFilter, setShowDeepFilter] = useState(false);
+  const [filterRole, setFilterRole] = useState<string>('ALL');
+  const [filterDesignation, setFilterDesignation] = useState<string>('');
   const [inviteData, setInviteData] = useState({
     email: '',
     name: '',
@@ -158,10 +161,12 @@ export default function UserManagement() {
     setEditingUser({ ...editingUser, companies: updated });
   };
 
-  const filteredProfiles = profiles.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.designation?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProfiles = profiles.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.designation?.toLowerCase().includes(search.toLowerCase());
+    const matchesRole = filterRole === 'ALL' ? true : p.role === filterRole;
+    const matchesDesignation = !filterDesignation || p.designation?.toLowerCase().includes(filterDesignation.toLowerCase());
+    return matchesSearch && matchesRole && matchesDesignation;
+  });
 
   return (
     <div className="space-y-8">
@@ -183,7 +188,7 @@ export default function UserManagement() {
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
@@ -193,7 +198,110 @@ export default function UserManagement() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <button 
+          onClick={() => setShowDeepFilter(!showDeepFilter)}
+          className={cn(
+            "px-6 py-3.5 rounded-2xl transition-all shadow-sm border flex items-center gap-2 h-[54px]",
+            showDeepFilter 
+              ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
+              : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+          )}
+        >
+          <Filter size={20} />
+          <span className="text-sm font-bold uppercase tracking-widest">Deep Filter</span>
+        </button>
       </div>
+
+      {/* Deep Filter Modal (User Access Context) */}
+      <AnimatePresence>
+        {showDeepFilter && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeepFilter(false)}
+              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+            >
+              <div className="p-10 space-y-8 text-left">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                      <Filter className="text-indigo-600" size={20} />
+                      Access Pool Diagnostics
+                    </h2>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining organizational security</p>
+                  </div>
+                  <button 
+                    onClick={() => setShowDeepFilter(false)}
+                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Security Role</label>
+                    <div className="relative group">
+                      <select
+                        value={filterRole}
+                        onChange={(e) => setFilterRole(e.target.value)}
+                        className="appearance-none w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer tracking-widest"
+                      >
+                        <option value="ALL">ALL ROLES</option>
+                        <option value="OWNER">OWNER</option>
+                        <option value="ADMIN">ADMIN</option>
+                        <option value="PROFESSIONAL">PROFESSIONAL</option>
+                        <option value="MODERATOR">MODERATOR</option>
+                      </select>
+                      <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-500 transition-colors" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Designation Match</label>
+                    <div className="relative group">
+                      <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <input 
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                        placeholder="Search specific title..."
+                        value={filterDesignation}
+                        onChange={(e) => setFilterDesignation(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-slate-50 flex gap-4">
+                  <button 
+                    onClick={() => {
+                      setFilterRole('ALL');
+                      setFilterDesignation('');
+                      setSearch('');
+                    }}
+                    className="flex-1 px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                  >
+                    Reset Query
+                  </button>
+                  <button 
+                    onClick={() => setShowDeepFilter(false)}
+                    className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                  >
+                    Execute Filter
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredProfiles.map((p) => (

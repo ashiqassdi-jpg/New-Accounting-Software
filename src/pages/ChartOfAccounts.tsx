@@ -6,7 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Plus, Edit3, Trash2, ListTree, AlertCircle, CheckCircle2, ChevronDown, ChevronRight, Search, 
-  Download, FileText, Printer, X
+  Download, FileText, Printer, X, Filter
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -30,6 +30,9 @@ export default function ChartOfAccounts() {
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [activeTab, setActiveTab] = useState<string>('ASSET');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDeepFilter, setShowDeepFilter] = useState(false);
+  const [balanceRange, setBalanceRange] = useState({ min: '', max: '' });
+  const [deepFilterType, setDeepFilterType] = useState<string>('ALL');
 
   // Form state
   const [name, setName] = useState('');
@@ -168,12 +171,18 @@ export default function ChartOfAccounts() {
   };
 
   const activeGroup = ACCOUNT_GROUPS.find(g => g.value === activeTab);
-  const filteredAccounts = accounts.filter(acc => 
-    acc.type === activeTab && (
-      acc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      acc.code.includes(searchQuery)
-    )
-  );
+  const filteredAccounts = accounts.filter(acc => {
+    const matchesSearch = acc.name.toLowerCase().includes(searchQuery.toLowerCase()) || acc.code.includes(searchQuery);
+    const matchesTab = deepFilterType === 'ALL' ? acc.type === activeTab : true;
+    const matchesDeepType = deepFilterType !== 'ALL' ? acc.type === deepFilterType : true;
+    
+    // Balance range check
+    const balance = acc.current_balance || 0;
+    const matchesMinAmount = balanceRange.min === '' || balance >= parseFloat(balanceRange.min);
+    const matchesMaxAmount = balanceRange.max === '' || balance <= parseFloat(balanceRange.max);
+
+    return matchesSearch && matchesTab && matchesDeepType && matchesMinAmount && matchesMaxAmount;
+  });
 
   const totalGroupBalance = accounts
     .filter(acc => acc.type === activeTab)
@@ -273,19 +282,147 @@ export default function ChartOfAccounts() {
         <section className="lg:col-span-3 space-y-4">
           <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
             <div className="px-6 py-4 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="relative flex-1 max-w-sm">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
-                <input 
-                  className="w-full bg-slate-50 border border-slate-100 rounded-lg pl-9 pr-4 py-1.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
-                  placeholder={`Search ${activeGroup?.label.toLowerCase()}...`}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              <div className="flex items-center gap-4 flex-1">
+                <div className="relative flex-1 max-w-sm">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+                  <input 
+                    className="w-full bg-slate-50 border border-slate-100 rounded-lg pl-9 pr-4 py-1.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
+                    placeholder={`Search ${activeGroup?.label.toLowerCase()}...`}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <button 
+                  onClick={() => setShowDeepFilter(!showDeepFilter)}
+                  className={cn(
+                    "px-4 py-1.5 rounded-lg transition-all border flex items-center gap-2",
+                    showDeepFilter 
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
+                      : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                  )}
+                >
+                  <Filter size={14} />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Deep Filter</span>
+                </button>
               </div>
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Displaying All Nodes</span>
               </div>
             </div>
+
+            {/* Deep Filter Modal (COA Context) */}
+            <AnimatePresence>
+              {showDeepFilter && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setShowDeepFilter(false)}
+                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                    className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+                  >
+                    <div className="p-10 space-y-8 text-left">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                            <Filter className="text-indigo-600" size={20} />
+                            COA Analytical Parameters
+                          </h2>
+                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining ledger architecture visibility</p>
+                        </div>
+                        <button 
+                          onClick={() => setShowDeepFilter(false)}
+                          className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Category Override</label>
+                          <div className="relative group">
+                            <select
+                              value={deepFilterType}
+                              onChange={(e) => setDeepFilterType(e.target.value)}
+                              className="appearance-none w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer tracking-widest"
+                            >
+                              <option value="ALL">USE TABS (CONTEXTUAL)</option>
+                              {ACCOUNT_GROUPS.map(g => (
+                                <option key={g.value} value={g.value}>{g.label}</option>
+                              ))}
+                            </select>
+                            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-500 transition-colors" />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Ledger Search</label>
+                          <div className="relative group">
+                            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                            <input 
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                              placeholder="Search Ledger Name/Code..."
+                              value={searchQuery}
+                              onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="md:col-span-2 space-y-4">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Balance Thresholds (৳)</label>
+                          <div className="flex gap-4">
+                            <div className="flex-1 space-y-1">
+                              <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Minimum Balance</label>
+                              <input 
+                                placeholder="-∞"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                                value={balanceRange.min}
+                                onChange={(e) => setBalanceRange(prev => ({ ...prev, min: e.target.value }))}
+                              />
+                            </div>
+                            <div className="flex-1 space-y-1">
+                              <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Maximum Balance</label>
+                              <input 
+                                placeholder="∞"
+                                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                                value={balanceRange.max}
+                                onChange={(e) => setBalanceRange(prev => ({ ...prev, max: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-8 border-t border-slate-50 flex gap-4">
+                        <button 
+                          onClick={() => {
+                            setDeepFilterType('ALL');
+                            setBalanceRange({ min: '', max: '' });
+                            setSearchQuery('');
+                          }}
+                          className="flex-1 px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                        >
+                          Reset Parameters
+                        </button>
+                        <button 
+                          onClick={() => setShowDeepFilter(false)}
+                          className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                        >
+                          Show Results
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
 
             <div className="overflow-x-auto">
               <table className="w-full">
