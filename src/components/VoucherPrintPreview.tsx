@@ -130,6 +130,30 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 </div>
               </div>
 
+              {/* Creator & Editor Info */}
+              {(voucher.creator || voucher.editor) && (
+                <div className="mt-2 flex justify-between text-[9px] bg-slate-50/50 px-4 py-1.5 rounded-md border border-slate-100/50">
+                  <div className="flex gap-1 items-center">
+                    {voucher.creator ? (
+                      <>
+                        <span className="text-slate-400 uppercase tracking-wider font-semibold">Prepared by:</span>
+                        <span className="font-bold text-slate-700">{voucher.creator.name}</span>
+                        <span className="text-slate-400">({voucher.creator.email})</span>
+                      </>
+                    ) : <span />}
+                  </div>
+                  <div className="flex gap-1 items-center">
+                    {voucher.editor ? (
+                      <>
+                        <span className="text-slate-400 uppercase tracking-wider font-semibold">Last Edited by:</span>
+                        <span className="font-bold text-slate-700">{voucher.editor.name}</span>
+                        <span className="text-slate-400">({voucher.editor.email})</span>
+                      </>
+                    ) : <span />}
+                  </div>
+                </div>
+              )}
+
               {/* Compact Transaction Table */}
               <div className="mt-4 border border-slate-200 rounded-lg overflow-hidden">
                 <table className="w-full border-collapse">

@@ -248,7 +248,9 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
             type,
             payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
             narration,
-            amount: Math.max(totalDebit, totalCredit)
+            amount: Math.max(totalDebit, totalCredit),
+            updated_by: user.id,
+            updated_at: new Date().toISOString()
           })
           .eq('id', editingVoucher.id);
 

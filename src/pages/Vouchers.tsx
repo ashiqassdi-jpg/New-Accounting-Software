@@ -86,9 +86,12 @@ export default function Vouchers() {
     if (amountRange.min) query = query.gte('amount', amountRange.min);
     if (amountRange.max) query = query.lte('amount', amountRange.max);
 
-    const { data, error } = await query
-      .order('date', { ascending: false })
-      .order('created_at', { ascending: false });
+    const [{ data, error }, { data: profilesData }] = await Promise.all([
+      query
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false }),
+      supabase.from('profiles').select('id, name, email')
+    ]);
 
     if (error) {
       console.error('Error fetching vouchers:', error);
@@ -100,6 +103,17 @@ export default function Vouchers() {
           v.items?.some((item: any) => item.account_id === filterAccountId)
         );
       }
+      
+      // Attach creator and editor information
+      if (profilesData) {
+        const profileMap = new Map(profilesData.map(p => [p.id, p]));
+        filteredData = filteredData.map(v => ({
+          ...v,
+          creator: v.created_by ? profileMap.get(v.created_by) : undefined,
+          editor: v.updated_by ? profileMap.get(v.updated_by) : undefined
+        }));
+      }
+
       setVouchers(filteredData);
     }
     setLoading(false);

@@ -86,7 +86,9 @@ CREATE TABLE vouchers (
   narration TEXT,
   amount DECIMAL(15,2) NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  created_by UUID REFERENCES auth.users(id)
+  created_by UUID REFERENCES auth.users(id),
+  updated_at TIMESTAMPTZ,
+  updated_by UUID REFERENCES auth.users(id)
 );
 
 -- Transactions Table (Double Entry)
