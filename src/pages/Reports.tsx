@@ -55,8 +55,8 @@ export default function Reports() {
   const [showAccountSearch, setShowAccountSearch] = useState(false);
   const filterSearchRef = useRef<HTMLDivElement>(null);
   const [dateRange, setDateRange] = useState({
-    from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
-    to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
+    from: '',
+    to: ''
   });
 
   useEffect(() => {
