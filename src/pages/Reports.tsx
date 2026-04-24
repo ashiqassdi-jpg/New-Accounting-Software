@@ -622,6 +622,8 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
 
   const fetchDaybook = async () => {
     setLoading(true);
+    
+    // Default to last entry date if no date filter is applied
     let query = supabase
       .from('vouchers')
       .select(`
@@ -631,9 +633,26 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
           account:accounts(*)
         )
       `)
-      .eq('company_id', companyId)
-      .gte('date', dateRange.from)
-      .lte('date', dateRange.to);
+      .eq('company_id', companyId);
+
+    let effectiveDateRange = { ...dateRange };
+    
+    if (!effectiveDateRange.from || !effectiveDateRange.to) {
+        const { data: lastVoucher } = await supabase
+            .from('vouchers')
+            .select('date')
+            .eq('company_id', companyId)
+            .order('date', { ascending: false })
+            .limit(1)
+            .single();
+            
+        if (lastVoucher) {
+            effectiveDateRange = { from: lastVoucher.date, to: lastVoucher.date };
+        }
+    }
+
+    if (effectiveDateRange.from) query = query.gte('date', effectiveDateRange.from);
+    if (effectiveDateRange.to) query = query.lte('date', effectiveDateRange.to);
     
     if (filters.voucherType) {
       query = query.eq('type', filters.voucherType);

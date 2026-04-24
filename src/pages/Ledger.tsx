@@ -66,16 +66,19 @@ export default function Ledger() {
   const fetchTransactions = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select(`
           *,
           voucher:vouchers(*)
         `)
-        .eq('account_id', selectedAccountId)
-        .gte('date', dateRange.from)
-        .lte('date', dateRange.to)
-        .order('date', { ascending: true }); // Important for running balance
+        .eq('account_id', selectedAccountId);
+        
+      if (dateRange.from && dateRange.to) {
+        query = query.gte('date', dateRange.from).lte('date', dateRange.to);
+      }
+        
+      const { data, error } = await query.order('date', { ascending: true }); // Important for running balance
       
       if (error) throw error;
       
