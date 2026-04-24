@@ -175,7 +175,7 @@ export default function UserManagement() {
           <h1 className="text-3xl font-semibold text-slate-900 font-sans tracking-tight">
             Security & Teams
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">
+          <p className="text-[11px] text-slate-400 uppercase tracking-widest mt-1.5 font-semibold truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl" title="Granular control over organizational access">
             Granular control over organizational access
           </p>
         </div>

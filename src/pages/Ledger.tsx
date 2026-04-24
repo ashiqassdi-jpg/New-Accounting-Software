@@ -167,7 +167,7 @@ export default function Ledger() {
               <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
                 General Ledger
               </h1>
-              <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-[0.2em]">
+              <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-[0.2em] truncate max-w-[200px] sm:max-w-[240px] md:max-w-[300px]" title={`${selectedCompany?.name || 'Academic Institution'} Protocol`}>
                 {selectedCompany?.name || 'Academic Institution'} Protocol
               </p>
             </div>
@@ -233,33 +233,47 @@ export default function Ledger() {
                         groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others } as any);
                       }
 
-                      return groups.map(group => (
-                        <div key={group.value} className="mb-3 last:mb-0">
-                          <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
-                          <div className="grid grid-cols-1 gap-1">
-                            {group.accounts.map(a => (
-                              <button
-                                key={a.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedAccountId(a.id);
-                                  setIsSearchOpen(false);
-                                }}
-                                className={cn(
-                                  "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group",
-                                  selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
-                                )}
-                              >
-                                <div className="flex flex-col">
-                                  <span className={cn("text-[11px] font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")}>{a.name}</span>
-                                  <span className="text-[9px] font-mono font-medium text-slate-400 group-hover:text-indigo-400 transition-colors">{a.code}</span>
-                                </div>
-                                {selectedAccountId === a.id && <Check size={14} className="text-indigo-600" />}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ));
+                      return (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedAccountId('');
+                              setIsSearchOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group hover:bg-rose-50 mb-3 border border-transparent hover:border-rose-100"
+                          >
+                            <span className="text-[10px] font-semibold text-rose-500 uppercase tracking-tight">No Selection</span>
+                          </button>
+                          {groups.map(group => (
+                            <div key={group.value} className="mb-3 last:mb-0">
+                              <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                              <div className="grid grid-cols-1 gap-1">
+                                {group.accounts.map(a => (
+                                  <button
+                                    key={a.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedAccountId(a.id);
+                                      setIsSearchOpen(false);
+                                    }}
+                                    className={cn(
+                                      "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group",
+                                      selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
+                                    )}
+                                  >
+                                    <div className="flex flex-col">
+                                      <span className={cn("text-[11px] font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")}>{a.name}</span>
+                                      <span className="text-[9px] font-mono font-medium text-slate-400 group-hover:text-indigo-400 transition-colors">{a.code}</span>
+                                    </div>
+                                    {selectedAccountId === a.id && <Check size={14} className="text-indigo-600" />}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      );
                     })()}
                   </div>
                 </motion.div>

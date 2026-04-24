@@ -189,7 +189,7 @@ export default function Dashboard() {
           <h1 className="text-xl font-bold text-slate-900 font-sans tracking-tight leading-none">
             Dashboard
           </h1>
-          <p className="text-[11px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest">
+          <p className="text-[10px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl" title={selectedCompany?.name || 'Vanguard Entity'}>
             {selectedCompany?.name || 'Vanguard Entity'}
           </p>
         </div>

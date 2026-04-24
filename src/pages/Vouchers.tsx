@@ -208,7 +208,7 @@ export default function Vouchers() {
           <h1 className="text-xl font-semibold text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
             Voucher Management
           </h1>
-          <p className="text-[11px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest leading-none text-center md:text-left">
+          <p className="text-[10px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest leading-none text-center md:text-left truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl" title={`Vanguard Entries for ${selectedCompany?.name || 'Vanguard'}`}>
             Vanguard Entries for {selectedCompany?.name || 'Vanguard'}
           </p>
         </div>
@@ -345,6 +345,19 @@ export default function Vouchers() {
                       onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
                       className="bg-transparent text-[9px] font-medium text-slate-600 outline-none w-[90px]"
                     />
+                    {(dateRange.from || dateRange.to) && (
+                      <button
+                        onClick={() => {
+                          setDateRange({ from: '', to: '' });
+                          setConfirmedDateRange({ from: '', to: '' });
+                          fetchVouchers();
+                        }}
+                        className="ml-1 p-0.5 hover:bg-slate-100 rounded text-slate-400 hover:text-rose-500 transition-colors"
+                        title="Clear Date Filter"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
                   </div>
 
                   <button 

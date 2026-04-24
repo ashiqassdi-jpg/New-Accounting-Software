@@ -173,6 +173,18 @@ export default function Reports() {
                     onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
                     className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none w-[95px]"
                   />
+                  {(dateRange.from || dateRange.to) && (
+                    <button
+                      onClick={() => {
+                        setDateRange({ from: '', to: '' });
+                        setConfirmedDateRange({ from: '', to: '' });
+                      }}
+                      className="ml-1 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
+                      title="Clear Date Filter"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
                 </div>
 
                 <button 
@@ -1101,38 +1113,55 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                         groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others } as any);
                       }
 
-                      return groups.map(group => (
-                        <div key={group.value} className="mb-4 last:mb-0">
-                          <div className="px-5 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-1">{group.label}</div>
-                          <div className="grid grid-cols-1 gap-1">
-                            {group.accounts.map(a => (
-                              <button
-                                key={a.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedAccountId(a.id);
-                                  setActiveAccountSearch(false);
-                                  setSearch('');
-                                }}
-                                className={cn(
-                                  "w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all",
-                                  selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
-                                )}
-                              >
-                                <div className="flex flex-col">
-                                  <span className={cn("text-xs font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
-                                  <span className={cn("text-[9px] font-mono font-semibold tracking-[0.2em] mt-0.5", selectedAccountId === a.id ? "text-indigo-400" : "text-slate-400")}>{a.code}</span>
-                                </div>
-                                {selectedAccountId === a.id && (
-                                  <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
-                                    <CheckCircle2 size={14} />
-                                  </div>
-                                )}
-                              </button>
-                            ))}
+                      return (
+                        <>
+                          <div className="mb-4">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedAccountId('');
+                                setActiveAccountSearch(false);
+                                setSearch('');
+                              }}
+                              className="w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all hover:bg-rose-50 border border-transparent hover:border-rose-100"
+                            >
+                              <span className="text-xs font-semibold text-rose-500 uppercase tracking-tight">No Selection</span>
+                            </button>
                           </div>
-                        </div>
-                      ));
+                          {groups.map(group => (
+                            <div key={group.value} className="mb-4 last:mb-0">
+                              <div className="px-5 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-1">{group.label}</div>
+                              <div className="grid grid-cols-1 gap-1">
+                                {group.accounts.map(a => (
+                                  <button
+                                    key={a.id}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedAccountId(a.id);
+                                      setActiveAccountSearch(false);
+                                      setSearch('');
+                                    }}
+                                    className={cn(
+                                      "w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all",
+                                      selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
+                                    )}
+                                  >
+                                    <div className="flex flex-col">
+                                      <span className={cn("text-xs font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
+                                      <span className={cn("text-[9px] font-mono font-semibold tracking-[0.2em] mt-0.5", selectedAccountId === a.id ? "text-indigo-400" : "text-slate-400")}>{a.code}</span>
+                                    </div>
+                                    {selectedAccountId === a.id && (
+                                      <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
+                                        <CheckCircle2 size={14} />
+                                      </div>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </>
+                      );
                     })()}
                   </div>
                 </div>

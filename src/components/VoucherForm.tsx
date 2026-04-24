@@ -518,28 +518,42 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                         groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others });
                                       }
 
-                                      return groups.map(group => (
-                                        <div key={group.value} className="mb-1 last:mb-0">
-                                          <div className="px-2 py-1 text-[7px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">{group.label}</div>
-                                          {group.accounts.map(a => (
-                                            <button
-                                              key={a.id}
-                                              type="button"
-                                              onClick={() => {
-                                                updateItem(index, 'account_id', a.id);
-                                                setActiveAccountSearch(null);
-                                              }}
-                                              className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-indigo-600 group flex items-center justify-between transition-all"
-                                            >
-                                              <div className="flex flex-col">
-                                                <span className="text-[10px] font-medium text-slate-700 group-hover:text-white uppercase tracking-tight">{a.name}</span>
-                                                <span className="text-[8px] font-mono text-slate-400 group-hover:text-indigo-100 tracking-widest">{a.code}</span>
-                                              </div>
-                                              <Plus size={10} className="text-slate-300 group-hover:text-white opacity-0 group-hover:opacity-100" />
-                                            </button>
+                                      return (
+                                        <>
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              updateItem(index, 'account_id', '');
+                                              setActiveAccountSearch(null);
+                                            }}
+                                            className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-rose-50 border border-transparent hover:border-rose-100 group flex items-center justify-between transition-all mb-2"
+                                          >
+                                            <span className="text-[10px] font-semibold text-rose-500 uppercase tracking-tight">No Selection</span>
+                                          </button>
+                                          {groups.map(group => (
+                                            <div key={group.value} className="mb-1 last:mb-0">
+                                              <div className="px-2 py-1 text-[7px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">{group.label}</div>
+                                              {group.accounts.map(a => (
+                                                <button
+                                                  key={a.id}
+                                                  type="button"
+                                                  onClick={() => {
+                                                    updateItem(index, 'account_id', a.id);
+                                                    setActiveAccountSearch(null);
+                                                  }}
+                                                  className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-indigo-600 group flex items-center justify-between transition-all"
+                                                >
+                                                  <div className="flex flex-col">
+                                                    <span className="text-[10px] font-medium text-slate-700 group-hover:text-white uppercase tracking-tight">{a.name}</span>
+                                                    <span className="text-[8px] font-mono text-slate-400 group-hover:text-indigo-100 tracking-widest">{a.code}</span>
+                                                  </div>
+                                                  <Plus size={10} className="text-slate-300 group-hover:text-white opacity-0 group-hover:opacity-100" />
+                                                </button>
+                                              ))}
+                                            </div>
                                           ))}
-                                        </div>
-                                      ));
+                                        </>
+                                      );
                                     })()}
                                   </div>
                                 </div>,
