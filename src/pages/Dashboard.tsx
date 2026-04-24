@@ -16,7 +16,8 @@ import {
   Banknote,
   Smartphone,
   Coins,
-  Printer
+  Printer,
+  X
 } from 'lucide-react';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -35,8 +36,8 @@ const COLORS = ['#6366f1', '#94a3b8', '#fbbf24', '#f43f5e', '#8b5cf6'];
 export default function Dashboard() {
   const { selectedCompany } = useCompany();
   const [dateRange, setDateRange] = useState({
-    from: format(startOfMonth(new Date()), 'yyyy-MM-dd'),
-    to: format(endOfMonth(new Date()), 'yyyy-MM-dd')
+    from: '',
+    to: ''
   });
   const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
 
@@ -65,13 +66,16 @@ export default function Dashboard() {
 
   const fetchExpenseDistribution = async () => {
     try {
-      const { data: transactions } = await supabase
+      let query = supabase
         .from('transactions')
         .select('debit, credit, accounts!inner(name, type)')
         .eq('company_id', selectedCompany!.id)
-        .eq('accounts.type', 'EXPENSE')
-        .gte('date', confirmedDateRange.from)
-        .lte('date', confirmedDateRange.to);
+        .eq('accounts.type', 'EXPENSE');
+
+      if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
+      if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
+
+      const { data: transactions } = await query;
 
       if (!transactions) return;
 
@@ -96,12 +100,15 @@ export default function Dashboard() {
 
   const fetchChartData = async () => {
     try {
-      const { data: transactions } = await supabase
+      let query = supabase
         .from('transactions')
         .select('date, debit, credit, accounts!inner(type)')
-        .eq('company_id', selectedCompany!.id)
-        .gte('date', confirmedDateRange.from)
-        .lte('date', confirmedDateRange.to);
+        .eq('company_id', selectedCompany!.id);
+
+      if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
+      if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
+
+      const { data: transactions } = await query;
 
       if (!transactions) return;
 
@@ -145,12 +152,15 @@ export default function Dashboard() {
 
       if (!accounts) return;
 
-      const { data: transactions } = await supabase
+      let transQuery = supabase
         .from('transactions')
         .select('account_id, debit, credit, accounts!inner(type)')
-        .eq('company_id', selectedCompany!.id)
-        .gte('date', confirmedDateRange.from)
-        .lte('date', confirmedDateRange.to);
+        .eq('company_id', selectedCompany!.id);
+
+      if (confirmedDateRange.from) transQuery = transQuery.gte('date', confirmedDateRange.from);
+      if (confirmedDateRange.to) transQuery = transQuery.lte('date', confirmedDateRange.to);
+
+      const { data: transactions } = await transQuery;
 
       const getBalance = (name: string) => {
         const acc = accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
@@ -205,15 +215,27 @@ export default function Dashboard() {
                 type="date" 
                 value={dateRange.from}
                 onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-24"
+                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-[100px]"
               />
               <span className="text-slate-300 text-[10px]">/</span>
               <input 
                 type="date" 
                 value={dateRange.to}
                 onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-24"
+                className="text-[11px] outline-none border-none bg-transparent font-bold text-slate-700 w-[100px]"
               />
+              {(dateRange.from || dateRange.to) && (
+                <button
+                  onClick={() => {
+                    setDateRange({ from: '', to: '' });
+                    setConfirmedDateRange({ from: '', to: '' });
+                  }}
+                  className="ml-1 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
+                  title="Clear Date Filter"
+                >
+                  <X size={12} />
+                </button>
+              )}
             </div>
             <button 
               onClick={() => setConfirmedDateRange(dateRange)}
