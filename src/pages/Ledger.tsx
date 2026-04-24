@@ -8,7 +8,7 @@ import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye, FileText,
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
-import { formatBDT } from '../constants';
+import { formatBDT, ACCOUNT_GROUPS } from '../constants';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -164,10 +164,10 @@ export default function Ledger() {
               <BookOpen className="text-white" size={24} />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-none">
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
                 General Ledger
               </h1>
-              <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-[0.2em]">
+              <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-[0.2em]">
                 {selectedCompany?.name || 'Academic Institution'} Protocol
               </p>
             </div>
@@ -179,7 +179,7 @@ export default function Ledger() {
           <div className="relative flex-1 max-w-sm" ref={searchRef}>
             <div 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="w-full bg-slate-50/50 border border-slate-100 rounded-2xl px-5 py-3 text-xs font-bold text-slate-700 cursor-pointer flex items-center justify-between hover:bg-white hover:border-indigo-500 transition-all shadow-sm"
+              className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3 text-xs font-semibold text-slate-700 cursor-pointer flex items-center justify-between hover:bg-white hover:border-indigo-500 transition-all shadow-sm"
             >
               <span className={cn("truncate", selectedAccount ? "text-slate-900" : "text-slate-400")}>
                 {selectedAccount ? `${selectedAccount.name} (${selectedAccount.code})` : "Select Account Ledger..."}
@@ -195,87 +195,89 @@ export default function Ledger() {
                   exit={{ opacity: 0, y: 10, scale: 0.98 }}
                   className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-2xl rounded-2xl z-[100] overflow-hidden"
                 >
-                  <div className="p-3 border-b border-slate-50 bg-slate-50/50">
+                  <div className="p-3 border-b border-slate-50 bg-slate-50/30">
                     <div className="relative">
                       <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
                         autoFocus
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                         placeholder="Search Account Ledger..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
                   </div>
-                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar px-2 py-2">
-                    {filteredAccounts.length > 0 ? (
-                      filteredAccounts.map(a => (
-                        <button
-                          key={a.id}
-                          type="button"
-                          onClick={() => {
-                            setSelectedAccountId(a.id);
-                            setIsSearchOpen(false);
-                          }}
-                          className={cn(
-                            "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group",
-                            selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
-                          )}
-                        >
-                          <div className="flex flex-col">
-                            <span className={cn("text-[11px] font-black uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")}>{a.name}</span>
-                            <span className="text-[9px] font-mono font-bold text-slate-400">{a.code}</span>
+                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar px-2 py-2 space-y-1">
+                    {(() => {
+                      const filtered = accounts.filter(a => 
+                        a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        a.code.toLowerCase().includes(searchQuery.toLowerCase())
+                      );
+
+                      if (filtered.length === 0) {
+                        return (
+                          <div className="py-8 text-center text-[10px] font-semibold text-slate-300 uppercase tracking-widest italic">
+                            No matching ledgers
                           </div>
-                          {selectedAccountId === a.id && <Check size={14} className="text-indigo-600" />}
-                        </button>
-                      ))
-                    ) : (
-                      <div className="py-8 text-center text-[10px] font-black text-slate-300 uppercase tracking-widest italic">No matching ledgers</div>
-                    )}
+                        );
+                      }
+
+                      const groups = ACCOUNT_GROUPS.map(group => ({
+                        ...group,
+                        accounts: filtered.filter(a => a.type === group.value)
+                      })).filter(g => g.accounts.length > 0);
+
+                      const groupedIds = groups.flatMap(g => g.accounts.map(a => a.id));
+                      const others = filtered.filter(a => !groupedIds.includes(a.id));
+                      if (others.length > 0) {
+                        groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others } as any);
+                      }
+
+                      return groups.map(group => (
+                        <div key={group.value} className="mb-3 last:mb-0">
+                          <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                          <div className="grid grid-cols-1 gap-1">
+                            {group.accounts.map(a => (
+                              <button
+                                key={a.id}
+                                type="button"
+                                onClick={() => {
+                                  setSelectedAccountId(a.id);
+                                  setIsSearchOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group",
+                                  selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
+                                )}
+                              >
+                                <div className="flex flex-col">
+                                  <span className={cn("text-[11px] font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")}>{a.name}</span>
+                                  <span className="text-[9px] font-mono font-medium text-slate-400 group-hover:text-indigo-400 transition-colors">{a.code}</span>
+                                </div>
+                                {selectedAccountId === a.id && <Check size={14} className="text-indigo-600" />}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
 
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-xl p-1">
-            <div className="flex items-center px-2 gap-2">
-              <Calendar size={14} className="text-slate-400" />
-              <input 
-                type="date"
-                className="bg-transparent text-[10px] font-bold text-slate-600 outline-none uppercase"
-                value={dateRange.from}
-                onChange={(e) => setDateRange({...dateRange, from: e.target.value})}
-              />
-            </div>
-            <div className="w-px h-4 bg-slate-200" />
-            <div className="flex items-center px-2">
-              <input 
-                type="date"
-                className="bg-transparent text-[10px] font-bold text-slate-600 outline-none uppercase"
-                value={dateRange.to}
-                onChange={(e) => setDateRange({...dateRange, to: e.target.value})}
-              />
-            </div>
-          </div>
-
-          <button 
-            onClick={fetchTransactions}
-            className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all shadow-lg active:scale-95"
-          >
-            Audit
-          </button>
-          
           <button 
             onClick={() => setShowDeepFilter(!showDeepFilter)}
             className={cn(
-              "p-2.5 rounded-xl transition-all shadow-sm border",
+              "px-6 py-2.5 rounded-xl transition-all shadow-lg text-[10px] font-semibold uppercase tracking-[0.2em] flex items-center gap-2 active:scale-95",
               showDeepFilter 
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
+                ? "bg-indigo-600 text-white" 
+                : "bg-slate-900 text-white hover:bg-indigo-600 shadow-slate-900/10"
             )}
           >
-            <Filter size={16} />
+            <Filter size={14} />
+            Deep Filter
           </button>
         </div>
       </div>
@@ -299,11 +301,11 @@ export default function Ledger() {
               <div className="p-10 space-y-8 text-left">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                    <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
                       <Filter className="text-indigo-600" size={20} />
                       Ledger Analytical Parameters
                     </h2>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining financial traceability</p>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Refining financial traceability</p>
                   </div>
                   <button 
                     onClick={() => setShowDeepFilter(false)}
@@ -315,30 +317,30 @@ export default function Ledger() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
                     <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[46px]">
                       <input 
                         type="date"
                         value={dateRange.from}
                         onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                        className="bg-transparent text-[10px] font-black text-slate-600 outline-none p-1.5"
+                        className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
                       />
                       <ArrowRight size={12} className="text-slate-300" />
                       <input 
                         type="date"
                         value={dateRange.to}
                         onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                        className="bg-transparent text-[10px] font-black text-slate-600 outline-none p-1.5"
+                        className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Narration Search</label>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Narration Search</label>
                     <div className="relative group">
                       <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                       <input 
-                        className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
+                        className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold"
                         placeholder="Search narration..."
                         value={narrationSearch}
                         onChange={(e) => setNarrationSearch(e.target.value)}
@@ -347,22 +349,22 @@ export default function Ledger() {
                   </div>
 
                   <div className="md:col-span-2 space-y-4">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Transaction Value Thresholds (৳)</label>
+                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Transaction Value Thresholds (৳)</label>
                     <div className="flex gap-4">
                       <div className="flex-1 space-y-1">
-                        <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Minimum Amount</label>
+                        <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Minimum Amount</label>
                         <input 
                           placeholder="0.00"
-                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-semibold"
                           value={amountRange.min}
                           onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
                         />
                       </div>
                       <div className="flex-1 space-y-1">
-                        <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Maximum Amount</label>
+                        <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Maximum Amount</label>
                         <input 
                           placeholder="∞"
-                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-semibold"
                           value={amountRange.max}
                           onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
                         />
@@ -382,7 +384,7 @@ export default function Ledger() {
                       setNarrationSearch('');
                       fetchTransactions();
                     }}
-                    className="flex-1 px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                    className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
                   >
                     Reset Parameters
                   </button>
@@ -391,7 +393,7 @@ export default function Ledger() {
                       setShowDeepFilter(false);
                       fetchTransactions();
                     }}
-                    className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                    className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
                   >
                     Execute Analysis
                   </button>
@@ -419,8 +421,8 @@ export default function Ledger() {
             <Search className="text-slate-300" size={32} />
           </div>
           <div>
-            <h3 className="text-lg font-black text-slate-800 tracking-tight">Analytical Readiness Pending</h3>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Select an account ledger to initiate real-time traceability</p>
+            <h3 className="text-lg font-bold text-slate-800 tracking-tight">Analytical Readiness Pending</h3>
+            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mt-1">Select an account ledger to initiate real-time traceability</p>
           </div>
         </div>
       )}
@@ -433,26 +435,26 @@ export default function Ledger() {
                 <FileText size={20} />
               </div>
               <div>
-                <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest">Transaction Traceability</h3>
-                <p className="text-[9px] font-black text-slate-400 mt-0.5 tracking-widest">Deep-dive record analysis</p>
+                <h3 className="font-semibold text-slate-900 uppercase text-xs tracking-widest">Transaction Traceability</h3>
+                <p className="text-[9px] font-semibold text-slate-400 mt-0.5 tracking-widest">Deep-dive record analysis</p>
               </div>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => window.print()}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-100"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-100"
               >
                 <Printer size={14} /> Print
               </button>
               <button 
                 onClick={handleExportExcel}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
               >
                 <FileDown size={14} /> Excel
               </button>
               <button 
                 onClick={handleExportPDF}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg"
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg"
               >
                 <FileText size={14} /> PDF Report
               </button>
@@ -463,33 +465,33 @@ export default function Ledger() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-slate-900 text-white border-b border-slate-800">
-                  <th className="px-10 py-5 text-left text-[10px] font-black uppercase tracking-widest border-r border-white/5">Date</th>
-                  <th className="px-10 py-5 text-left text-[10px] font-black uppercase tracking-widest border-r border-white/5">Ref ID</th>
-                  <th className="px-10 py-5 text-left text-[10px] font-black uppercase tracking-widest border-r border-white/5">Transaction Narrative</th>
-                  <th className="px-10 py-5 text-right text-[10px] font-black uppercase tracking-widest border-r border-white/5">Debit</th>
-                  <th className="px-10 py-5 text-right text-[10px] font-black uppercase tracking-widest border-r border-white/5">Credit</th>
-                  <th className="px-10 py-5 text-right text-[10px] font-black uppercase tracking-widest pr-12">Balance</th>
+                  <th className="px-10 py-5 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Date</th>
+                  <th className="px-10 py-5 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Ref ID</th>
+                  <th className="px-10 py-5 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Transaction Narrative</th>
+                  <th className="px-10 py-5 text-right text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Debit</th>
+                  <th className="px-10 py-5 text-right text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Credit</th>
+                  <th className="px-10 py-5 text-right text-[10px] font-semibold uppercase tracking-widest pr-12">Balance</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
                 {transactions.map((t, idx) => (
                   <tr key={t.id} className="hover:bg-slate-50/80 transition-colors group">
-                    <td className="px-10 py-6 text-[11px] font-black text-slate-400 whitespace-nowrap font-mono tabular-nums">
+                    <td className="px-10 py-6 text-[11px] font-semibold text-slate-400 whitespace-nowrap font-mono tabular-nums">
                       {format(new Date(t.date), 'dd/MM/yyyy')}
                     </td>
-                    <td className="px-10 py-6 text-xs font-black text-slate-700 font-mono tracking-tighter">
+                    <td className="px-10 py-6 text-xs font-semibold text-slate-700 font-mono tracking-tighter">
                       {t.voucher?.voucher_no}
                     </td>
-                    <td className="px-10 py-6 text-[13px] font-bold text-slate-500 max-w-lg leading-relaxed">
+                    <td className="px-10 py-6 text-[13px] font-medium text-slate-500 max-w-lg leading-relaxed">
                       {t.voucher?.narration}
                     </td>
-                    <td className="px-10 py-6 text-xs font-black text-rose-600 text-right font-mono tabular-nums">
+                    <td className="px-10 py-6 text-xs font-semibold text-rose-600 text-right font-mono tabular-nums">
                       {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
                     </td>
-                    <td className="px-10 py-6 text-xs font-black text-emerald-600 text-right font-mono tabular-nums">
+                    <td className="px-10 py-6 text-xs font-semibold text-emerald-600 text-right font-mono tabular-nums">
                       {t.credit > 0 ? formatBDT(t.credit).replace(/[^0-9.,]/g, '') : '-'}
                     </td>
-                    <td className="px-10 py-6 text-xs font-black text-slate-900 text-right pr-12 font-mono tabular-nums relative">
+                    <td className="px-10 py-6 text-xs font-semibold text-slate-900 text-right pr-12 font-mono tabular-nums relative">
                       <div className="flex items-center justify-end gap-3 translate-x-4">
                         {formatBDT(t.balance).replace(/[^0-9.,]/g, '')}
                         <div className={cn(
@@ -512,7 +514,7 @@ export default function Ledger() {
                       <div className="mx-auto w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
                         <ArchiveX className="text-slate-200" size={32} />
                       </div>
-                      <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">
+                      <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-widest italic">
                         No financial events detected for this period
                       </p>
                     </td>
@@ -555,11 +557,11 @@ function LedgerStat({ label, value, isType, icon }: any) {
   return (
     <div className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group overflow-hidden relative">
       <div className="flex flex-col gap-1 relative z-10">
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
           {icon} {label}
         </span>
         <span className={cn(
-          "text-2xl font-black tracking-tight",
+          "text-xl font-bold tracking-tight",
           isType ? "text-indigo-600 uppercase" : "text-slate-900 font-mono"
         )}>
           {isType ? value : formatBDT(value)}

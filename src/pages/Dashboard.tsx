@@ -186,10 +186,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none">
+          <h1 className="text-xl font-bold text-slate-900 font-sans tracking-tight leading-none">
             Dashboard
           </h1>
-          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest">
+          <p className="text-[11px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest">
             {selectedCompany?.name || 'Vanguard Entity'}
           </p>
         </div>
@@ -198,7 +198,7 @@ export default function Dashboard() {
           <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
             <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400">
               <Calendar size={12} />
-              <span className="text-[9px] font-black uppercase tracking-wider">Period</span>
+              <span className="text-[9px] font-semibold uppercase tracking-wider">Period</span>
             </div>
             <div className="flex items-center gap-1.5 pr-1">
               <input 
@@ -352,7 +352,7 @@ function StatCard({ title, value, icon: Icon, color }: any) {
         <div className={cn("p-2 rounded-lg bg-slate-50/50", colorMap[color])}>
           <Icon size={16} />
         </div>
-        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</h3>
+        <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{title}</h3>
       </div>
       <p className="text-xl font-bold text-slate-800 font-mono tracking-tighter tabular-nums truncate">
         {formatBDT(value)}
@@ -368,7 +368,7 @@ function ChartBox({ title, children, icon: Icon }: any) {
         <div className="bg-slate-50 p-1.5 rounded-lg text-slate-400">
           <Icon size={14} />
         </div>
-        <h3 className="text-xs font-black text-slate-800 uppercase tracking-wider">{title}</h3>
+        <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">{title}</h3>
       </div>
       <div>
         {children}

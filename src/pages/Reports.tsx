@@ -33,7 +33,6 @@ import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES, PAYMENT_CHANNELS } from '../constants';
-import { motion, AnimatePresence } from 'motion/react';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -138,102 +137,87 @@ export default function Reports() {
 
   return (
     <div className="space-y-6 pb-20">
-      <AnimatePresence mode="wait">
-        {editingVoucher ? (
-          <VoucherForm 
-            editingVoucher={editingVoucher}
-            onSuccess={() => {
-              setEditingVoucher(null);
-            }}
-            onCancel={() => setEditingVoucher(null)}
-          />
-        ) : (
-          <motion.div 
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="space-y-6"
-          >
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none">
-                  Financial Reports
-                </h1>
-                <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none">
-                  Governance & Audit Protocols
-                </p>
-              </div>
+      {editingVoucher ? (
+        <VoucherForm 
+          editingVoucher={editingVoucher}
+          onSuccess={() => {
+            setEditingVoucher(null);
+          }}
+          onCancel={() => setEditingVoucher(null)}
+        />
+      ) : (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h1 className="text-xl font-semibold text-slate-900 font-sans tracking-tight leading-none">
+                Financial Reports
+              </h1>
+              <p className="text-[11px] text-slate-400 mt-1.5 font-medium uppercase tracking-widest leading-none">
+                Governance & Audit Protocols
+              </p>
+            </div>
 
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400 border border-slate-100">
-                    <Calendar size={12} />
-                    <span className="text-[9px] font-black uppercase tracking-wider">Audit Range</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 pr-1">
-                    <input 
-                      type="date" 
-                      value={dateRange.from}
-                      onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                      className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
-                    />
-                    <span className="text-slate-300 text-[10px]">/</span>
-                    <input 
-                      type="date" 
-                      value={dateRange.to}
-                      onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                      className="text-[11px] font-bold text-slate-700 outline-none border-none bg-transparent w-24"
-                    />
-                  </div>
-                  <button 
-                    onClick={() => setConfirmedDateRange(dateRange)}
-                    className="bg-slate-900 text-white px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md shadow-slate-100"
-                  >
-                    Load
-                  </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center bg-white border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[42px] shadow-sm">
+                  <input 
+                    type="date"
+                    value={dateRange.from}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                    className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
+                  />
+                  <ArrowRight size={12} className="text-slate-300" />
+                  <input 
+                    type="date"
+                    value={dateRange.to}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                    className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
+                  />
                 </div>
+
+                <button 
+                  onClick={() => {
+                    setConfirmedDateRange(dateRange);
+                  }}
+                  className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-semibold uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                >
+                  <Filter size={14} />
+                  Deep Filter
+                </button>
                 
                 <button 
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                   className={cn(
-                    "px-4 py-2.5 rounded-xl transition-all shadow-sm border flex items-center gap-2",
+                    "p-2.5 rounded-xl transition-all shadow-sm border",
                     showAdvancedFilters 
                       ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
                       : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
                   )}
                 >
                   <Filter size={16} />
-                  <span className="text-[11px] font-black uppercase tracking-widest">Deep Filter</span>
                 </button>
               </div>
             </div>
 
             {/* Advanced Filters Modal (Enhanced) */}
-            <AnimatePresence>
+            <div>
               {showAdvancedFilters && (
                 <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
+                  <div
                     onClick={() => setShowAdvancedFilters(false)}
                     className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
                   />
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  <div
                     className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
                   >
                     <div className="p-10 space-y-8">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                          <h2 className="text-lg font-semibold text-slate-900 tracking-tight flex items-center gap-2">
                             <Filter className="text-indigo-600" size={20} />
                             Analytical Parameters
                           </h2>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining financial visibility</p>
+                          <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">Refining financial visibility</p>
                         </div>
                         <button 
                           onClick={() => setShowAdvancedFilters(false)}
@@ -245,12 +229,31 @@ export default function Reports() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Voucher Identification</label>
+                          <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Date Boundary</label>
+                          <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[46px]">
+                            <input 
+                              type="date"
+                              value={dateRange.from}
+                              onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
+                              className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
+                            />
+                            <ArrowRight size={12} className="text-slate-300" />
+                            <input 
+                              type="date"
+                              value={dateRange.to}
+                              onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
+                              className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Voucher Identification</label>
                           <div className="relative">
                             <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
                             <input 
                               placeholder="Search Narrative or #..."
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                               value={filters.searchQuery}
                               onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
                             />
@@ -258,17 +261,17 @@ export default function Reports() {
                         </div>
 
                         <div className="space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Value Thresholds (৳)</label>
+                          <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Value Thresholds (৳)</label>
                           <div className="flex gap-2">
                             <input 
                               placeholder="Min"
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-bold"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-semibold"
                               value={filters.minAmount}
                               onChange={(e) => setFilters(prev => ({ ...prev, minAmount: e.target.value }))}
                             />
                             <input 
                               placeholder="Max"
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-bold"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono font-semibold"
                               value={filters.maxAmount}
                               onChange={(e) => setFilters(prev => ({ ...prev, maxAmount: e.target.value }))}
                             />
@@ -276,7 +279,7 @@ export default function Reports() {
                         </div>
 
                         <div className="md:col-span-2 space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Primary Ledger Context</label>
+                          <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Primary Ledger Context</label>
                           <div className="relative" ref={filterSearchRef}>
                             <div 
                               onClick={() => setShowAccountSearch(!showAccountSearch)}
@@ -286,13 +289,13 @@ export default function Reports() {
                               )}
                             >
                               <div className="flex flex-col overflow-hidden">
-                                <span className={cn(filters.accountId ? "text-slate-900 font-black" : "text-slate-300 font-bold uppercase tracking-widest")}>
+                                <span className={cn(filters.accountId ? "text-slate-900 font-semibold" : "text-slate-300 font-medium uppercase tracking-widest")}>
                                   {filters.accountId 
                                     ? accounts.find(a => a.id === filters.accountId)?.name 
                                     : "Filter by specific ledger account..."}
                                 </span>
                                 {filters.accountId && (
-                                  <span className="text-[9px] font-mono text-slate-400 mt-0.5 tracking-wider uppercase font-black">
+                                  <span className="text-[9px] font-mono text-slate-400 mt-0.5 tracking-wider uppercase font-semibold">
                                     CODE: {accounts.find(a => a.id === filters.accountId)?.code}
                                   </span>
                                 )}
@@ -300,12 +303,9 @@ export default function Reports() {
                               <ChevronDown size={14} className={cn("transition-transform duration-300", showAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
                             </div>
 
-                            <AnimatePresence>
+                            <div>
                               {showAccountSearch && (
-                                <motion.div 
-                                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                                  exit={{ opacity: 0, y: 10, scale: 0.98 }}
+                                <div 
                                   className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-[0_30px_60px_rgba(0,0,0,0.15)] rounded-2xl z-[150] overflow-hidden"
                                 >
                                   <div className="p-3 border-b border-slate-50 bg-slate-50/50">
@@ -313,7 +313,7 @@ export default function Reports() {
                                       <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                       <input 
                                         autoFocus
-                                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-bold"
+                                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                                         placeholder="Search ledger name or numeric code..."
                                         value={filters.searchQuery}
                                         onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
@@ -328,23 +328,32 @@ export default function Reports() {
                                       }}
                                       className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-slate-50 mb-1 flex items-center justify-between group"
                                     >
-                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Clear Selection</span>
+                                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Clear Selection</span>
                                       <X size={12} className="text-slate-200 group-hover:text-rose-500" />
                                     </button>
                                     
-                                    {ACCOUNT_GROUPS.map(group => {
-                                      const groupAccounts = accounts.filter(a => 
-                                        a.type === group.value && 
-                                        (a.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) || 
-                                         a.code.includes(filters.searchQuery))
+                                    {(() => {
+                                      const filtered = accounts.filter(a => 
+                                        a.name.toLowerCase().includes(filters.searchQuery.toLowerCase()) || 
+                                        a.code.includes(filters.searchQuery)
                                       );
-                                      if (groupAccounts.length === 0) return null;
                                       
-                                      return (
+                                      const groups = ACCOUNT_GROUPS.map(group => ({
+                                        ...group,
+                                        accounts: filtered.filter(a => a.type === group.value)
+                                      })).filter(g => g.accounts.length > 0);
+
+                                      const groupedIds = groups.flatMap(g => g.accounts.map(a => a.id));
+                                      const others = filtered.filter(a => !groupedIds.includes(a.id));
+                                      if (others.length > 0) {
+                                        groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others } as any);
+                                      }
+
+                                      return groups.map(group => (
                                         <div key={group.value} className="mb-3 last:mb-0">
-                                          <div className="px-4 py-1 text-[8px] font-black text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                                          <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
                                           <div className="grid grid-cols-1 gap-1">
-                                            {groupAccounts.map(a => (
+                                            {group.accounts.map(a => (
                                               <button
                                                 key={a.id}
                                                 type="button"
@@ -358,31 +367,31 @@ export default function Reports() {
                                                 )}
                                               >
                                                 <div className="flex flex-col">
-                                                  <span className={cn("text-[10px] font-black uppercase tracking-tight", filters.accountId === a.id ? "text-white" : "text-slate-800")}>{a.name}</span>
-                                                  <span className={cn("text-[8px] font-mono font-bold tracking-widest", filters.accountId === a.id ? "text-indigo-300" : "text-slate-400")}>{a.code}</span>
+                                                  <span className={cn("text-[10px] font-semibold uppercase tracking-tight", filters.accountId === a.id ? "text-white" : "text-slate-800")}>{a.name}</span>
+                                                  <span className={cn("text-[8px] font-mono font-medium tracking-widest", filters.accountId === a.id ? "text-indigo-300" : "text-slate-400")}>{a.code}</span>
                                                 </div>
                                               </button>
                                             ))}
                                           </div>
                                         </div>
-                                      );
-                                    })}
+                                      ));
+                                    })()}
                                   </div>
-                                </motion.div>
+                                </div>
                               )}
-                            </AnimatePresence>
+                            </div>
                           </div>
                         </div>
 
                         <div className="md:col-span-2 space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Document Category</label>
+                          <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Document Category</label>
                           <div className="flex flex-wrap gap-2">
                             {VOUCHER_TYPES.map(v => (
                               <button 
                                 key={v.value}
                                 onClick={() => setFilters(prev => ({ ...prev, voucherType: prev.voucherType === v.value ? '' : v.value }))}
                                 className={cn(
-                                  "px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border",
+                                  "px-5 py-2.5 rounded-xl text-[10px] font-semibold uppercase tracking-wider transition-all border",
                                   filters.voucherType === v.value 
                                     ? "bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200 scale-105" 
                                     : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100"
@@ -398,22 +407,25 @@ export default function Reports() {
                       <div className="pt-6 flex gap-4">
                         <button 
                           onClick={resetFilters}
-                          className="px-8 py-4 text-xs font-black text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
+                          className="px-8 py-4 text-xs font-semibold text-slate-400 hover:text-slate-600 transition-all uppercase tracking-widest"
                         >
                           Reset
                         </button>
                         <button 
-                          onClick={() => setShowAdvancedFilters(false)}
-                          className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
+                          onClick={() => {
+                            setConfirmedDateRange(dateRange);
+                            setShowAdvancedFilters(false);
+                          }}
+                          className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-semibold text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-100"
                         >
                           Execute Analysis
                         </button>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 </>
               )}
-            </AnimatePresence>
+            </div>
 
             {/* Tabs */}
             <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
@@ -434,15 +446,8 @@ export default function Reports() {
               />
             </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.2 }}
-              >
-                {activeTab === 'DAYBOOK' && (
+            <div className="mt-8">
+              {activeTab === 'DAYBOOK' && (
                   <Daybook 
                     companyId={selectedCompany?.id} 
                     dateRange={confirmedDateRange} 
@@ -470,13 +475,11 @@ export default function Reports() {
                     onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
                   />
                 )}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
-    </div>
-  );
+      </div>
+    );
 }
 
 function TabButton({ active, onClick, label }: any) {
@@ -484,7 +487,7 @@ function TabButton({ active, onClick, label }: any) {
     <button 
       onClick={onClick}
       className={cn(
-        "px-6 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all",
+        "px-6 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all",
         active 
           ? "bg-white text-indigo-600 shadow-sm border border-indigo-100/50" 
           : "text-slate-500 hover:text-slate-700"
@@ -547,15 +550,15 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
   const totalDebit = filteredData.reduce((sum, acc) => sum + acc.debit, 0);
   const totalCredit = filteredData.reduce((sum, acc) => sum + acc.credit, 0);
 
-  if (loading) return <div className="p-20 text-center text-slate-400 font-black animate-pulse uppercase tracking-widest text-[10px]">Calculating Ledger Equilibrium...</div>;
+  if (loading) return <div className="p-20 text-center text-slate-400 font-semibold animate-pulse uppercase tracking-widest text-[10px]">Calculating Ledger Equilibrium...</div>;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
       <div className="px-10 py-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div className="flex items-center gap-6 flex-1">
           <div>
-            <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest">Trial Balance</h3>
-            <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">Audit verification of ledger balances</p>
+            <h3 className="font-semibold text-slate-900 uppercase text-xs tracking-widest">Trial Balance</h3>
+            <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-widest">Audit verification of ledger balances</p>
           </div>
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
@@ -563,7 +566,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
               placeholder="Search Ledger or Code..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50/50 border border-slate-100 rounded-xl pl-11 pr-4 py-2.5 text-[11px] font-bold outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono"
+              className="w-full bg-slate-50/50 border border-slate-100 rounded-xl pl-11 pr-4 py-2.5 text-[11px] font-semibold outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-mono"
             />
           </div>
         </div>
@@ -586,38 +589,38 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
         <table className="w-full text-left">
           <thead>
             <tr className="bg-slate-900 text-white">
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Code</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 whitespace-nowrap">Account Ledger</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right whitespace-nowrap">Debit (৳)</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Code</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5 whitespace-nowrap">Account Ledger</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5 text-right whitespace-nowrap">Debit (৳)</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {filteredData.map(acc => (
               <tr key={acc.id} className="hover:bg-slate-50 transition-all group">
-                <td className="px-10 py-5 text-xs font-mono font-black text-slate-400">{acc.code}</td>
-                <td className="px-10 py-5 text-[11px] font-black text-slate-700 uppercase tracking-tight group-hover:text-indigo-600 transition-colors">
+                <td className="px-10 py-5 text-xs font-mono font-semibold text-slate-400">{acc.code}</td>
+                <td className="px-10 py-5 text-[11px] font-semibold text-slate-700 uppercase tracking-tight group-hover:text-indigo-600 transition-colors">
                    {acc.name}
                 </td>
-                <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right tabular-nums">
+                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">
                   {acc.debit > 0 ? formatBDT(acc.debit).replace(/[^0-9.,]/g, '') : '-'}
                 </td>
-                <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right tabular-nums">
+                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">
                   {acc.credit > 0 ? formatBDT(acc.credit).replace(/[^0-9.,]/g, '') : '-'}
                 </td>
               </tr>
             ))}
             {filteredData.length === 0 && (
               <tr>
-                <td colSpan={4} className="py-32 text-center text-slate-300 font-black uppercase tracking-widest text-[11px] italic">No ledger activity found for this period</td>
+                <td colSpan={4} className="py-32 text-center text-slate-300 font-semibold uppercase tracking-widest text-[11px] italic">No ledger activity found for this period</td>
               </tr>
             )}
           </tbody>
-          <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-black backdrop-blur-sm sticky bottom-0">
+          <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
             <tr>
-              <td colSpan={2} className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-black">Consolidated Total</td>
-              <td className="px-10 py-6 text-sm font-mono font-black text-indigo-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
-              <td className="px-10 py-6 text-sm font-mono font-black text-indigo-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
+              <td colSpan={2} className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">Consolidated Total</td>
+              <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+              <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
             </tr>
           </tfoot>
         </table>
@@ -729,14 +732,14 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
     Amount: v.amount
   }));
 
-  if (loading) return <div className="p-20 text-center text-slate-400 font-black animate-pulse uppercase tracking-[0.2em] text-[10px]">Synchronizing Audit Trail...</div>;
+  if (loading) return <div className="p-20 text-center text-slate-400 font-semibold animate-pulse uppercase tracking-[0.2em] text-[10px]">Synchronizing Audit Trail...</div>;
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
       <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between no-print">
         <div>
-          <h3 className="font-black text-slate-900 uppercase text-xs tracking-widest">Daybook Register</h3>
-          <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-widest">Chronological sequence of all financial events</p>
+          <h3 className="font-semibold text-slate-900 uppercase text-xs tracking-widest">Daybook Register</h3>
+          <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-widest">Chronological sequence of all financial events</p>
         </div>
         <div className="flex gap-2">
           <button 
@@ -758,11 +761,11 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         <table className="w-full text-left">
           <thead>
             <tr className="bg-slate-900 text-white">
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Voucher / Ref</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Main Ledger</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Category</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right">Debit / Credit</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest pr-10 text-right">Actions</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Voucher / Ref</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Main Ledger</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Category</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5 text-right">Debit / Credit</th>
+              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest pr-10 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -782,18 +785,18 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                         v.type === 'JOURNAL' && "bg-amber-500",
                       )} />
                       <div>
-                        <p className="text-xs font-black text-slate-900 font-mono tracking-tighter">{v.voucher_no}</p>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{format(new Date(v.date), 'dd MMM yyyy')}</p>
+                        <p className="text-xs font-semibold text-slate-900 font-mono tracking-tighter">{v.voucher_no}</p>
+                        <p className="text-[10px] font-medium text-slate-400 uppercase tracking-widest">{format(new Date(v.date), 'dd MMM yyyy')}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-10 py-6" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
-                    <p className="text-[11px] font-black text-slate-700 uppercase tracking-tight">{getOppositeAccount(v)}</p>
-                    <p className="text-[10px] text-slate-400 font-bold truncate max-w-[200px] mt-1">{v.narration}</p>
+                    <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-tight">{getOppositeAccount(v)}</p>
+                    <p className="text-[10px] text-slate-400 font-medium truncate max-w-[200px] mt-1">{v.narration}</p>
                   </td>
                   <td className="px-10 py-6">
                     <span className={cn(
-                      "px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest",
+                      "px-3 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest",
                       v.type === 'PAYMENT' && "bg-rose-50 text-rose-600 border border-rose-100",
                       v.type === 'RECEIPT' && "bg-emerald-50 text-emerald-600 border border-emerald-100",
                       v.type === 'CONTRA' && "bg-indigo-50 text-indigo-600 border border-indigo-100",
@@ -805,7 +808,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                     </span>
                   </td>
                   <td className="px-10 py-6 text-right">
-                    <p className="text-sm font-black text-slate-900 font-mono tabular-nums">{formatBDT(v.amount).replace(/[^0-9.,]/g, '')}</p>
+                    <p className="text-sm font-semibold text-slate-900 font-mono tabular-nums">{formatBDT(v.amount).replace(/[^0-9.,]/g, '')}</p>
                   </td>
                   <td className="px-10 py-6 text-right pr-10">
                     <div className="flex items-center justify-end gap-1">
@@ -844,19 +847,13 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                     </div>
                   </td>
                 </tr>
-                <AnimatePresence>
-                  {expandedVoucherId === v.id && (
-                    <motion.tr
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="bg-slate-50/50"
-                    >
-                      <td colSpan={5} className="p-0">
+                {expandedVoucherId === v.id && (
+                  <tr className="bg-slate-50/50">
+                    <td colSpan={5} className="p-0">
                         <div className="px-20 py-8 border-y border-slate-100 space-y-4">
                           <div className="flex items-center justify-between">
-                            <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Technical Ledger Distribution</h4>
-                            <div className="flex gap-4 text-[9px] font-bold text-slate-400">
+                            <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.3em]">Technical Ledger Distribution</h4>
+                            <div className="flex gap-4 text-[9px] font-medium text-slate-400">
                               <span>Ref: {v.voucher_no}</span>
                               <span>Method: {v.payment_channel || 'N/A'}</span>
                             </div>
@@ -865,19 +862,19 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                             <table className="w-full text-left">
                               <thead>
                                 <tr className="bg-slate-100/50">
-                                  <th className="px-6 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest">Account Name</th>
-                                  <th className="px-6 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Debit</th>
-                                  <th className="px-6 py-3 text-[9px] font-black text-slate-500 uppercase tracking-widest text-right">Credit</th>
+                                  <th className="px-6 py-3 text-[9px] font-semibold text-slate-500 uppercase tracking-widest">Account Name</th>
+                                  <th className="px-6 py-3 text-[9px] font-semibold text-slate-500 uppercase tracking-widest text-right">Debit</th>
+                                  <th className="px-6 py-3 text-[9px] font-semibold text-slate-500 uppercase tracking-widest text-right">Credit</th>
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-100">
                                 {v.transactions.map((t: any, tIdx: number) => (
                                   <tr key={tIdx}>
-                                    <td className="px-6 py-3 text-[11px] font-bold text-slate-600 uppercase italic pl-10 border-l-4 border-indigo-500/20">{t.account?.name}</td>
-                                    <td className="px-6 py-3 text-[11px] font-mono font-black text-right text-rose-500">
+                                    <td className="px-6 py-3 text-[11px] font-medium text-slate-600 uppercase italic pl-10 border-l-4 border-indigo-500/20">{t.account?.name}</td>
+                                    <td className="px-6 py-3 text-[11px] font-mono font-semibold text-right text-rose-500">
                                       {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
                                     </td>
-                                    <td className="px-6 py-3 text-[11px] font-mono font-black text-right text-emerald-500">
+                                    <td className="px-6 py-3 text-[11px] font-mono font-semibold text-right text-emerald-500">
                                       {t.credit > 0 ? formatBDT(t.credit).replace(/[^0-9.,]/g, '') : '-'}
                                     </td>
                                   </tr>
@@ -887,9 +884,8 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                           </div>
                         </div>
                       </td>
-                    </motion.tr>
+                    </tr>
                   )}
-                </AnimatePresence>
               </React.Fragment>
             ))}
             {vouchers.length === 0 && (
@@ -898,16 +894,31 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                   <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
                     <Receipt className="text-slate-200" size={32} />
                   </div>
-                  <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">Temporal vacuum: No financial events discovered</p>
+                  <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-widest italic">Temporal vacuum: No financial events discovered</p>
                 </td>
               </tr>
             )}
           </tbody>
+          {vouchers.length > 0 && (
+            <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
+              <tr>
+                <td colSpan={2} className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">
+                  Total Entries: {vouchers.length}
+                </td>
+                <td className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">
+                  Consolidated Volume
+                </td>
+                <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums">
+                  {formatBDT(vouchers.reduce((sum, v) => sum + (Number(v.amount) || 0), 0)).replace(/[^0-9.,]/g, '')}
+                </td>
+                <td className="px-10 py-6"></td>
+              </tr>
+            </tfoot>
+          )}
         </table>
       </div>
 
-      <AnimatePresence>
-        {viewingVoucher && (
+      {viewingVoucher && (
           <VoucherPrintPreview 
             voucher={viewingVoucher}
             company={selectedCompany}
@@ -915,7 +926,6 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
             onClose={() => setViewingVoucher(null)}
           />
         )}
-      </AnimatePresence>
     </div>
   );
 }
@@ -923,8 +933,8 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
 function BalanceRow({ label, value, bold }: any) {
   return (
     <div className="flex items-center justify-between">
-      <span className={cn("text-sm", bold ? "font-bold" : "text-slate-500 font-medium")}>{label}</span>
-      <span className={cn("text-base font-mono", bold ? "font-black" : "text-slate-700 font-bold")}>{formatBDT(value)}</span>
+      <span className={cn("text-sm", bold ? "font-semibold" : "text-slate-500 font-medium")}>{label}</span>
+      <span className={cn("text-base font-mono", bold ? "font-semibold" : "text-slate-700 font-semibold")}>{formatBDT(value)}</span>
     </div>
   );
 }
@@ -1026,10 +1036,10 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       <div className="p-10 border-b border-slate-50 space-y-10 no-print">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-end">
           <div className="lg:col-span-2 space-y-3 relative" ref={searchContainerRef}>
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">Target Analytical Ledger</label>
+            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block pl-1">Target Analytical Ledger</label>
             <div 
               className={cn(
-                "w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm transition-all font-black flex items-center justify-between cursor-pointer group shadow-sm",
+                "w-full bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm transition-all font-semibold flex items-center justify-between cursor-pointer group shadow-sm",
                 activeAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5" : "hover:border-slate-300"
               )}
               onClick={() => setActiveAccountSearch(!activeAccountSearch)}
@@ -1048,7 +1058,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                       : "Awaiting selection..."}
                   </span>
                   {selectedAccountId && (
-                    <span className="text-[10px] font-mono text-slate-400 mt-0.5 font-bold uppercase tracking-widest">
+                    <span className="text-[10px] font-mono text-slate-400 mt-0.5 font-medium uppercase tracking-widest">
                       Ledger ID: {accounts.find(a => a.id === selectedAccountId)?.code}
                     </span>
                   )}
@@ -1057,20 +1067,15 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
               <ChevronDown size={20} className={cn("transition-transform duration-300", activeAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300")} />
             </div>
 
-            <AnimatePresence>
+            <div>
               {activeAccountSearch && (
-                <motion.div 
-                  initial={{ opacity: 0, y: 15, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 15, scale: 0.98 }}
-                  className="absolute left-0 right-0 top-full mt-3 bg-white border border-slate-100 shadow-2xl rounded-[2.5rem] z-[100] no-print overflow-hidden min-w-[400px]"
-                >
+                <div className="absolute left-0 right-0 top-full mt-3 bg-white border border-slate-100 shadow-2xl rounded-[2.5rem] z-[100] no-print overflow-hidden min-w-[400px]">
                   <div className="p-5 border-b border-slate-50 bg-slate-50/30">
                     <div className="relative">
                       <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
                         autoFocus
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-4 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-black uppercase placeholder:text-slate-300"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-4 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold uppercase placeholder:text-slate-300"
                         placeholder="Search by name or reference ID..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -1078,19 +1083,28 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                     </div>
                   </div>
                   <div className="max-h-[350px] overflow-y-auto custom-scrollbar p-3 space-y-1">
-                    {ACCOUNT_GROUPS.map(group => {
-                      const groupAccounts = accounts.filter(a => 
-                        a.type === group.value && 
-                        (a.name.toLowerCase().includes(search.toLowerCase()) || 
-                         a.code.includes(search))
+                    {(() => {
+                      const filtered = accounts.filter(a => 
+                        a.name.toLowerCase().includes(search.toLowerCase()) || 
+                        a.code.includes(search)
                       );
-                      if (groupAccounts.length === 0) return null;
-                      
-                      return (
+
+                      const groups = ACCOUNT_GROUPS.map(group => ({
+                        ...group,
+                        accounts: filtered.filter(a => a.type === group.value)
+                      })).filter(g => g.accounts.length > 0);
+
+                      const groupedIds = groups.flatMap(g => g.accounts.map(a => a.id));
+                      const others = filtered.filter(a => !groupedIds.includes(a.id));
+                      if (others.length > 0) {
+                        groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others } as any);
+                      }
+
+                      return groups.map(group => (
                         <div key={group.value} className="mb-4 last:mb-0">
-                          <div className="px-5 py-2 text-[8px] font-black text-slate-400 uppercase tracking-[0.3em] mb-1">{group.label}</div>
+                          <div className="px-5 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-1">{group.label}</div>
                           <div className="grid grid-cols-1 gap-1">
-                            {groupAccounts.map(a => (
+                            {group.accounts.map(a => (
                               <button
                                 key={a.id}
                                 type="button"
@@ -1105,8 +1119,8 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                                 )}
                               >
                                 <div className="flex flex-col">
-                                  <span className={cn("text-xs font-black uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
-                                  <span className={cn("text-[9px] font-mono font-black tracking-[0.2em] mt-0.5", selectedAccountId === a.id ? "text-indigo-400" : "text-slate-400")}>{a.code}</span>
+                                  <span className={cn("text-xs font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
+                                  <span className={cn("text-[9px] font-mono font-semibold tracking-[0.2em] mt-0.5", selectedAccountId === a.id ? "text-indigo-400" : "text-slate-400")}>{a.code}</span>
                                 </div>
                                 {selectedAccountId === a.id && (
                                   <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
@@ -1117,21 +1131,21 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                             ))}
                           </div>
                         </div>
-                      );
-                    })}
+                      ));
+                    })()}
                   </div>
-                </motion.div>
+                </div>
               )}
-            </AnimatePresence>
+            </div>
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block pl-1">In-Period Search</label>
+            <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block pl-1">In-Period Search</label>
             <div className="relative group">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={18} />
               <input 
                 placeholder="Audit description / narrative..."
-                className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-4 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold placeholder:text-slate-300 h-[62px]"
+                className="w-full bg-slate-50 border border-slate-100 rounded-2xl pl-14 pr-6 py-4 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold placeholder:text-slate-300 h-[62px]"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -1145,7 +1159,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
               title="Export to Excel"
             >
               <FileDown size={20} />
-              <span className="text-[10px] font-black uppercase tracking-widest">Excel</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest">Excel</span>
             </button>
             <button 
               onClick={() => {
@@ -1156,7 +1170,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
               title="Generate PDF Report"
             >
               <FileText size={20} />
-              <span className="text-[10px] font-black uppercase tracking-widest">PDF Report</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest">PDF Report</span>
             </button>
           </div>
         </div>
@@ -1167,34 +1181,34 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
           <table className="w-full text-left">
             <thead>
               <tr className="bg-slate-900 text-white">
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Date</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Particulars</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5">Vch Type</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right">Debit</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest border-r border-white/5 text-right">Credit</th>
-                <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest text-right pr-10">Running Balance</th>
+                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5">Date</th>
+                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5">Particulars</th>
+                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5">Vch Type</th>
+                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5 text-right">Debit</th>
+                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5 text-right">Credit</th>
+                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest text-right pr-10">Running Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               <tr className="bg-slate-50/50 border-b-2 border-slate-100">
-                <td colSpan={5} className="px-10 py-5 text-[10px] uppercase tracking-[0.2em] font-black text-slate-400 italic">Historical Opening Balance Forward</td>
-                <td className="px-10 py-5 text-sm font-mono font-black text-slate-900 text-right pr-10 tabular-nums">{formatBDT(openingBalance).replace(/[^0-9.,]/g, '')}</td>
+                <td colSpan={5} className="px-10 py-5 text-[10px] uppercase tracking-[0.2em] font-semibold text-slate-400 italic">Historical Opening Balance Forward</td>
+                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right pr-10 tabular-nums">{formatBDT(openingBalance).replace(/[^0-9.,]/g, '')}</td>
               </tr>
               {displayRows.map(r => (
                 <tr key={r.id} className="hover:bg-slate-50 transition-all group">
-                  <td className="px-10 py-5 text-xs font-black text-slate-400 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
+                  <td className="px-10 py-5 text-xs font-semibold text-slate-400 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
                   <td className="px-10 py-5">
-                    <p className="text-[11px] font-bold text-slate-600 whitespace-pre-wrap max-w-sm italic leading-relaxed">{r.voucher?.narration}</p>
-                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Ref: {r.voucher?.voucher_no}</p>
+                    <p className="text-[11px] font-medium text-slate-600 whitespace-pre-wrap max-w-sm italic leading-relaxed">{r.voucher?.narration}</p>
+                    <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Ref: {r.voucher?.voucher_no}</p>
                   </td>
                   <td className="px-10 py-5">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{r.voucher?.type}</span>
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">{r.voucher?.type}</span>
                   </td>
-                  <td className="px-10 py-5 text-sm font-mono font-black text-rose-500 text-right tabular-nums">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
-                  <td className="px-10 py-5 text-sm font-mono font-black text-emerald-500 text-right tabular-nums">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-10 py-5 text-sm font-mono font-semibold text-rose-500 text-right tabular-nums">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-10 py-5 text-sm font-mono font-semibold text-emerald-500 text-right tabular-nums">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
                   <td className="px-10 py-5 text-right pr-10">
                     <div className="flex items-center justify-end gap-3">
-                      <span className="text-sm font-mono font-black text-indigo-600 tabular-nums">{formatBDT(r.runningBalance).replace(/[^0-9.,]/g, '')}</span>
+                      <span className="text-sm font-mono font-semibold text-indigo-600 tabular-nums">{formatBDT(r.runningBalance).replace(/[^0-9.,]/g, '')}</span>
                       <button 
                         className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 group-hover:opacity-100 opacity-0"
                         onClick={() => setViewingVoucher(r.voucher)}
@@ -1212,14 +1226,14 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                      <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-slate-100">
                         <Receipt className="text-slate-200" size={32} />
                       </div>
-                      <p className="text-[11px] font-black text-slate-300 uppercase tracking-widest italic">No transactional footprints discovered</p>
+                      <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-widest italic">No transactional footprints discovered</p>
                   </td>
                 </tr>
               )}
             </tbody>
-            <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-black backdrop-blur-sm sticky bottom-0">
+            <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
               <tr>
-                <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-black">Analytical Totals</td>
+                <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">Analytical Totals</td>
                 <td className="px-10 py-8 text-sm font-mono text-rose-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
                 <td className="px-10 py-8 text-sm font-mono text-emerald-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
                 <td className="px-10 py-8 text-sm font-mono text-indigo-700 text-right pr-10 tabular-nums">CLOSING: {formatBDT(closingBalance).replace(/[^0-9.,]/g, '')}</td>
@@ -1232,11 +1246,10 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
           <div className="inline-flex p-6 bg-slate-50 rounded-3xl text-slate-200 border border-slate-100 shadow-inner">
             <Search size={40} />
           </div>
-          <p className="text-slate-400 text-xs font-black uppercase tracking-[0.2em]">Awaiting Ledger Protocol Initialization</p>
+          <p className="text-slate-400 text-xs font-semibold uppercase tracking-[0.2em]">Awaiting Ledger Protocol Initialization</p>
         </div>
       )}
-      <AnimatePresence>
-        {viewingVoucher && (
+      {viewingVoucher && (
           <VoucherPrintPreview 
             voucher={viewingVoucher}
             company={selectedCompany}
@@ -1244,7 +1257,6 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             onClose={() => setViewingVoucher(null)}
           />
         )}
-      </AnimatePresence>
     </div>
   );
 }

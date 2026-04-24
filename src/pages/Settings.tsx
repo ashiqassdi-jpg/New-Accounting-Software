@@ -193,10 +193,10 @@ export default function Settings() {
     <div className="max-w-6xl space-y-10 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 font-sans tracking-tight uppercase">
+          <h1 className="text-xl font-bold text-slate-900 font-sans tracking-tight uppercase">
             System Infrastructure
           </h1>
-          <p className="text-[10px] font-black text-slate-400 mt-1 uppercase tracking-[0.2em]">
+          <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-[0.2em]">
             Policy configuration & core administrative parameters
           </p>
         </div>
@@ -206,7 +206,7 @@ export default function Settings() {
         <button 
           onClick={() => setActiveTab('PROFILE')}
           className={cn(
-            "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
+            "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
             activeTab === 'PROFILE' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
           )}
         >
@@ -215,7 +215,7 @@ export default function Settings() {
         <button 
           onClick={() => setActiveTab('COMPANY')}
           className={cn(
-            "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
+            "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
             activeTab === 'COMPANY' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
           )}
         >
@@ -225,7 +225,7 @@ export default function Settings() {
           <button 
             onClick={() => setActiveTab('USERS')}
             className={cn(
-              "px-6 py-2.5 rounded-xl text-[10px] font-black transition-all uppercase tracking-widest",
+              "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
               activeTab === 'USERS' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
             )}
           >
@@ -249,51 +249,51 @@ export default function Settings() {
                     <User className="text-indigo-600" size={20} />
                   </div>
                   <div>
-                    <h2 className="font-black text-slate-900 text-xs uppercase tracking-widest">Authentication Profile</h2>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Personal Identity Verification</p>
+                    <h2 className="font-semibold text-slate-900 text-xs uppercase tracking-widest">Authentication Profile</h2>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">Personal Identity Verification</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleUpdateProfile} className="p-10 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Full Legal Name</label>
+                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Full Legal Name</label>
                       <input 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700 underline-offset-4 decoration-indigo-500/30"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 underline-offset-4 decoration-indigo-500/30"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Contact Protocol</label>
+                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Contact Protocol</label>
                       <input 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+880 1XXX-XXXXXX"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Organizational Title</label>
+                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Organizational Title</label>
                       <input 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700 italic"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 italic"
                         value={designation}
                         onChange={(e) => setDesignation(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Commission Entry</label>
+                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Commission Entry</label>
                       <input 
                         type="date"
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700"
                         value={joiningDate}
                         onChange={(e) => setJoiningDate(e.target.value)}
                       />
                     </div>
                     <div className="md:col-span-2 space-y-1">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Domicile Address</label>
+                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Domicile Address</label>
                       <textarea 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-black text-slate-700 resize-none h-24"
+                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 resize-none h-24"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="Verified headquarters or residence..."
@@ -304,7 +304,7 @@ export default function Settings() {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-fit flex items-center justify-center gap-3 bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95 disabled:opacity-50"
+                    className="w-fit flex items-center justify-center gap-3 bg-slate-900 text-white px-10 py-4 rounded-2xl font-semibold text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95 disabled:opacity-50"
                   >
                     {success === 'profile' ? <CheckCircle2 size={16} /> : <Save size={16} />}
                     {success === 'profile' ? 'Profile Synchronized' : 'Sync Identity Data'}
@@ -360,8 +360,8 @@ export default function Settings() {
                         <Building2 className="text-emerald-600" size={24} />
                       </div>
                       <div>
-                        <h2 className="font-black text-slate-900 text-sm uppercase tracking-tight">{selectedCompany.name}</h2>
-                        <p className="text-[9px] font-black text-emerald-600 uppercase tracking-[0.2em] mt-0.5">Entity Meta-Configuration</p>
+                        <h2 className="font-semibold text-slate-900 text-sm uppercase tracking-tight">{selectedCompany.name}</h2>
+                        <p className="text-[9px] font-semibold text-emerald-600 uppercase tracking-[0.2em] mt-0.5">Entity Meta-Configuration</p>
                       </div>
                     </div>
                   </div>
@@ -370,30 +370,30 @@ export default function Settings() {
                     <form onSubmit={handleUpdateCompany} className="bg-white p-10 space-y-10">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div className="space-y-1">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
+                          <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
                             <Calendar size={12} /> Fiscal Baseline
                           </label>
                           <input 
                             type="date"
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-black text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
                             value={fiscalYear}
                             onChange={(e) => setFiscalYear(e.target.value)}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
+                          <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
                             <Coins size={12} /> Unit ISO Symbol
                           </label>
                           <input 
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-black text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono"
+                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono"
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
                           />
                         </div>
                         <div className="sm:col-span-2 space-y-1">
-                          <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Operational State</label>
+                          <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Operational State</label>
                           <select 
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-4 text-[10px] font-black uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-4 text-[10px] font-semibold uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
                           >
@@ -407,7 +407,7 @@ export default function Settings() {
                       <button 
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-indigo-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transform active:scale-[0.98] transition-all hover:bg-slate-900 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
+                        className="w-full bg-indigo-600 text-white py-4 rounded-xl font-semibold text-[10px] uppercase tracking-[0.2em] transform active:scale-[0.98] transition-all hover:bg-slate-900 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
                       >
                         <Save size={16} /> Apply Entity Changes
                       </button>
@@ -419,7 +419,7 @@ export default function Settings() {
                           <div className="bg-amber-50/30 p-8 rounded-[2rem] border border-amber-100">
                              <div className="flex items-center gap-3 mb-6">
                                 <Trash2 size={16} className="text-amber-600" />
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-900">Selective Purge</h3>
+                                <h3 className="text-[10px] font-semibold uppercase tracking-widest text-amber-900">Selective Purge</h3>
                              </div>
                              <p className="text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-tight leading-relaxed">Reset all financial footprint for <strong>{selectedCompany.name}</strong>. All vouchers and ledgers will be erased.</p>
                              <div className="space-y-3">
@@ -432,7 +432,7 @@ export default function Settings() {
                                 <button 
                                   disabled={confirmCompanyReset !== selectedCompany.name || loading}
                                   onClick={handleWipeCompanyData}
-                                  className="w-full bg-amber-600 text-white py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-amber-700 disabled:opacity-20 transition-all shadow-lg shadow-amber-100"
+                                  className="w-full bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-[9px] uppercase tracking-widest hover:bg-amber-700 disabled:opacity-20 transition-all shadow-lg shadow-amber-100"
                                 >
                                   Execute Purge Protocol
                                 </button>
@@ -444,7 +444,7 @@ export default function Settings() {
                           <div className="bg-rose-50/30 p-8 rounded-[2rem] border border-rose-100">
                              <div className="flex items-center gap-3 mb-6">
                                 <ShieldAlert size={16} className="text-rose-600" />
-                                <h3 className="text-[10px] font-black uppercase tracking-widest text-rose-900">Platform Reset</h3>
+                                <h3 className="text-[10px] font-semibold uppercase tracking-widest text-rose-900">Platform Reset</h3>
                              </div>
                              <div className="space-y-3">
                                 <input 
@@ -456,7 +456,7 @@ export default function Settings() {
                                 <button 
                                   disabled={confirmGlobalReset !== 'WIPE ENTIRE SYSTEM' || loading}
                                   onClick={handleGlobalWipe}
-                                  className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-black text-[9px] uppercase tracking-widest hover:bg-rose-900 disabled:opacity-20 transition-all shadow-lg shadow-rose-100"
+                                  className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-semibold text-[9px] uppercase tracking-widest hover:bg-rose-900 disabled:opacity-20 transition-all shadow-lg shadow-rose-100"
                                 >
                                   Reset Infrastructure
                                 </button>

@@ -206,10 +206,10 @@ export default function ChartOfAccounts() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
+          <h1 className="text-2xl font-semibold text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
             Chart of Accounts
           </h1>
-          <p className="text-[11px] text-slate-400 mt-1.5 font-bold uppercase tracking-widest leading-none text-center md:text-left">
+          <p className="text-[11px] text-slate-400 mt-1.5 font-medium uppercase tracking-widest leading-none text-center md:text-left">
             Vanguard Ledger Architecture
           </p>
         </div>
@@ -224,7 +224,7 @@ export default function ChartOfAccounts() {
           {!isModerator && (
             <button 
               onClick={() => openModal()}
-              className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
+              className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
             >
               <Plus size={16} /> New Ledger
             </button>
@@ -249,33 +249,16 @@ export default function ChartOfAccounts() {
               >
                 <div className="flex items-center gap-3">
                   <ListTree size={16} className={cn(activeTab === group.value ? "text-indigo-400" : "text-slate-300")} />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">{group.label}</span>
+                  <span className="text-[11px] font-semibold uppercase tracking-wider">{group.label}</span>
                 </div>
                 <div className={cn(
-                  "text-[10px] font-bold px-2 py-0.5 rounded-full",
+                  "text-[10px] font-semibold px-2 py-0.5 rounded-full",
                   activeTab === group.value ? "bg-white/20 text-white" : "bg-slate-100 text-slate-400"
                 )}>
                   {accounts.filter(a => a.type === group.value).length}
                 </div>
               </button>
             ))}
-          </div>
-
-          <div className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden relative group">
-            <div className="flex items-center justify-between relative z-10">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Net Volume</p>
-                <p className={cn(
-                  "text-xl font-bold font-mono tracking-tighter leading-none pt-1",
-                  totalGroupBalance < 0 ? "text-rose-600" : "text-slate-900"
-                )}>
-                  {formatBDT(totalGroupBalance)}
-                </p>
-              </div>
-            </div>
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-              <span className="text-4xl font-black italic">{activeGroup?.label.charAt(0)}</span>
-            </div>
           </div>
         </aside>
 
@@ -302,127 +285,119 @@ export default function ChartOfAccounts() {
                   )}
                 >
                   <Filter size={14} />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Deep Filter</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest">Deep Filter</span>
                 </button>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-300 uppercase tracking-widest">Displaying All Nodes</span>
+                <span className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Displaying All Nodes</span>
               </div>
             </div>
 
             {/* Deep Filter Modal (COA Context) */}
-            <AnimatePresence>
-              {showDeepFilter && (
-                <>
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setShowDeepFilter(false)}
-                    className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
-                  />
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                    className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
-                  >
-                    <div className="p-10 space-y-8 text-left">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h2 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-                            <Filter className="text-indigo-600" size={20} />
-                            COA Analytical Parameters
-                          </h2>
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Refining ledger architecture visibility</p>
+            {showDeepFilter && (
+              <>
+                <div
+                  onClick={() => setShowDeepFilter(false)}
+                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+                />
+                <div
+                  className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+                >
+                  <div className="p-10 space-y-8 text-left">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h2 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
+                          <Filter className="text-indigo-600" size={20} />
+                          COA Analytical Parameters
+                        </h2>
+                        <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Refining ledger architecture visibility</p>
+                      </div>
+                      <button 
+                        onClick={() => setShowDeepFilter(false)}
+                        className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Category Override</label>
+                        <div className="relative group">
+                          <select
+                            value={deepFilterType}
+                            onChange={(e) => setDeepFilterType(e.target.value)}
+                            className="appearance-none w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-semibold uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer tracking-widest"
+                          >
+                            <option value="ALL">USE TABS (CONTEXTUAL)</option>
+                            {ACCOUNT_GROUPS.map(g => (
+                              <option key={g.value} value={g.value}>{g.label}</option>
+                            ))}
+                          </select>
+                          <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-500 transition-colors" />
                         </div>
-                        <button 
-                          onClick={() => setShowDeepFilter(false)}
-                          className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
-                        >
-                          <X size={20} />
-                        </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Category Override</label>
-                          <div className="relative group">
-                            <select
-                              value={deepFilterType}
-                              onChange={(e) => setDeepFilterType(e.target.value)}
-                              className="appearance-none w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-black uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer tracking-widest"
-                            >
-                              <option value="ALL">USE TABS (CONTEXTUAL)</option>
-                              {ACCOUNT_GROUPS.map(g => (
-                                <option key={g.value} value={g.value}>{g.label}</option>
-                              ))}
-                            </select>
-                            <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-500 transition-colors" />
-                          </div>
+                      <div className="space-y-4">
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Ledger Search</label>
+                        <div className="relative group">
+                          <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                          <input 
+                            className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium"
+                            placeholder="Search Ledger Name/Code..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                          />
                         </div>
+                      </div>
 
-                        <div className="space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Ledger Search</label>
-                          <div className="relative group">
-                            <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+                      <div className="md:col-span-2 space-y-4">
+                        <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Balance Thresholds (৳)</label>
+                        <div className="flex gap-4">
+                          <div className="flex-1 space-y-1">
+                            <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Minimum Balance</label>
                             <input 
-                              className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold"
-                              placeholder="Search Ledger Name/Code..."
-                              value={searchQuery}
-                              onChange={(e) => setSearchQuery(e.target.value)}
+                              placeholder="-∞"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-medium"
+                              value={balanceRange.min}
+                              onChange={(e) => setBalanceRange(prev => ({ ...prev, min: e.target.value }))}
+                            />
+                          </div>
+                          <div className="flex-1 space-y-1">
+                            <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Maximum Balance</label>
+                            <input 
+                              placeholder="∞"
+                              className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-medium"
+                              value={balanceRange.max}
+                              onChange={(e) => setBalanceRange(prev => ({ ...prev, max: e.target.value }))}
                             />
                           </div>
                         </div>
-
-                        <div className="md:col-span-2 space-y-4">
-                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Balance Thresholds (৳)</label>
-                          <div className="flex gap-4">
-                            <div className="flex-1 space-y-1">
-                              <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Minimum Balance</label>
-                              <input 
-                                placeholder="-∞"
-                                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
-                                value={balanceRange.min}
-                                onChange={(e) => setBalanceRange(prev => ({ ...prev, min: e.target.value }))}
-                              />
-                            </div>
-                            <div className="flex-1 space-y-1">
-                              <label className="text-[9px] font-black text-slate-300 uppercase pl-1">Maximum Balance</label>
-                              <input 
-                                placeholder="∞"
-                                className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
-                                value={balanceRange.max}
-                                onChange={(e) => setBalanceRange(prev => ({ ...prev, max: e.target.value }))}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="pt-8 border-t border-slate-50 flex gap-4">
-                        <button 
-                          onClick={() => {
-                            setDeepFilterType('ALL');
-                            setBalanceRange({ min: '', max: '' });
-                            setSearchQuery('');
-                          }}
-                          className="flex-1 px-6 py-4 text-xs font-black text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
-                        >
-                          Reset Parameters
-                        </button>
-                        <button 
-                          onClick={() => setShowDeepFilter(false)}
-                          className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
-                        >
-                          Show Results
-                        </button>
                       </div>
                     </div>
-                  </motion.div>
-                </>
-              )}
-            </AnimatePresence>
+
+                    <div className="pt-8 border-t border-slate-50 flex gap-4">
+                      <button 
+                        onClick={() => {
+                          setDeepFilterType('ALL');
+                          setBalanceRange({ min: '', max: '' });
+                          setSearchQuery('');
+                        }}
+                        className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                      >
+                        Reset Parameters
+                      </button>
+                      <button 
+                        onClick={() => setShowDeepFilter(false)}
+                        className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                      >
+                        Show Results
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -438,10 +413,10 @@ export default function ChartOfAccounts() {
                   {filteredAccounts.map(acc => (
                     <tr key={acc.id} className="group hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-0 text-center md:text-left">
                       <td className="px-5 py-3 text-xs font-mono text-slate-400">{acc.code}</td>
-                      <td className="px-5 py-3 text-xs font-bold text-slate-800">{acc.name}</td>
+                      <td className="px-5 py-3 text-xs font-semibold text-slate-800">{acc.name}</td>
                       <td className="px-5 py-3 text-right">
                         <span className={cn(
-                          "text-xs font-mono font-bold tabular-nums",
+                          "text-xs font-mono font-semibold tabular-nums",
                           acc.current_balance < 0 ? "text-rose-500" : "text-slate-700"
                         )}>
                           {formatBDT(acc.current_balance)}
@@ -466,7 +441,7 @@ export default function ChartOfAccounts() {
                       <td colSpan={4} className="py-32 text-center">
                         <div className="flex flex-col items-center">
                           <ListTree className="text-slate-200 mb-4" size={48} />
-                          <p className="text-[11px] font-black text-slate-300 uppercase tracking-[0.2em]">Void Ledger Path</p>
+                          <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-[0.2em]">Void Ledger Path</p>
                         </div>
                       </td>
                     </tr>
@@ -479,88 +454,83 @@ export default function ChartOfAccounts() {
       </div>
 
       {/* Modal */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
-            >
-              <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
-                <div className="flex flex-col">
-                  <h2 className="text-lg font-black text-slate-900 leading-none">
-                    {editingAccount ? 'Refine Ledger' : 'Incorporate Ledger'}
-                  </h2>
-                  <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Protocol Assignment Mode</p>
-                </div>
-                <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-600 transition-colors">
-                  <X size={24} />
-                </button>
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div 
+            className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+          >
+            <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
+              <div className="flex flex-col">
+                <h2 className="text-lg font-semibold text-slate-900 leading-none">
+                  {editingAccount ? 'Refine Ledger' : 'Incorporate Ledger'}
+                </h2>
+                <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-widest">Protocol Assignment Mode</p>
               </div>
-              
-              <form onSubmit={handleSave} className="p-8 space-y-6">
-                <div className="grid grid-cols-5 gap-2 mb-4">
-                  {ACCOUNT_GROUPS.map((g) => (
-                    <button
-                      key={g.value}
-                      type="button"
-                      onClick={() => setType(g.value as Account['type'])}
-                      className={cn(
-                        "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all group",
-                        type === g.value ? "border-indigo-600 bg-indigo-50/50 shadow-md" : "border-slate-50 hover:border-slate-100"
-                      )}
-                    >
-                      <ListTree size={16} className={cn(type === g.value ? "text-indigo-600 shadow-xl" : "text-slate-300 group-hover:text-slate-400")} />
-                      <span className={cn("text-[8px] font-black uppercase tracking-widest", type === g.value ? "text-indigo-700" : "text-slate-400")}>{g.label.charAt(0)}</span>
-                    </button>
-                  ))}
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-600 transition-colors">
+                <X size={24} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleSave} className="p-8 space-y-6">
+              <div className="grid grid-cols-5 gap-2 mb-4">
+                {ACCOUNT_GROUPS.map((g) => (
+                  <button
+                    key={g.value}
+                    type="button"
+                    onClick={() => setType(g.value as Account['type'])}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all group",
+                      type === g.value ? "border-indigo-600 bg-indigo-50/50 shadow-md" : "border-slate-50 hover:border-slate-100"
+                    )}
+                  >
+                    <ListTree size={16} className={cn(type === g.value ? "text-indigo-600 shadow-xl" : "text-slate-300 group-hover:text-slate-400")} />
+                    <span className={cn("text-[8px] font-semibold uppercase tracking-widest", type === g.value ? "text-indigo-700" : "text-slate-400")}>{g.label.charAt(0)}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Ledger Identifier (Name)</label>
+                  <input 
+                    required
+                    className="w-full"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Accounts Receivable"
+                  />
                 </div>
 
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Ledger Identifier (Name)</label>
+                    <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Atomic Code</label>
                     <input 
                       required
-                      className="w-full"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="e.g. Accounts Receivable"
+                      className="w-full font-mono font-semibold tracking-widest text-slate-700"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      placeholder="e.g. 1201"
                     />
                   </div>
-
-                  <div className="grid grid-cols-1 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-1">Atomic Code</label>
-                      <input 
-                        required
-                        className="w-full font-mono font-bold tracking-widest text-slate-700"
-                        value={code}
-                        onChange={(e) => setCode(e.target.value)}
-                        placeholder="e.g. 1201"
-                      />
-                    </div>
-                  </div>
                 </div>
+              </div>
 
-                <div className="pt-4 flex gap-3">
-                  <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-bold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
-                    Dismiss
-                  </button>
-                  <button 
-                    disabled={loading}
-                    type="submit"
-                    className="flex-1 px-4 py-3 bg-slate-900 text-white text-[10px] font-bold rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
-                  >
-                    {loading ? 'Processing...' : (editingAccount ? 'Apply Changes' : 'Register Ledger')}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
+                  Dismiss
+                </button>
+                <button 
+                  disabled={loading}
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-slate-900 text-white text-[10px] font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
+                >
+                  {loading ? 'Processing...' : (editingAccount ? 'Apply Changes' : 'Register Ledger')}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
     </div>
   );
 }
