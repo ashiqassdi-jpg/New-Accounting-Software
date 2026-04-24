@@ -249,9 +249,8 @@ export default function UserManagement() {
                       className="appearance-none w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs font-semibold uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all cursor-pointer tracking-widest"
                     >
                       <option value="ALL">ALL ROLES</option>
-                      <option value="OWNER">OWNER</option>
+                      <option value="SUPER_ADMIN">SUPER ADMIN</option>
                       <option value="ADMIN">ADMIN</option>
-                      <option value="PROFESSIONAL">PROFESSIONAL</option>
                       <option value="MODERATOR">MODERATOR</option>
                     </select>
                     <ChevronDown size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-indigo-500 transition-colors" />

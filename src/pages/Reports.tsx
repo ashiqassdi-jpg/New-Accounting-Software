@@ -159,19 +159,19 @@ export default function Reports() {
             </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center bg-white border border-slate-100 rounded-xl px-3 py-1 gap-2 h-[42px] shadow-sm">
+                <div className="flex items-center bg-white border border-slate-100 rounded-xl px-2 py-0.5 gap-1.5 h-[38px] shadow-sm shrink-0">
                   <input 
                     type="date"
                     value={dateRange.from}
                     onChange={(e) => setDateRange(prev => ({ ...prev, from: e.target.value }))}
-                    className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
+                    className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none w-[95px]"
                   />
-                  <ArrowRight size={12} className="text-slate-300" />
+                  <ArrowRight size={10} className="text-slate-300" />
                   <input 
                     type="date"
                     value={dateRange.to}
                     onChange={(e) => setDateRange(prev => ({ ...prev, to: e.target.value }))}
-                    className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none p-1.5"
+                    className="bg-transparent text-[10px] font-semibold text-slate-600 outline-none w-[95px]"
                   />
                 </div>
 
@@ -179,22 +179,23 @@ export default function Reports() {
                   onClick={() => {
                     setConfirmedDateRange(dateRange);
                   }}
-                  className="px-6 py-2.5 bg-slate-900 text-white rounded-xl text-[10px] font-semibold uppercase tracking-[0.2em] hover:bg-indigo-600 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg active:scale-95 flex items-center gap-2 h-[38px] shrink-0"
                 >
-                  <Filter size={14} />
-                  Deep Filter
+                  <Search size={14} />
+                  Search
                 </button>
                 
                 <button 
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
                   className={cn(
-                    "p-2.5 rounded-xl transition-all shadow-sm border",
+                    "px-4 py-2 rounded-xl transition-all shadow-sm border flex items-center gap-2 h-[38px] shrink-0",
                     showAdvancedFilters 
                       ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
                       : "bg-white border-slate-200 text-slate-400 hover:text-slate-600"
                   )}
                 >
-                  <Filter size={16} />
+                  <Filter size={14} />
+                  <span className="text-[10px] font-semibold uppercase tracking-widest">Deep Filter</span>
                 </button>
               </div>
             </div>

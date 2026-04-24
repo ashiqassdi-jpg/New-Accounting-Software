@@ -20,7 +20,6 @@ export default function Companies() {
   const [editingCompany, setEditingCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showDeepFilter, setShowDeepFilter] = useState(false);
   const [filterAddress, setFilterAddress] = useState('');
 
   const filteredCompanies = companies.filter(c => {
@@ -139,19 +138,6 @@ export default function Companies() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button 
-            onClick={() => setShowDeepFilter(!showDeepFilter)}
-            className={cn(
-              "px-6 py-3.5 rounded-2xl text-[11px] font-semibold uppercase tracking-[0.2em] transition-all flex items-center gap-2",
-              showDeepFilter 
-                ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100" 
-                : "bg-slate-900 text-white shadow-xl shadow-slate-100 hover:bg-slate-800"
-            )}
-          >
-            <Filter size={14} />
-            Deep Filter
-          </button>
-          
           {canManageCompanies && (
             <button 
               onClick={() => openModal()}
@@ -163,67 +149,6 @@ export default function Companies() {
           )}
         </div>
       </div>
-
-      {showDeepFilter && (
-        <>
-          <div
-            onClick={() => setShowDeepFilter(false)}
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
-          />
-          <div
-            className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
-          >
-            <div className="p-10 space-y-8 text-left">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                    <Filter className="text-indigo-600" size={20} />
-                    Portfolio Diagnostics
-                  </h2>
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Refining entity visibility</p>
-                </div>
-                <button 
-                  onClick={() => setShowDeepFilter(false)}
-                  className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Geographic Boundary (Address)</label>
-                <div className="relative group">
-                  <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
-                  <input 
-                    className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium"
-                    placeholder="Search specific location..."
-                    value={filterAddress}
-                    onChange={(e) => setFilterAddress(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="pt-8 border-t border-slate-50 flex gap-4">
-                <button 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilterAddress('');
-                  }}
-                  className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
-                >
-                  Reset
-                </button>
-                <button 
-                  onClick={() => setShowDeepFilter(false)}
-                  className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
-                >
-                  Apply Analysis
-                </button>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredCompanies.map((company) => (
