@@ -21,7 +21,9 @@ export default function UserManagement() {
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [showDeepFilter, setShowDeepFilter] = useState(false);
   const [filterRole, setFilterRole] = useState<string>('ALL');
+  const [confirmedFilterRole, setConfirmedFilterRole] = useState<string>('ALL');
   const [filterDesignation, setFilterDesignation] = useState<string>('');
+  const [confirmedFilterDesignation, setConfirmedFilterDesignation] = useState<string>('');
   const [inviteData, setInviteData] = useState({
     email: '',
     name: '',
@@ -163,8 +165,8 @@ export default function UserManagement() {
 
   const filteredProfiles = profiles.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.designation?.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = filterRole === 'ALL' ? true : p.role === filterRole;
-    const matchesDesignation = !filterDesignation || p.designation?.toLowerCase().includes(filterDesignation.toLowerCase());
+    const matchesRole = confirmedFilterRole === 'ALL' ? true : p.role === confirmedFilterRole;
+    const matchesDesignation = !confirmedFilterDesignation || p.designation?.toLowerCase().includes(confirmedFilterDesignation.toLowerCase());
     return matchesSearch && matchesRole && matchesDesignation;
   });
 
@@ -277,13 +279,20 @@ export default function UserManagement() {
                     setFilterRole('ALL');
                     setFilterDesignation('');
                     setSearch('');
+                    // Instantly reset
+                    setConfirmedFilterRole('ALL');
+                    setConfirmedFilterDesignation('');
                   }}
                   className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
                 >
                   Reset Query
                 </button>
                 <button 
-                  onClick={() => setShowDeepFilter(false)}
+                  onClick={() => {
+                    setConfirmedFilterRole(filterRole);
+                    setConfirmedFilterDesignation(filterDesignation);
+                    setShowDeepFilter(false);
+                  }}
                   className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
                 >
                   Execute Filter

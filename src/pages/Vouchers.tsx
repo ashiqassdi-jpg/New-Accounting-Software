@@ -38,7 +38,10 @@ export default function Vouchers() {
   const [dateRange, setDateRange] = useState({ from: '', to: '' });
   const [confirmedDateRange, setConfirmedDateRange] = useState({ from: '', to: '' });
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
+  const [confirmedAmountRange, setConfirmedAmountRange] = useState({ min: '', max: '' });
   const [filterAccountId, setFilterAccountId] = useState<string | null>(null);
+  const [confirmedFilterAccountId, setConfirmedFilterAccountId] = useState<string | null>(null);
+  const [confirmedFilterType, setConfirmedFilterType] = useState<VoucherType | 'ALL'>('ALL');
   const [accounts, setAccounts] = useState<any[]>([]);
   const [isAccountSearchOpen, setIsAccountSearchOpen] = useState(false);
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
@@ -79,13 +82,13 @@ export default function Vouchers() {
     if (filterMode === 'RECENT' && !showDeepFilter && !search) {
       query = query.limit(20);
     }
-    if (filterType !== 'ALL') {
-      query = query.eq('type', filterType);
+    if (confirmedFilterType !== 'ALL') {
+      query = query.eq('type', confirmedFilterType);
     }
     if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
     if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
-    if (amountRange.min) query = query.gte('amount', amountRange.min);
-    if (amountRange.max) query = query.lte('amount', amountRange.max);
+    if (confirmedAmountRange.min) query = query.gte('amount', confirmedAmountRange.min);
+    if (confirmedAmountRange.max) query = query.lte('amount', confirmedAmountRange.max);
 
     const [{ data, error }, { data: profilesData }] = await Promise.all([
       query
@@ -99,9 +102,9 @@ export default function Vouchers() {
     } else {
       let filteredData = data || [];
       // Filter by account if selected
-      if (filterAccountId) {
+      if (confirmedFilterAccountId) {
         filteredData = filteredData.filter(v => 
-          v.items?.some((item: any) => item.account_id === filterAccountId)
+          v.items?.some((item: any) => item.account_id === confirmedFilterAccountId)
         );
       }
       
@@ -126,7 +129,7 @@ export default function Vouchers() {
 
   useEffect(() => {
     fetchVouchers();
-  }, [selectedCompany, filterMode, filterType, confirmedDateRange.from, confirmedDateRange.to, amountRange.min, amountRange.max, filterAccountId]);
+  }, [selectedCompany, filterMode, confirmedFilterType, confirmedDateRange.from, confirmedDateRange.to, confirmedAmountRange.min, confirmedAmountRange.max, confirmedFilterAccountId]);
 
   const filteredVouchers = vouchers.filter(v => 
     v.voucher_no.toLowerCase().includes(search.toLowerCase()) ||
@@ -541,7 +544,13 @@ export default function Vouchers() {
                           setFilterType('ALL');
                           setDateRange({ from: '', to: '' });
                           setAmountRange({ min: '', max: '' });
+                          setFilterAccountId(null);
                           setSearch('');
+                          // To instantly reset UI to all data:
+                          setConfirmedFilterType('ALL');
+                          setConfirmedDateRange({ from: '', to: '' });
+                          setConfirmedAmountRange({ min: '', max: '' });
+                          setConfirmedFilterAccountId(null);
                         }}
                         className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
                       >
@@ -550,6 +559,9 @@ export default function Vouchers() {
                       <button 
                         onClick={() => {
                           setConfirmedDateRange(dateRange);
+                          setConfirmedFilterType(filterType);
+                          setConfirmedAmountRange(amountRange);
+                          setConfirmedFilterAccountId(filterAccountId);
                           setShowDeepFilter(false);
                         }}
                         className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500/50 outline-none"

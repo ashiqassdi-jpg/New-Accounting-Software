@@ -30,8 +30,14 @@ export default function Ledger() {
   const [showDeepFilter, setShowDeepFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [narrationSearch, setNarrationSearch] = useState('');
+  const [confirmedNarrationSearch, setConfirmedNarrationSearch] = useState('');
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
+  const [confirmedAmountRange, setConfirmedAmountRange] = useState({ min: '', max: '' });
   const [dateRange, setDateRange] = useState({
+    from: '',
+    to: ''
+  });
+  const [confirmedDateRange, setConfirmedDateRange] = useState({
     from: '',
     to: ''
   });
@@ -61,7 +67,7 @@ export default function Ledger() {
     if (selectedAccountId) {
       fetchTransactions();
     }
-  }, [selectedAccountId, dateRange.from, dateRange.to, amountRange.min, amountRange.max, narrationSearch]);
+  }, [selectedAccountId, confirmedDateRange.from, confirmedDateRange.to, confirmedAmountRange.min, confirmedAmountRange.max, confirmedNarrationSearch]);
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -74,8 +80,8 @@ export default function Ledger() {
         `)
         .eq('account_id', selectedAccountId);
         
-      if (dateRange.from && dateRange.to) {
-        query = query.gte('date', dateRange.from).lte('date', dateRange.to);
+      if (confirmedDateRange.from && confirmedDateRange.to) {
+        query = query.gte('date', confirmedDateRange.from).lte('date', confirmedDateRange.to);
       }
         
       const { data, error } = await query.order('date', { ascending: true }); // Important for running balance
@@ -83,10 +89,10 @@ export default function Ledger() {
       if (error) throw error;
       
       let filteredData = data || [];
-      if (amountRange.min) filteredData = filteredData.filter(t => (t.debit || t.credit) >= parseFloat(amountRange.min));
-      if (amountRange.max) filteredData = filteredData.filter(t => (t.debit || t.credit) <= parseFloat(amountRange.max));
-      if (narrationSearch) {
-        filteredData = filteredData.filter(t => t.voucher?.narration?.toLowerCase().includes(narrationSearch.toLowerCase()));
+      if (confirmedAmountRange.min) filteredData = filteredData.filter(t => (t.debit || t.credit) >= parseFloat(confirmedAmountRange.min));
+      if (confirmedAmountRange.max) filteredData = filteredData.filter(t => (t.debit || t.credit) <= parseFloat(confirmedAmountRange.max));
+      if (confirmedNarrationSearch) {
+        filteredData = filteredData.filter(t => t.voucher?.narration?.toLowerCase().includes(confirmedNarrationSearch.toLowerCase()));
       }
 
       // Calculate running balance starting from 0 or opening balance logic
@@ -382,13 +388,13 @@ export default function Ledger() {
                 <div className="pt-8 border-t border-slate-50 flex gap-4">
                   <button 
                     onClick={() => {
-                      setDateRange({
-                        from: format(new Date(new Date().getFullYear(), new Date().getMonth(), 1), 'yyyy-MM-dd'),
-                        to: format(new Date(), 'yyyy-MM-dd')
-                      });
+                      setDateRange({ from: '', to: '' });
                       setAmountRange({ min: '', max: '' });
                       setNarrationSearch('');
-                      fetchTransactions();
+                      // Instantly reset
+                      setConfirmedDateRange({ from: '', to: '' });
+                      setConfirmedAmountRange({ min: '', max: '' });
+                      setConfirmedNarrationSearch('');
                     }}
                     className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
                   >
@@ -396,8 +402,10 @@ export default function Ledger() {
                   </button>
                   <button 
                     onClick={() => {
+                      setConfirmedDateRange(dateRange);
+                      setConfirmedAmountRange(amountRange);
+                      setConfirmedNarrationSearch(narrationSearch);
                       setShowDeepFilter(false);
-                      fetchTransactions();
                     }}
                     className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
                   >

@@ -58,6 +58,10 @@ export default function Reports() {
     from: '',
     to: ''
   });
+  const [tempDateRange, setTempDateRange] = useState({
+    from: '',
+    to: ''
+  });
 
   useEffect(() => {
     if (selectedCompany) {
@@ -74,7 +78,7 @@ export default function Reports() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  const [confirmedDateRange, setConfirmedDateRange] = useState(dateRange);
+  const [confirmedDateRange, setConfirmedDateRange] = useState({ from: '', to: '' });
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [filters, setFilters] = useState({
     accountType: '',
@@ -84,9 +88,28 @@ export default function Reports() {
     minAmount: '',
     maxAmount: ''
   });
+  const [confirmedFilters, setConfirmedFilters] = useState({
+    accountType: '',
+    accountId: '',
+    voucherType: '',
+    searchQuery: '',
+    minAmount: '',
+    maxAmount: ''
+  });
 
   const resetFilters = () => {
+    setTempDateRange({ from: '', to: '' });
+    setDateRange({ from: '', to: '' });
+    setConfirmedDateRange({ from: '', to: '' });
     setFilters({
+      accountType: '',
+      accountId: '',
+      voucherType: '',
+      searchQuery: '',
+      minAmount: '',
+      maxAmount: ''
+    });
+    setConfirmedFilters({
       accountType: '',
       accountId: '',
       voucherType: '',
@@ -165,6 +188,7 @@ export default function Reports() {
                 <button 
                   onClick={() => {
                     setConfirmedDateRange(dateRange);
+                    setConfirmedFilters(filters);
                   }}
                   className="px-4 py-2 bg-slate-900 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-lg active:scale-95 flex items-center gap-2 h-[38px] shrink-0"
                 >
@@ -173,7 +197,10 @@ export default function Reports() {
                 </button>
                 
                 <button 
-                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  onClick={() => {
+                    setTempDateRange(dateRange);
+                    setShowAdvancedFilters(!showAdvancedFilters);
+                  }}
                   className={cn(
                     "px-3 py-1.5 rounded-lg transition-all shadow-sm border flex items-center gap-1.5 h-[38px] shrink-0",
                     showAdvancedFilters 
@@ -218,7 +245,7 @@ export default function Reports() {
                         <div className="space-y-2">
                           <label className="block text-sm font-medium text-slate-700">Date Boundary</label>
                           <div className="pt-1">
-                            <DateRangeFilter value={dateRange} onChange={setDateRange} />
+                            <DateRangeFilter value={tempDateRange} onChange={setTempDateRange} />
                           </div>
                         </div>
 
@@ -390,7 +417,9 @@ export default function Reports() {
                         </button>
                         <button 
                           onClick={() => {
-                            setConfirmedDateRange(dateRange);
+                            setConfirmedDateRange(tempDateRange);
+                            setDateRange(tempDateRange);
+                            setConfirmedFilters(filters);
                             setShowAdvancedFilters(false);
                           }}
                           className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:ring-2 focus:ring-indigo-500/50 outline-none"
@@ -428,7 +457,7 @@ export default function Reports() {
                   <Daybook 
                     companyId={selectedCompany?.id} 
                     dateRange={confirmedDateRange} 
-                    filters={filters}
+                    filters={confirmedFilters}
                     onEdit={setEditingVoucher}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Date', 'Voucher #', 'Main Account', 'Type', 'Description', 'Amount'], 'daybook')}
                     onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
@@ -438,7 +467,7 @@ export default function Reports() {
                   <LedgerReport 
                     companyId={selectedCompany?.id} 
                     dateRange={confirmedDateRange} 
-                    filters={filters}
+                    filters={confirmedFilters}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'], 'ledger_statement')}
                     onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement')}
                   />
@@ -447,7 +476,7 @@ export default function Reports() {
                   <TrialBalance 
                     companyId={selectedCompany?.id} 
                     dateRange={confirmedDateRange} 
-                    filters={filters}
+                    filters={confirmedFilters}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
                     onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
                   />
@@ -640,24 +669,8 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       `)
       .eq('company_id', companyId);
 
-    let effectiveDateRange = { ...dateRange };
-    
-    if (!effectiveDateRange.from || !effectiveDateRange.to) {
-        const { data: lastVoucher } = await supabase
-            .from('vouchers')
-            .select('date')
-            .eq('company_id', companyId)
-            .order('date', { ascending: false })
-            .limit(1)
-            .single();
-            
-        if (lastVoucher) {
-            effectiveDateRange = { from: lastVoucher.date, to: lastVoucher.date };
-        }
-    }
-
-    if (effectiveDateRange.from) query = query.gte('date', effectiveDateRange.from);
-    if (effectiveDateRange.to) query = query.lte('date', effectiveDateRange.to);
+    if (dateRange.from) query = query.gte('date', dateRange.from);
+    if (dateRange.to) query = query.lte('date', dateRange.to);
     
     if (filters.voucherType) {
       query = query.eq('type', filters.voucherType);
