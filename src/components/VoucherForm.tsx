@@ -42,7 +42,10 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   // Voucher state
   const [type, setType] = useState<VoucherType>(initialType || 'PAYMENT');
   const [channel, setChannel] = useState<PaymentChannel>('CASH');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+  const [date, setDate] = useState(() => {
+    const saved = localStorage.getItem(`last_date_${initialType || 'PAYMENT'}`);
+    return saved || new Date().toISOString().split('T')[0];
+  });
   const [voucherNo, setVoucherNo] = useState('');
   const [manualVoucherNo, setManualVoucherNo] = useState(false);
   const [narration, setNarration] = useState('');
@@ -98,8 +101,58 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       setNarration(editingVoucher.narration || '');
       setManualVoucherNo(true); // Preserve manual number when editing
       fetchVoucherTransactions();
+    } else {
+      // Load last used date for this type
+      const savedDate = localStorage.getItem(`last_date_${type}`);
+      if (savedDate) setDate(savedDate);
     }
-  }, [editingVoucher]);
+  }, [editingVoucher, type]);
+
+  const findAccountForChannel = (ch: PaymentChannel) => {
+    if (!accounts.length) return null;
+    const searchTerms = {
+      'CASH': ['cash', 'cash in hand', 'cash-in-hand', 'petty cash'],
+      'BANK': ['bank', 'cash at bank', 'cash-at-bank'],
+      'BKASH': ['bkash', 'b-kash'],
+      'NAGAD': ['nagad']
+    };
+    
+    const terms = searchTerms[ch];
+    // First try exact match or includes with label
+    const label = PAYMENT_CHANNELS.find(c => c.value === ch)?.label.toLowerCase();
+    
+    let matched = accounts.find(a => a.name.toLowerCase() === label);
+    if (!matched) {
+      matched = accounts.find(a => terms.some(t => a.name.toLowerCase().includes(t)));
+    }
+    return matched;
+  };
+
+  // Auto-update row when channel or type changes
+  useEffect(() => {
+    if (editingVoucher || loading || !accounts.length) return;
+    
+    // Only auto-map for Payment and Receipt
+    if (!['PAYMENT', 'RECEIPT'].includes(type)) return;
+
+    const matchedAcc = findAccountForChannel(channel);
+    if (matchedAcc) {
+      setItems(prev => {
+        const newItems = [...prev];
+        if (type === 'RECEIPT') {
+          // Map to FIRST row for Receipt
+          newItems[0] = { ...newItems[0], account_id: matchedAcc.id };
+        } else {
+          // Map to LAST row for Payment
+          const lastIdx = newItems.length - 1;
+          if (lastIdx >= 0) {
+            newItems[lastIdx] = { ...newItems[lastIdx], account_id: matchedAcc.id };
+          }
+        }
+        return newItems;
+      });
+    }
+  }, [channel, type, accounts.length, loading]);
 
   const fetchVoucherTransactions = async () => {
     if (!editingVoucher) return;
@@ -300,6 +353,9 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
 
       if (tError) throw tError;
 
+      // Save date for next time
+      localStorage.setItem(`last_date_${type}`, date);
+
       toast.success(editingVoucher ? 'Voucher Updated' : 'Voucher Posted Successfully');
 
       if (!editingVoucher) {
@@ -366,21 +422,25 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block pl-1">Payment Engine</label>
-              <div className="relative group">
-                <select 
-                  className="appearance-none w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold text-slate-900 cursor-pointer uppercase tracking-tight"
-                  value={channel}
-                  onChange={(e) => setChannel(e.target.value as PaymentChannel)}
-                >
-                  {PAYMENT_CHANNELS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-                </select>
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 group-hover:text-indigo-500 transition-colors">
-                  <ChevronDown size={12} />
+            {type !== 'JOURNAL' && (
+              <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1 duration-200">
+                <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block pl-1">
+                  {type === 'CONTRA' ? 'Contra Engine' : (type === 'RECEIPT' ? 'Receipt Engine' : 'Payment Engine')}
+                </label>
+                <div className="relative group">
+                  <select 
+                    className="appearance-none w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold text-slate-900 cursor-pointer uppercase tracking-tight"
+                    value={channel}
+                    onChange={(e) => setChannel(e.target.value as PaymentChannel)}
+                  >
+                    {PAYMENT_CHANNELS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  </select>
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 group-hover:text-indigo-500 transition-colors">
+                    <ChevronDown size={12} />
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block pl-1">Posting Date</label>
