@@ -54,6 +54,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     { account_id: '', debit: 0, credit: 0 }
   ]);
   const [activeAccountSearch, setActiveAccountSearch] = useState<{index: number, query: string, rect?: { top: number, left: number, width: number }} | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLFormElement>(null);
 
@@ -550,7 +551,38 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                         className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-4 py-1.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium uppercase placeholder:text-slate-300"
                                         placeholder="Type name or code..."
                                         value={activeAccountSearch.query}
-                                        onChange={(e) => setActiveAccountSearch({ ...activeAccountSearch, query: e.target.value })}
+                                        onChange={(e) => {
+                                          setActiveAccountSearch({ ...activeAccountSearch, query: e.target.value });
+                                          setSelectedIndex(0);
+                                        }}
+                                        onKeyDown={(e) => {
+                                          const filtered = accounts.filter(a => 
+                                            a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
+                                            a.code.toLowerCase().includes(activeAccountSearch.query.toLowerCase())
+                                          );
+
+                                          if (e.key === 'ArrowDown') {
+                                            e.preventDefault();
+                                            setSelectedIndex(prev => (prev + 1) % (filtered.length + 1));
+                                          } else if (e.key === 'ArrowUp') {
+                                            e.preventDefault();
+                                            setSelectedIndex(prev => (prev - 1 + filtered.length + 1) % (filtered.length + 1));
+                                          } else if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            if (selectedIndex === 0) {
+                                              updateItem(index, 'account_id', '');
+                                              setActiveAccountSearch(null);
+                                            } else {
+                                              const account = filtered[selectedIndex - 1];
+                                              if (account) {
+                                                updateItem(index, 'account_id', account.id);
+                                                setActiveAccountSearch(null);
+                                              }
+                                            }
+                                          } else if (e.key === 'Escape') {
+                                            setActiveAccountSearch(null);
+                                          }
+                                        }}
                                       />
                                     </div>
                                   </div>
@@ -588,30 +620,49 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                               updateItem(index, 'account_id', '');
                                               setActiveAccountSearch(null);
                                             }}
-                                            className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-rose-50 border border-transparent hover:border-rose-100 group flex items-center justify-between transition-all mb-2"
+                                            className={cn(
+                                              "w-full text-left px-2 py-1.5 rounded-lg border border-transparent group flex items-center justify-between transition-all mb-2",
+                                              selectedIndex === 0 ? "bg-rose-50 border-rose-100" : "hover:bg-rose-50 hover:border-rose-100"
+                                            )}
                                           >
-                                            <span className="text-[10px] font-semibold text-rose-500 uppercase tracking-tight">No Selection</span>
+                                            <span className={cn("text-[10px] font-semibold uppercase tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
                                           </button>
                                           {groups.map(group => (
                                             <div key={group.value} className="mb-1 last:mb-0">
                                               <div className="px-2 py-1 text-[7px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">{group.label}</div>
-                                              {group.accounts.map(a => (
-                                                <button
-                                                  key={a.id}
-                                                  type="button"
-                                                  onClick={() => {
-                                                    updateItem(index, 'account_id', a.id);
-                                                    setActiveAccountSearch(null);
-                                                  }}
-                                                  className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-indigo-600 group flex items-center justify-between transition-all"
-                                                >
-                                                  <div className="flex flex-col">
-                                                    <span className="text-[10px] font-medium text-slate-700 group-hover:text-white uppercase tracking-tight">{a.name}</span>
-                                                    <span className="text-[8px] font-mono text-slate-400 group-hover:text-indigo-100 tracking-widest">{a.code}</span>
-                                                  </div>
-                                                  <Plus size={10} className="text-slate-300 group-hover:text-white opacity-0 group-hover:opacity-100" />
-                                                </button>
-                                              ))}
+                                              {group.accounts.map(a => {
+                                                const globalIndex = filtered.indexOf(a) + 1;
+                                                const isSelected = selectedIndex === globalIndex;
+                                                return (
+                                                  <button
+                                                    key={a.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                      updateItem(index, 'account_id', a.id);
+                                                      setActiveAccountSearch(null);
+                                                    }}
+                                                    className={cn(
+                                                      "w-full text-left px-2 py-1.5 rounded-lg group flex items-center justify-between transition-all",
+                                                      isSelected ? "bg-indigo-600 shadow-md" : "hover:bg-indigo-50"
+                                                    )}
+                                                  >
+                                                    <div className="flex flex-col">
+                                                      <span className={cn(
+                                                        "text-[10px] font-medium uppercase tracking-tight",
+                                                        isSelected ? "text-white" : "text-slate-700"
+                                                      )}>{a.name}</span>
+                                                      <span className={cn(
+                                                        "text-[8px] font-mono tracking-widest",
+                                                        isSelected ? "text-indigo-100" : "text-slate-400"
+                                                      )}>{a.code}</span>
+                                                    </div>
+                                                    <Plus size={10} className={cn(
+                                                      "transition-all",
+                                                      isSelected ? "text-white opacity-100" : "text-slate-300 opacity-0 group-hover:opacity-100"
+                                                    )} />
+                                                  </button>
+                                                );
+                                              })}
                                             </div>
                                           ))}
                                         </>

@@ -29,6 +29,7 @@ export default function Ledger() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showDeepFilter, setShowDeepFilter] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const [narrationSearch, setNarrationSearch] = useState('');
   const [confirmedNarrationSearch, setConfirmedNarrationSearch] = useState('');
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
@@ -213,7 +214,38 @@ export default function Ledger() {
                         className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                         placeholder="Search Account Ledger..."
                         value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onChange={(e) => {
+                          setSearchQuery(e.target.value);
+                          setSelectedIndex(0);
+                        }}
+                        onKeyDown={(e) => {
+                          const filtered = accounts.filter(a => 
+                            a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            a.code.toLowerCase().includes(searchQuery.toLowerCase())
+                          );
+
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setSelectedIndex(prev => (prev + 1) % (filtered.length + 1));
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setSelectedIndex(prev => (prev - 1 + filtered.length + 1) % (filtered.length + 1));
+                          } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (selectedIndex === 0) {
+                              setSelectedAccountId('');
+                              setIsSearchOpen(false);
+                            } else {
+                              const account = filtered[selectedIndex - 1];
+                              if (account) {
+                                setSelectedAccountId(account.id);
+                                setIsSearchOpen(false);
+                              }
+                            }
+                          } else if (e.key === 'Escape') {
+                            setIsSearchOpen(false);
+                          }
+                        }}
                       />
                     </div>
                   </div>
@@ -251,34 +283,47 @@ export default function Ledger() {
                               setSelectedAccountId('');
                               setIsSearchOpen(false);
                             }}
-                            className="w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group hover:bg-rose-50 mb-3 border border-transparent hover:border-rose-100"
+                            className={cn(
+                              "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group mb-3 border border-transparent",
+                              selectedIndex === 0 ? "bg-rose-50 border-rose-100 shadow-sm" : "hover:bg-rose-50 hover:border-rose-100"
+                            )}
                           >
-                            <span className="text-[10px] font-semibold text-rose-500 uppercase tracking-tight">No Selection</span>
+                            <span className={cn("text-[10px] font-semibold uppercase tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
                           </button>
                           {groups.map(group => (
                             <div key={group.value} className="mb-3 last:mb-0">
                               <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
                               <div className="grid grid-cols-1 gap-1">
-                                {group.accounts.map(a => (
-                                  <button
-                                    key={a.id}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedAccountId(a.id);
-                                      setIsSearchOpen(false);
-                                    }}
-                                    className={cn(
-                                      "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group",
-                                      selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
-                                    )}
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className={cn("text-[11px] font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")}>{a.name}</span>
-                                      <span className="text-[9px] font-mono font-medium text-slate-400 group-hover:text-indigo-400 transition-colors">{a.code}</span>
-                                    </div>
-                                    {selectedAccountId === a.id && <Check size={14} className="text-indigo-600" />}
-                                  </button>
-                                ))}
+                                {group.accounts.map(a => {
+                                  const globalIndex = filtered.indexOf(a) + 1;
+                                  const isSelected = selectedIndex === globalIndex;
+                                  return (
+                                    <button
+                                      key={a.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setSelectedAccountId(a.id);
+                                        setIsSearchOpen(false);
+                                      }}
+                                      className={cn(
+                                        "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group border border-transparent",
+                                        isSelected ? "bg-indigo-600 border-indigo-700 shadow-md" : (selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50")
+                                      )}
+                                    >
+                                      <div className="flex flex-col">
+                                        <span className={cn(
+                                          "text-[11px] font-semibold uppercase tracking-tight",
+                                          isSelected ? "text-white" : (selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")
+                                        )}>{a.name}</span>
+                                        <span className={cn(
+                                          "text-[9px] font-mono font-medium transition-colors",
+                                          isSelected ? "text-indigo-100" : "text-slate-400 group-hover:text-indigo-400"
+                                        )}>{a.code}</span>
+                                      </div>
+                                      {(isSelected || selectedAccountId === a.id) && <Check size={14} className={isSelected ? "text-white" : "text-indigo-600"} />}
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </div>
                           ))}
