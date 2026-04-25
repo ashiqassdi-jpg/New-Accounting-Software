@@ -54,9 +54,46 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     { account_id: '', debit: 0, credit: 0 }
   ]);
   const [activeAccountSearch, setActiveAccountSearch] = useState<{index: number, query: string, rect?: { top: number, left: number, width: number }} | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedQuery(activeAccountSearch?.query || '');
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [activeAccountSearch?.query]);
+
   const searchRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLFormElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  // Focus search input when modal opens and restore focus on close
+  useEffect(() => {
+    if (activeAccountSearch) {
+      triggerRef.current = document.activeElement as HTMLElement;
+      setTimeout(() => searchInputRef.current?.focus(), 10);
+    } else if (triggerRef.current) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+    setSelectedIndex(0); // Reset index on open/close
+  }, [activeAccountSearch]);
+
+  // Scroll active item into view
+  useEffect(() => {
+    if (scrollContainerRef.current && selectedIndex >= 0) {
+      const selectedElement = scrollContainerRef.current.querySelector('[data-selected="true"]');
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'instant',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -547,7 +584,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                     <div className="relative">
                                       <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                       <input 
-                                        autoFocus
+                                        ref={searchInputRef}
                                         className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-4 py-1.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium uppercase placeholder:text-slate-300"
                                         placeholder="Type name or code..."
                                         value={activeAccountSearch.query}
@@ -557,8 +594,8 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                         }}
                                         onKeyDown={(e) => {
                                           const filtered = accounts.filter(a => 
-                                            a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
-                                            a.code.toLowerCase().includes(activeAccountSearch.query.toLowerCase())
+                                            a.name.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
+                                            a.code.toLowerCase().includes(debouncedQuery.toLowerCase())
                                           );
 
                                           if (e.key === 'ArrowDown') {
@@ -581,16 +618,42 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                             }
                                           } else if (e.key === 'Escape') {
                                             setActiveAccountSearch(null);
+                                          } else if (e.key === 'Tab') {
+                                            // Handle basic tabbing: if on input, Tab moves focus to the selected item in the list
+                                            if (!e.shiftKey) {
+                                              const selectedBtn = scrollContainerRef.current?.querySelector('[data-selected="true"]') as HTMLButtonElement;
+                                              if (selectedBtn) {
+                                                e.preventDefault();
+                                                selectedBtn.focus();
+                                              }
+                                            }
                                           }
                                         }}
                                       />
                                     </div>
                                   </div>
-                                  <div className="max-h-[220px] overflow-y-auto custom-scrollbar p-1.5 space-y-0.5">
+                                  <div 
+                                    ref={scrollContainerRef}
+                                    className="max-h-[220px] overflow-y-auto custom-scrollbar p-1.5 space-y-0.5"
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Tab' && !e.shiftKey) {
+                                        // If tabbing at the end of results, loop to input?
+                                        // Actually, let's just make any Tab in this container return to input for circularity
+                                        // or allow normal tabbing within but the LAST item loops back.
+                                        // Simplified: Tab from results goes back to input
+                                        e.preventDefault();
+                                        searchInputRef.current?.focus();
+                                      } else if (e.key === 'Tab' && e.shiftKey) {
+                                        // Shift+Tab from results goes back to input
+                                        e.preventDefault();
+                                        searchInputRef.current?.focus();
+                                      }
+                                    }}
+                                  >
                                     {(() => {
                                       const filtered = accounts.filter(a => 
-                                        a.name.toLowerCase().includes(activeAccountSearch.query.toLowerCase()) || 
-                                        a.code.toLowerCase().includes(activeAccountSearch.query.toLowerCase())
+                                        a.name.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
+                                        a.code.toLowerCase().includes(debouncedQuery.toLowerCase())
                                       );
 
                                       if (filtered.length === 0) {
@@ -616,6 +679,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                         <>
                                           <button
                                             type="button"
+                                            data-selected={selectedIndex === 0}
                                             onClick={() => {
                                               updateItem(index, 'account_id', '');
                                               setActiveAccountSearch(null);
@@ -637,6 +701,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                                   <button
                                                     key={a.id}
                                                     type="button"
+                                                    data-selected={isSelected}
                                                     onClick={() => {
                                                       updateItem(index, 'account_id', a.id);
                                                       setActiveAccountSearch(null);

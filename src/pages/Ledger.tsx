@@ -43,6 +43,20 @@ export default function Ledger() {
     to: ''
   });
   const searchRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isSearchOpen) {
+      triggerRef.current = document.activeElement as HTMLElement;
+      setTimeout(() => searchInputRef.current?.focus(), 10);
+      setSelectedIndex(0);
+    } else if (triggerRef.current) {
+      triggerRef.current.focus();
+      triggerRef.current = null;
+    }
+  }, [isSearchOpen]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -53,6 +67,18 @@ export default function Ledger() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    if (scrollContainerRef.current && selectedIndex >= 0) {
+      const selectedElement = scrollContainerRef.current.querySelector('[data-selected="true"]');
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'instant',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   useEffect(() => {
     if (selectedCompany) {
@@ -210,7 +236,7 @@ export default function Ledger() {
                     <div className="relative">
                       <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
-                        autoFocus
+                        ref={searchInputRef}
                         className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                         placeholder="Search Account Ledger..."
                         value={searchQuery}
@@ -244,12 +270,29 @@ export default function Ledger() {
                             }
                           } else if (e.key === 'Escape') {
                             setIsSearchOpen(false);
+                          } else if (e.key === 'Tab') {
+                            if (!e.shiftKey) {
+                              const selectedBtn = scrollContainerRef.current?.querySelector('[data-selected="true"]') as HTMLButtonElement;
+                              if (selectedBtn) {
+                                e.preventDefault();
+                                selectedBtn.focus();
+                              }
+                            }
                           }
                         }}
                       />
                     </div>
                   </div>
-                  <div className="max-h-[300px] overflow-y-auto custom-scrollbar px-2 py-2 space-y-1">
+                  <div 
+                    ref={scrollContainerRef}
+                    className="max-h-[300px] overflow-y-auto custom-scrollbar px-2 py-2 space-y-1"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Tab') {
+                        e.preventDefault();
+                        searchInputRef.current?.focus();
+                      }
+                    }}
+                  >
                     {(() => {
                       const filtered = accounts.filter(a => 
                         a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -279,6 +322,7 @@ export default function Ledger() {
                         <>
                           <button
                             type="button"
+                            data-selected={selectedIndex === 0}
                             onClick={() => {
                               setSelectedAccountId('');
                               setIsSearchOpen(false);
@@ -301,6 +345,7 @@ export default function Ledger() {
                                     <button
                                       key={a.id}
                                       type="button"
+                                      data-selected={isSelected}
                                       onClick={() => {
                                         setSelectedAccountId(a.id);
                                         setIsSearchOpen(false);

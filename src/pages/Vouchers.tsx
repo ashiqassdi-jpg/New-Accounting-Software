@@ -45,7 +45,34 @@ export default function Vouchers() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [isAccountSearchOpen, setIsAccountSearchOpen] = useState(false);
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const accountSearchRef = React.useRef<HTMLDivElement>(null);
+  const accountSearchInputRef = React.useRef<HTMLInputElement>(null);
+  const accountScrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const accountTriggerRef = React.useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (isAccountSearchOpen) {
+      accountTriggerRef.current = document.activeElement as HTMLElement;
+      setTimeout(() => accountSearchInputRef.current?.focus(), 10);
+      setSelectedIndex(0);
+    } else if (accountTriggerRef.current) {
+      accountTriggerRef.current.focus();
+      accountTriggerRef.current = null;
+    }
+  }, [isAccountSearchOpen]);
+
+  useEffect(() => {
+    if (accountScrollContainerRef.current && selectedIndex >= 0) {
+      const selectedElement = accountScrollContainerRef.current.querySelector('[data-selected="true"]');
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'instant',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -441,16 +468,62 @@ export default function Vouchers() {
                                 <div className="relative">
                                   <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                   <input 
-                                    autoFocus
+                                    ref={accountSearchInputRef}
                                     className="w-full bg-white border border-slate-300 rounded-md pl-8 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
                                     placeholder="Search accounts..."
                                     value={accountSearchQuery}
-                                    onChange={(e) => setAccountSearchQuery(e.target.value)}
+                                    onChange={(e) => {
+                                      setAccountSearchQuery(e.target.value);
+                                      setSelectedIndex(0);
+                                    }}
+                                    onKeyDown={(e) => {
+                                      const filtered = accounts.filter(a => a.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) || a.code.includes(accountSearchQuery));
+                                      if (e.key === 'ArrowDown') {
+                                        e.preventDefault();
+                                        setSelectedIndex(prev => (prev + 1) % (filtered.length + 1));
+                                      } else if (e.key === 'ArrowUp') {
+                                        e.preventDefault();
+                                        setSelectedIndex(prev => (prev - 1 + filtered.length + 1) % (filtered.length + 1));
+                                      } else if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        if (selectedIndex === 0) {
+                                          setFilterAccountId(null);
+                                          setIsAccountSearchOpen(false);
+                                        } else {
+                                          const account = filtered[selectedIndex - 1];
+                                          if (account) {
+                                            setFilterAccountId(account.id);
+                                            setIsAccountSearchOpen(false);
+                                            setAccountSearchQuery('');
+                                          }
+                                        }
+                                      } else if (e.key === 'Escape') {
+                                        setIsAccountSearchOpen(false);
+                                      } else if (e.key === 'Tab') {
+                                        if (!e.shiftKey) {
+                                          const selectedBtn = accountScrollContainerRef.current?.querySelector('[data-selected="true"]') as HTMLButtonElement;
+                                          if (selectedBtn) {
+                                            e.preventDefault();
+                                            selectedBtn.focus();
+                                          }
+                                        }
+                                      }
+                                    }}
                                   />
                                 </div>
                               </div>
-                              <div className="max-h-[240px] overflow-y-auto p-1 space-y-0.5">
+                               <div 
+                                ref={accountScrollContainerRef} 
+                                className="max-h-[240px] overflow-y-auto p-1 space-y-0.5"
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Tab') {
+                                    e.preventDefault();
+                                    accountSearchInputRef.current?.focus();
+                                  }
+                                }}
+                              >
                                 <button
+                                  data-selected={selectedIndex === 0}
                                   onClick={() => {
                                     setFilterAccountId(null);
                                     setIsAccountSearchOpen(false);
@@ -462,25 +535,29 @@ export default function Vouchers() {
                                 >
                                   Reset Account Selection
                                 </button>
-                                {accounts.filter(a => a.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) || a.code.includes(accountSearchQuery)).map(a => (
-                                  <button
-                                    key={a.id}
-                                    onClick={() => {
-                                      setFilterAccountId(a.id);
-                                      setIsAccountSearchOpen(false);
-                                      setAccountSearchQuery('');
-                                    }}
-                                    className={cn(
-                                      "w-full text-left px-3 py-2 rounded-md flex items-center justify-between transition-colors",
-                                      filterAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
-                                    )}
-                                  >
-                                    <div className="flex flex-col truncate pr-2">
-                                      <span className={cn("text-sm truncate", filterAccountId === a.id ? "text-indigo-900 font-medium" : "text-slate-700")}>{a.name}</span>
-                                    </div>
-                                    <span className={cn("text-xs font-mono shrink-0", filterAccountId === a.id ? "text-indigo-500" : "text-slate-400")}>{a.code}</span>
-                                  </button>
-                                ))}
+                                {accounts.filter(a => a.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) || a.code.includes(accountSearchQuery)).map((a, idx) => {
+                                  const isSelected = selectedIndex === idx + 1;
+                                  return (
+                                    <button
+                                      key={a.id}
+                                      data-selected={isSelected}
+                                      onClick={() => {
+                                        setFilterAccountId(a.id);
+                                        setIsAccountSearchOpen(false);
+                                        setAccountSearchQuery('');
+                                      }}
+                                      className={cn(
+                                        "w-full text-left px-3 py-2 rounded-md flex items-center justify-between transition-colors",
+                                        isSelected ? "bg-indigo-600 text-white" : (filterAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50")
+                                      )}
+                                    >
+                                      <div className="flex flex-col truncate pr-2">
+                                        <span className={cn("text-sm truncate", isSelected ? "text-white font-medium" : (filterAccountId === a.id ? "text-indigo-900 font-medium" : "text-slate-700"))}>{a.name}</span>
+                                      </div>
+                                      <span className={cn("text-xs font-mono shrink-0", isSelected ? "text-indigo-100" : (filterAccountId === a.id ? "text-indigo-500" : "text-slate-400"))}>{a.code}</span>
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </div>
                           )}
