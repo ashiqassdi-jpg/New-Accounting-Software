@@ -493,11 +493,16 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
     const { data: accounts, error: accError } = await accQuery;
     if (accError) { setLoading(false); return; }
 
-    const { data: transactions, error: transError } = await supabase
+    let transQuery = supabase
       .from('transactions')
       .select('*')
-      .eq('company_id', companyId)
-      .lte('date', dateRange.to);
+      .eq('company_id', companyId);
+
+    if (dateRange.to) {
+      transQuery = transQuery.lte('date', dateRange.to);
+    }
+
+    const { data: transactions, error: transError } = await transQuery;
 
     if (transError) { setLoading(false); return; }
 
@@ -975,13 +980,17 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   const fetchLedger = async () => {
     setLoading(true);
-    const { data: prevTransactions } = await supabase
-      .from('transactions')
-      .select('debit, credit')
-      .eq('account_id', selectedAccountId)
-      .lt('date', dateRange.from);
+    let opening = 0;
     
-    const opening = (prevTransactions || []).reduce((sum, t) => sum + (t.debit - t.credit), 0);
+    if (dateRange.from) {
+      const { data: prevTransactions } = await supabase
+        .from('transactions')
+        .select('debit, credit')
+        .eq('account_id', selectedAccountId)
+        .lt('date', dateRange.from);
+      
+      opening = (prevTransactions || []).reduce((sum, t) => sum + (t.debit - t.credit), 0);
+    }
     setOpeningBalance(opening);
 
     let query = supabase
@@ -990,9 +999,10 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         *,
         voucher:vouchers(*)
       `)
-      .eq('account_id', selectedAccountId)
-      .gte('date', dateRange.from)
-      .lte('date', dateRange.to);
+      .eq('account_id', selectedAccountId);
+      
+    if (dateRange.from) query = query.gte('date', dateRange.from);
+    if (dateRange.to) query = query.lte('date', dateRange.to);
     
     const { data, error } = await query
       .order('date', { ascending: true })
