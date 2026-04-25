@@ -12,7 +12,7 @@ import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { Account } from '../types';
-import { ACCOUNT_GROUPS, formatBDT } from '../constants';
+import { ACCOUNT_GROUPS, formatBDT, getDisplayBalance } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -185,7 +185,7 @@ export default function ChartOfAccounts() {
 
   const totalGroupBalance = accounts
     .filter(acc => acc.type === activeTab)
-    .reduce((sum, acc) => sum + (acc.current_balance || 0), 0);
+    .reduce((sum, acc) => sum + getDisplayBalance(acc.type, acc.current_balance || 0), 0);
 
   const handleExportExcel = () => {
     const data = accounts.map(acc => ({
@@ -296,12 +296,17 @@ export default function ChartOfAccounts() {
                       <td className="px-5 py-3 text-xs font-mono text-slate-400">{acc.code}</td>
                       <td className="px-5 py-3 text-xs font-semibold text-slate-800">{acc.name}</td>
                       <td className="px-5 py-3 text-right">
-                        <span className={cn(
-                          "text-xs font-mono font-semibold tabular-nums",
-                          acc.current_balance < 0 ? "text-rose-500" : "text-slate-700"
-                        )}>
-                          {formatBDT(acc.current_balance)}
-                        </span>
+                        {(() => {
+                          const displayBalance = getDisplayBalance(acc.type, acc.current_balance);
+                          return (
+                            <span className={cn(
+                              "text-xs font-mono font-semibold tabular-nums",
+                              displayBalance < 0 ? "text-rose-500" : "text-slate-700"
+                            )}>
+                              {formatBDT(displayBalance)}
+                            </span>
+                          );
+                        })()}
                       </td>
                       {!isModerator && (
                         <td className="px-5 py-3 text-right">

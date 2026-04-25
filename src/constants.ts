@@ -38,3 +38,20 @@ export const BDT_FORMATTER = new Intl.NumberFormat('en-BD', {
 export const formatBDT = (amount: number = 0) => {
   return `৳${BDT_FORMATTER.format(amount || 0)}`;
 };
+
+export const calculateBalance = (type: string, debit: number, credit: number) => {
+  const d = Number(debit) || 0;
+  const c = Number(credit) || 0;
+  if (['INCOME', 'LIABILITY', 'EQUITY'].includes(type)) {
+    return c - d;
+  }
+  return d - c;
+};
+
+export const getDisplayBalance = (type: string, balance: number) => {
+  const b = Number(balance) || 0;
+  if (['INCOME', 'LIABILITY', 'EQUITY'].includes(type)) {
+    return -b;
+  }
+  return b;
+};

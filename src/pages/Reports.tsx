@@ -32,7 +32,7 @@ import {
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
-import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES, PAYMENT_CHANNELS } from '../constants';
+import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES, PAYMENT_CHANNELS, getDisplayBalance, calculateBalance } from '../constants';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
@@ -44,7 +44,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 
-type ReportTab = 'TRIAL_BALANCE' | 'DAYBOOK' | 'LEDGER_REPORT';
+type ReportTab = 'TRIAL_BALANCE' | 'DAYBOOK' | 'LEDGER_REPORT' | 'PROFIT_LOSS' | 'BALANCE_SHEET';
 
 export default function Reports() {
   const { selectedCompany } = useCompany();
@@ -434,7 +434,7 @@ export default function Reports() {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
+            <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
               <TabButton 
                 active={activeTab === 'DAYBOOK'} 
                 onClick={() => setActiveTab('DAYBOOK')}
@@ -449,6 +449,16 @@ export default function Reports() {
                 active={activeTab === 'TRIAL_BALANCE'} 
                 onClick={() => setActiveTab('TRIAL_BALANCE')}
                 label="Trial Balance"
+              />
+              <TabButton 
+                active={activeTab === 'PROFIT_LOSS'} 
+                onClick={() => setActiveTab('PROFIT_LOSS')}
+                label="P & L"
+              />
+              <TabButton 
+                active={activeTab === 'BALANCE_SHEET'} 
+                onClick={() => setActiveTab('BALANCE_SHEET')}
+                label="Balance Sheet"
               />
             </div>
 
@@ -479,6 +489,22 @@ export default function Reports() {
                     filters={confirmedFilters}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
                     onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
+                  />
+                )}
+                {activeTab === 'PROFIT_LOSS' && (
+                  <ProfitAndLoss 
+                    companyId={selectedCompany?.id} 
+                    dateRange={confirmedDateRange} 
+                    onExportPDF={(data: any) => handleExportPDF(data, 'Profit & Loss Statement', ['Particulars', 'Amount'], 'profit_and_loss')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'profit_and_loss')}
+                  />
+                )}
+                {activeTab === 'BALANCE_SHEET' && (
+                  <BalanceSheet 
+                    companyId={selectedCompany?.id} 
+                    dateRange={confirmedDateRange} 
+                    onExportPDF={(data: any) => handleExportPDF(data, 'Balance Sheet', ['Particulars', 'Amount'], 'balance_sheet')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'balance_sheet')}
                   />
                 )}
             </div>
@@ -944,11 +970,198 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
   );
 }
 
+function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+  const [data, setData] = useState<any>({ income: [], expenses: [], netProfit: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (companyId) fetchPL();
+  }, [companyId, dateRange]);
+
+  const fetchPL = async () => {
+    setLoading(true);
+    const { data: accounts } = await supabase.from('accounts').select('*').eq('company_id', companyId).in('type', ['INCOME', 'EXPENSE']);
+    const { data: transactions } = await supabase.from('transactions').select('account_id, debit, credit').eq('company_id', companyId).gte('date', dateRange.from || '1970-01-01').lte('date', dateRange.to || '2100-12-31');
+
+    const balances: any = {};
+    transactions?.forEach(t => {
+      balances[t.account_id] = (balances[t.account_id] || 0) + (t.debit - t.credit);
+    });
+
+    const income = accounts?.filter(a => a.type === 'INCOME').map(a => ({ name: a.name, value: getDisplayBalance('INCOME', balances[a.id] || 0) })).filter(a => a.value !== 0) || [];
+    const expenses = accounts?.filter(a => a.type === 'EXPENSE').map(a => ({ name: a.name, value: getDisplayBalance('EXPENSE', balances[a.id] || 0) })).filter(a => a.value !== 0) || [];
+
+    const totalIncome = income.reduce((sum, item) => sum + item.value, 0);
+    const totalExpenses = expenses.reduce((sum, item) => sum + item.value, 0);
+    const netProfit = totalIncome - totalExpenses;
+
+    setData({ income, expenses, totalIncome, totalExpenses, netProfit });
+    setLoading(false);
+  };
+
+  if (loading) return <div className="p-20 text-center animate-pulse text-slate-300 uppercase tracking-widest font-semibold">Generating Profit Analytics...</div>;
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statement of Profit or Loss</h3>
+        <div className="flex gap-2">
+           <button onClick={() => onExportExcel([
+             ['Income'], ...data.income.map((i:any) => [i.name, i.value]), ['Total Income', data.totalIncome],
+             ['Expenses'], ...data.expenses.map((e:any) => [e.name, e.value]), ['Total Expenses', data.totalExpenses],
+             ['Net Profit', data.netProfit]
+           ])} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"><FileDown size={18} /></button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100">
+        <div className="p-10 space-y-8">
+          <div>
+            <h4 className="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-6">Revenue / Income Records ({data.income.length})</h4>
+            <div className="space-y-4">
+              {data.income.map((i: any) => (
+                <BalanceRow key={i.name} label={i.name} value={i.value} />
+              ))}
+              {data.income.length === 0 && <p className="text-xs text-slate-300 italic">No revenue streams discovered</p>}
+            </div>
+          </div>
+          <div className="pt-6 border-t border-slate-50">
+            <BalanceRow label="Total Revenue" value={data.totalIncome} bold />
+          </div>
+        </div>
+        <div className="p-10 space-y-8">
+          <div>
+            <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] mb-6">Operational Expenditures ({data.expenses.length})</h4>
+            <div className="space-y-4">
+              {data.expenses.map((e: any) => (
+                <BalanceRow key={e.name} label={e.name} value={e.value} />
+              ))}
+              {data.expenses.length === 0 && <p className="text-xs text-slate-300 italic">No operational leakage detected</p>}
+            </div>
+          </div>
+          <div className="pt-6 border-t border-slate-50">
+            <BalanceRow label="Total Expenses" value={data.totalExpenses} bold />
+          </div>
+        </div>
+      </div>
+      <div className="bg-slate-900 p-10 flex border-t-8 border-slate-50">
+        <div className="flex-1">
+          <h3 className={cn("text-xs font-bold uppercase tracking-[0.3em]", data.netProfit >= 0 ? "text-emerald-400" : "text-rose-400")}>
+            {data.netProfit >= 0 ? "Consolidated Net Profit" : "Consolidated Net Loss"}
+          </h3>
+          <p className="text-3xl font-bold text-white mt-2 font-mono tracking-tighter tabular-nums">{formatBDT(data.netProfit)}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+  const [data, setData] = useState<any>({ assets: [], liabilities: [], equity: [], netProfit: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (companyId) fetchBS();
+  }, [companyId, dateRange]);
+
+  const fetchBS = async () => {
+    setLoading(true);
+    const { data: accounts } = await supabase.from('accounts').select('*').eq('company_id', companyId);
+    
+    // We need all transactions to get cumulative balances for Balance Sheet
+    const { data: transactions } = await supabase.from('transactions').select('account_id, debit, credit').eq('company_id', companyId).lte('date', dateRange.to || '2100-12-31');
+
+    const balances: any = {};
+    transactions?.forEach(t => {
+      balances[t.account_id] = (balances[t.account_id] || 0) + (t.debit - t.credit);
+    });
+
+    const assets = accounts?.filter(a => a.type === 'ASSET').map(a => ({ name: a.name, value: getDisplayBalance('ASSET', balances[a.id] || 0) })).filter(a => a.value !== 0) || [];
+    const liabilities = accounts?.filter(a => a.type === 'LIABILITY').map(a => ({ name: a.name, value: getDisplayBalance('LIABILITY', balances[a.id] || 0) })).filter(a => a.value !== 0) || [];
+    const equity = accounts?.filter(a => a.type === 'EQUITY').map(a => ({ name: a.name, value: getDisplayBalance('EQUITY', balances[a.id] || 0) })).filter(a => a.value !== 0) || [];
+
+    // Calculate Net Profit for the period to date
+    const incomeTotal = (accounts?.filter(a => a.type === 'INCOME') || []).reduce((sum, a) => sum + getDisplayBalance('INCOME', balances[a.id] || 0), 0);
+    const expenseTotal = (accounts?.filter(a => a.type === 'EXPENSE') || []).reduce((sum, a) => sum + getDisplayBalance('EXPENSE', balances[a.id] || 0), 0);
+    const netProfit = incomeTotal - expenseTotal;
+
+    const totalAssets = assets.reduce((sum, item) => sum + item.value, 0);
+    const totalLiabilities = liabilities.reduce((sum, item) => sum + item.value, 0);
+    const totalEquity = equity.reduce((sum, item) => sum + item.value, 0) + netProfit;
+
+    setData({ assets, liabilities, equity, totalAssets, totalLiabilities, totalEquity, netProfit });
+    setLoading(false);
+  };
+
+  if (loading) return <div className="p-20 text-center animate-pulse text-slate-300 uppercase tracking-widest font-semibold">Reconstructing Financial Position...</div>;
+
+  return (
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+        <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statement of Financial Position</h3>
+        <div className="flex gap-2">
+           <button onClick={() => onExportExcel([
+             ['Assets'], ...data.assets.map((i:any) => [i.name, i.value]), ['Total Assets', data.totalAssets],
+             ['Liabilities'], ...data.liabilities.map((l:any) => [l.name, l.value]), ['Total Liabilities', data.totalLiabilities],
+             ['Equity'], ...data.equity.map((e:any) => [e.name, e.value]), ['Net Profit (Retained)', data.netProfit], ['Total Equity', data.totalEquity]
+           ])} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"><FileDown size={18} /></button>
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100">
+        <div className="p-10 space-y-8">
+          <div>
+            <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em] mb-6">Total Resources / Assets</h4>
+            <div className="space-y-4">
+              {data.assets.map((a: any) => (
+                <BalanceRow key={a.name} label={a.name} value={a.value} />
+              ))}
+            </div>
+          </div>
+          <div className="pt-6 border-t border-slate-50">
+            <BalanceRow label="Total Assets" value={data.totalAssets} bold />
+          </div>
+        </div>
+        <div className="p-10 space-y-8">
+          <div className="space-y-8">
+            <div>
+              <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] mb-6">External Obligations / Liabilities</h4>
+              <div className="space-y-4">
+                {data.liabilities.map((l: any) => (
+                  <BalanceRow key={l.name} label={l.name} value={l.value} />
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-[0.2em] mb-6">Owner's Equity & Retained Earnings</h4>
+              <div className="space-y-4">
+                {data.equity.map((e: any) => (
+                  <BalanceRow key={e.name} label={e.name} value={e.value} />
+                ))}
+                <BalanceRow label="Retained Earnings (Net Profit)" value={data.netProfit} />
+              </div>
+            </div>
+          </div>
+          <div className="pt-6 border-t border-slate-100 space-y-3">
+             <BalanceRow label="Total Liabilities + Equity" value={data.totalLiabilities + data.totalEquity} bold />
+             {Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) > 0.01 && (
+               <div className="bg-rose-50 p-3 rounded-xl border border-rose-100">
+                 <p className="text-[9px] font-bold text-rose-600 uppercase tracking-widest text-center">Unbalanced Protocol: Diff ৳{formatBDT(data.totalAssets - (data.totalLiabilities + data.totalEquity))}</p>
+               </div>
+             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function BalanceRow({ label, value, bold }: any) {
+  const isNegative = value < 0;
   return (
     <div className="flex items-center justify-between">
-      <span className={cn("text-sm", bold ? "font-semibold" : "text-slate-500 font-medium")}>{label}</span>
-      <span className={cn("text-base font-mono", bold ? "font-semibold" : "text-slate-700 font-semibold")}>{formatBDT(value)}</span>
+      <span className={cn("text-sm", bold ? "font-semibold text-slate-900" : "text-slate-500 font-medium")}>{label}</span>
+      <span className={cn("text-sm font-mono font-semibold tabular-nums", isNegative ? "text-rose-500" : (bold ? "text-slate-900" : "text-slate-700"))}>
+        {formatBDT(value)}
+      </span>
     </div>
   );
 }
@@ -1002,7 +1215,10 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         .eq('account_id', selectedAccountId)
         .lt('date', dateRange.from);
       
-      opening = (prevTransactions || []).reduce((sum, t) => sum + (t.debit - t.credit), 0);
+      const acc = accounts.find(a => a.id === selectedAccountId);
+      const totalD = (prevTransactions || []).reduce((sum, t) => sum + (Number(t.debit) || 0), 0);
+      const totalC = (prevTransactions || []).reduce((sum, t) => sum + (Number(t.credit) || 0), 0);
+      opening = calculateBalance(acc?.type || 'ASSET', totalD, totalC);
     }
     setOpeningBalance(opening);
 
@@ -1033,8 +1249,9 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   };
 
   let currentBalance = openingBalance;
+  const targetAcc = accounts.find(a => a.id === selectedAccountId);
   const ledgerRows = transactions.map(t => {
-    currentBalance += (t.debit - t.credit);
+    currentBalance += calculateBalance(targetAcc?.type || 'ASSET', t.debit, t.credit);
     return { ...t, runningBalance: currentBalance };
   });
 
@@ -1043,12 +1260,12 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
     r.voucher?.voucher_no?.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Reverse for display: Most recent at the top
-  const displayRows = [...filteredRows].reverse();
-
   const totalDebit = filteredRows.reduce((sum, r) => sum + r.debit, 0);
   const totalCredit = filteredRows.reduce((sum, r) => sum + r.credit, 0);
-  const closingBalance = openingBalance + totalDebit - totalCredit;
+  const periodBalanceMovement = calculateBalance(targetAcc?.type || 'ASSET', totalDebit, totalCredit);
+  const closingBalance = openingBalance + periodBalanceMovement;
+
+  const displayRows = [...filteredRows].reverse();
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
@@ -1244,7 +1461,12 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                   <td className="px-10 py-5 text-sm font-mono font-semibold text-emerald-500 text-right tabular-nums">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
                   <td className="px-10 py-5 text-right pr-10">
                     <div className="flex items-center justify-end gap-3">
-                      <span className="text-sm font-mono font-semibold text-indigo-600 tabular-nums">{formatBDT(r.runningBalance).replace(/[^0-9.,]/g, '')}</span>
+                      <span className={cn(
+                        "text-sm font-mono font-semibold tabular-nums",
+                        r.runningBalance < 0 ? "text-rose-600" : "text-indigo-600"
+                      )}>
+                        {formatBDT(r.runningBalance).replace(/[^0-9.,]/g, '')}
+                      </span>
                       <button 
                         className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-white rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 group-hover:opacity-100 opacity-0"
                         onClick={() => setViewingVoucher(r.voucher)}
@@ -1272,7 +1494,12 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                 <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">Analytical Totals</td>
                 <td className="px-10 py-8 text-sm font-mono text-rose-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
                 <td className="px-10 py-8 text-sm font-mono text-emerald-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
-                <td className="px-10 py-8 text-sm font-mono text-indigo-700 text-right pr-10 tabular-nums">CLOSING: {formatBDT(closingBalance).replace(/[^0-9.,]/g, '')}</td>
+                <td className={cn(
+                  "px-10 py-8 text-sm font-mono text-right pr-10 tabular-nums",
+                  closingBalance < 0 ? "text-rose-600" : "text-indigo-700"
+                )}>
+                  CLOSING: {formatBDT(closingBalance).replace(/[^0-9.,]/g, '')}
+                </td>
               </tr>
             </tfoot>
           </table>

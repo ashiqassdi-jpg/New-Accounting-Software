@@ -26,7 +26,7 @@ import {
 } from 'recharts';
 import { DateRangeFilter } from '../components/DateRangeFilter';
 import { motion } from 'motion/react';
-import { formatBDT } from '../constants';
+import { formatBDT, getDisplayBalance } from '../constants';
 import { useCompany } from '../hooks/useCompany';
 import { supabase } from '../lib/supabase';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
@@ -165,7 +165,7 @@ export default function Dashboard() {
 
       const getBalance = (name: string) => {
         const acc = accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
-        return acc ? acc.current_balance : 0;
+        return acc ? getDisplayBalance(acc.type, acc.current_balance) : 0;
       };
 
       // Aggregating revenue and expenses from transactions in date range
@@ -353,7 +353,10 @@ function StatCard({ title, value, icon: Icon, color }: any) {
         </div>
         <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{title}</h3>
       </div>
-      <p className="text-xl font-bold text-slate-800 font-mono tracking-tighter tabular-nums truncate">
+      <p className={cn(
+        "text-xl font-bold font-mono tracking-tighter tabular-nums truncate",
+        value < 0 ? "text-rose-600" : "text-slate-800"
+      )}>
         {formatBDT(value)}
       </p>
     </motion.div>

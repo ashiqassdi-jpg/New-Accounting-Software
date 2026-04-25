@@ -8,7 +8,7 @@ import { Search, Download, Calendar, ArrowUpRight, ArrowDownLeft, Eye, FileText,
 import { supabase } from '../lib/supabase';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
-import { formatBDT, ACCOUNT_GROUPS } from '../constants';
+import { formatBDT, ACCOUNT_GROUPS, getDisplayBalance, calculateBalance } from '../constants';
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -125,7 +125,7 @@ export default function Ledger() {
       // Calculate running balance starting from 0 or opening balance logic
       let runningBalance = 0;
       const transactionsWithBalance = filteredData.map(t => {
-        runningBalance += (t.debit - t.credit);
+        runningBalance += calculateBalance(selectedAccount?.type || 'ASSET', t.debit, t.credit);
         return { ...t, balance: runningBalance };
       });
 
@@ -515,7 +515,11 @@ export default function Ledger() {
           <LedgerStat label="In-Period Credit" value={transactions.reduce((acc, t) => acc + (t.credit || 0), 0)} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
           <LedgerStat 
             label="Net Variance (Period)" 
-            value={transactions.reduce((acc, t) => acc + (t.debit - t.credit), 0)} 
+            value={calculateBalance(
+              selectedAccount?.type || 'ASSET',
+              transactions.reduce((acc, t) => acc + (t.debit || 0), 0),
+              transactions.reduce((acc, t) => acc + (t.credit || 0), 0)
+            )} 
             icon={<Filter size={16} className="text-indigo-500" />}
           />
         </div>
@@ -597,7 +601,9 @@ export default function Ledger() {
                     </td>
                     <td className="px-10 py-6 text-xs font-semibold text-slate-900 text-right pr-12 font-mono tabular-nums relative">
                       <div className="flex items-center justify-end gap-3 translate-x-4">
-                        {formatBDT(t.balance).replace(/[^0-9.,]/g, '')}
+                        <span className={cn(t.balance < 0 ? "text-rose-600" : "text-slate-900")}>
+                          {formatBDT(t.balance).replace(/[^0-9.,]/g, '')}
+                        </span>
                         <div className={cn(
                           "w-1.5 h-1.5 rounded-full shrink-0",
                           t.balance >= 0 ? "bg-emerald-400" : "bg-rose-400"
