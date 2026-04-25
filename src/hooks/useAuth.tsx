@@ -112,23 +112,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isSupabaseConfigured) return;
 
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Initial session fetch error:', error);
+        // "Refresh Token Not Found" or "Invalid Refresh Token" means local state is out of sync
+        if (error.message.includes('Refresh Token Not Found') || error.message.includes('invalid_grant')) {
+          supabase.auth.signOut();
+        }
+        setLoading(false);
+        return;
+      }
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user).then(setProfile);
       }
       setLoading(false);
+    }).catch(err => {
+      console.error('Fatal auth error:', err);
+      setLoading(false);
     });
 
     // Listen for changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // If we get an error-like event or invalid refresh token error is thrown internally
+      // console.log('Auth state change:', event, session);
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchProfile(session.user).then(setProfile);
       } else {
         setProfile(null);
+        // If event is SIGNED_OUT, we've already handled it
       }
       setLoading(false);
     });
