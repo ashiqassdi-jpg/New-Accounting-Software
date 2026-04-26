@@ -26,6 +26,8 @@ import {
 } from 'recharts';
 import { DateRangeFilter } from '../components/DateRangeFilter';
 import { motion } from 'motion/react';
+import { StatCard } from '../components/dashboard/StatCard';
+import { ChartBox } from '../components/dashboard/ChartBox';
 import { formatBDT, getDisplayBalance } from '../constants';
 import { useCompany } from '../hooks/useCompany';
 import { supabase } from '../lib/supabase';
@@ -333,48 +335,3 @@ export default function Dashboard() {
   );
 }
 
-function StatCard({ title, value, icon: Icon, color }: any) {
-  const colorMap: any = {
-    indigo: 'text-indigo-600',
-    emerald: 'text-emerald-600',
-    rose: 'text-rose-600',
-    amber: 'text-amber-600',
-    slate: 'text-slate-600',
-  };
-
-  return (
-    <motion.div 
-      whileHover={{ y: -2 }}
-      className="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)] transition-all duration-300 relative group"
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className={cn("p-2 rounded-lg bg-slate-50/50", colorMap[color])}>
-          <Icon size={16} />
-        </div>
-        <h3 className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">{title}</h3>
-      </div>
-      <p className={cn(
-        "text-xl font-bold font-mono tracking-tighter tabular-nums truncate",
-        value < 0 ? "text-rose-600" : "text-slate-800"
-      )}>
-        {formatBDT(value)}
-      </p>
-    </motion.div>
-  );
-}
-
-function ChartBox({ title, children, icon: Icon }: any) {
-  return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)] relative">
-      <div className="flex items-center gap-2.5 mb-8">
-        <div className="bg-slate-50 p-1.5 rounded-lg text-slate-400">
-          <Icon size={14} />
-        </div>
-        <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-wider">{title}</h3>
-      </div>
-      <div>
-        {children}
-      </div>
-    </div>
-  );
-}
