@@ -910,7 +910,14 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                               <tbody className="divide-y divide-slate-100">
                                 {v.transactions.map((t: any, tIdx: number) => (
                                   <tr key={tIdx}>
-                                    <td className="px-6 py-3 text-[11px] font-medium text-slate-600 uppercase italic pl-10 border-l-4 border-indigo-500/20">{t.account?.name}</td>
+                                    <td className="px-6 py-3 text-[11px] font-medium text-slate-600 uppercase italic pl-10 border-l-4 border-indigo-500/20">
+                                      <div>{t.account?.name}</div>
+                                      <div className="text-[9px] text-slate-400 mt-0.5 normal-case">
+                                        {t.narration 
+                                          ? `${t.narration} - ${v.narration}`
+                                          : v.narration}
+                                      </div>
+                                    </td>
                                     <td className="px-6 py-3 text-[11px] font-mono font-semibold text-right text-rose-500">
                                       {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
                                     </td>
@@ -1407,7 +1414,14 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
           
           <div className="flex gap-3 justify-end h-[62px]">
             <button 
-              onClick={() => onExportExcel(filteredRows.map(r => ({ Date: r.date, Narration: r.voucher?.narration, Type: r.voucher?.type, Debit: r.debit, Credit: r.credit, Balance: r.runningBalance })))}
+              onClick={() => onExportExcel(filteredRows.map(r => ({ 
+                Date: r.date, 
+                Narration: r.narration ? `${r.narration} - ${r.voucher?.narration}` : r.voucher?.narration, 
+                Type: r.voucher?.type, 
+                Debit: r.debit, 
+                Credit: r.credit, 
+                Balance: r.runningBalance 
+              })))}
               className="px-6 bg-white text-slate-400 hover:text-emerald-600 rounded-2xl transition-all border border-slate-200 shadow-sm flex items-center gap-2"
               title="Export to Excel"
             >
@@ -1416,7 +1430,14 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             </button>
             <button 
               onClick={() => {
-                const docData = filteredRows.map(r => [format(new Date(r.date), 'dd/MM/yyyy'), r.voucher?.narration, r.voucher?.type, r.debit, r.credit, r.runningBalance]);
+                const docData = filteredRows.map(r => [
+                  format(new Date(r.date), 'dd/MM/yyyy'), 
+                  r.narration ? `${r.narration} - ${r.voucher?.narration}` : r.voucher?.narration, 
+                  r.voucher?.type, 
+                  r.debit, 
+                  r.credit, 
+                  r.runningBalance
+                ]);
                 onExportPDF(docData)
               }}
               className="px-6 bg-slate-900 text-white rounded-2xl transition-all shadow-xl shadow-slate-100 flex items-center gap-2 hover:bg-indigo-600"
@@ -1451,7 +1472,11 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                 <tr key={r.id} className="hover:bg-slate-50 transition-all group">
                   <td className="px-10 py-5 text-xs font-semibold text-slate-400 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
                   <td className="px-10 py-5">
-                    <p className="text-[11px] font-medium text-slate-600 whitespace-pre-wrap max-w-sm italic leading-relaxed">{r.voucher?.narration}</p>
+                    <p className="text-[11px] font-medium text-slate-600 whitespace-pre-wrap max-w-sm italic leading-relaxed">
+                      {r.narration 
+                        ? `${r.narration} - ${r.voucher?.narration}`
+                        : r.voucher?.narration}
+                    </p>
                     <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Ref: {r.voucher?.voucher_no}</p>
                   </td>
                   <td className="px-10 py-5">

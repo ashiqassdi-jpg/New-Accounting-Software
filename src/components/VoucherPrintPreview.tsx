@@ -169,7 +169,11 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                       <tr key={idx}>
                         <td className="px-4 py-3">
                           <p className="text-[11px] font-bold text-slate-700 uppercase">{item.account_name}</p>
-                          {idx === 0 && <p className="text-[9px] text-slate-400 mt-1 italic leading-tight">Narration: {voucher.narration}</p>}
+                          <p className="text-[9px] text-slate-400 mt-1 italic leading-tight">
+                            {item.narration 
+                              ? `${item.narration} - ${voucher.narration}`
+                              : voucher.narration}
+                          </p>
                         </td>
                         <td className="px-4 py-3 text-right font-mono text-[11px] font-bold text-slate-900">
                           {item.debit > 0 ? formatBDT(item.debit).replace(/[^0-9.,]/g, '') : ''}
@@ -189,6 +193,14 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                   </tfoot>
                 </table>
               </div>
+
+              {/* Primary Narration Section */}
+              {voucher.narration && (
+                <div className="mt-6 p-4 bg-slate-50 border border-slate-100 rounded-lg">
+                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Primary Narration</p>
+                  <p className="text-[10px] text-slate-600 font-medium leading-relaxed">{voucher.narration}</p>
+                </div>
+              )}
 
               {/* Refined Modular Signatures */}
               <div className="mt-16 grid grid-cols-4 gap-4">

@@ -166,7 +166,7 @@ export default function Ledger() {
     const body = transactions.map(t => [
       format(new Date(t.date), 'dd/MM/yyyy'),
       t.voucher?.voucher_no || '-',
-      t.voucher?.narration || '-',
+      t.narration ? `${t.narration} - ${t.voucher?.narration}` : (t.voucher?.narration || '-'),
       t.debit > 0 ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.debit) : '-',
       t.credit > 0 ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.credit) : '-'
     ]);
@@ -188,7 +188,7 @@ export default function Ledger() {
     const data = transactions.map(t => ({
       Date: format(new Date(t.date), 'dd/MM/yyyy'),
       'Voucher No': t.voucher?.voucher_no,
-      Narration: t.voucher?.narration,
+      Narration: t.narration ? `${t.narration} - ${t.voucher?.narration}` : t.voucher?.narration,
       Debit: t.debit,
       Credit: t.credit
     }));
@@ -586,7 +586,9 @@ export default function Ledger() {
                       {t.voucher?.voucher_no}
                     </td>
                     <td className="px-10 py-6 text-[13px] font-medium text-slate-500 max-w-lg leading-relaxed">
-                      {t.voucher?.narration}
+                      {t.narration 
+                        ? `${t.narration} - ${t.voucher?.narration}`
+                        : t.voucher?.narration}
                     </td>
                     <td className="px-10 py-6 text-xs font-semibold text-rose-600 text-right font-mono tabular-nums">
                       {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
