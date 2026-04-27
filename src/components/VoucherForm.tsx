@@ -54,14 +54,18 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     { account_id: '', debit: 0, credit: 0 }
   ]);
   const [activeAccountSearch, setActiveAccountSearch] = useState<{index: number, query: string, rect?: { top: number, left: number, width: number }} | null>(null);
-  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
 
+  const filteredAccounts = React.useMemo(() => {
+    const q = (activeAccountSearch?.query || '').toLowerCase();
+    return accounts.filter(a => 
+      a.name.toLowerCase().includes(q) || 
+      a.code.toLowerCase().includes(q)
+    );
+  }, [accounts, activeAccountSearch?.query]);
+
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedQuery(activeAccountSearch?.query || '');
-    }, 200);
-    return () => clearTimeout(timer);
+    setSelectedIndex(0); // Reset index when query changes
   }, [activeAccountSearch?.query]);
 
   const searchRef = useRef<HTMLDivElement>(null);
@@ -585,32 +589,26 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                       <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                                       <input 
                                         ref={searchInputRef}
-                                        className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-4 py-1.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium uppercase placeholder:text-slate-300"
+                                        className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-4 py-1.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium placeholder:text-slate-300"
                                         placeholder="Type name or code..."
                                         value={activeAccountSearch.query}
                                         onChange={(e) => {
                                           setActiveAccountSearch({ ...activeAccountSearch, query: e.target.value });
-                                          setSelectedIndex(0);
                                         }}
                                         onKeyDown={(e) => {
-                                          const filtered = accounts.filter(a => 
-                                            a.name.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
-                                            a.code.toLowerCase().includes(debouncedQuery.toLowerCase())
-                                          );
-
                                           if (e.key === 'ArrowDown') {
                                             e.preventDefault();
-                                            setSelectedIndex(prev => (prev + 1) % (filtered.length + 1));
+                                            setSelectedIndex(prev => (prev + 1) % (filteredAccounts.length + 1));
                                           } else if (e.key === 'ArrowUp') {
                                             e.preventDefault();
-                                            setSelectedIndex(prev => (prev - 1 + filtered.length + 1) % (filtered.length + 1));
+                                            setSelectedIndex(prev => (prev - 1 + filteredAccounts.length + 1) % (filteredAccounts.length + 1));
                                           } else if (e.key === 'Enter') {
                                             e.preventDefault();
                                             if (selectedIndex === 0) {
                                               updateItem(index, 'account_id', '');
                                               setActiveAccountSearch(null);
                                             } else {
-                                              const account = filtered[selectedIndex - 1];
+                                              const account = filteredAccounts[selectedIndex - 1];
                                               if (account) {
                                                 updateItem(index, 'account_id', account.id);
                                                 setActiveAccountSearch(null);
@@ -651,12 +649,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                     }}
                                   >
                                     {(() => {
-                                      const filtered = accounts.filter(a => 
-                                        a.name.toLowerCase().includes(debouncedQuery.toLowerCase()) || 
-                                        a.code.toLowerCase().includes(debouncedQuery.toLowerCase())
-                                      );
-
-                                      if (filtered.length === 0) {
+                                      if (filteredAccounts.length === 0) {
                                         return (
                                           <div className="py-6 text-center text-[9px] font-medium text-slate-300 uppercase tracking-widest">
                                             No Ledgers Found
@@ -666,11 +659,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
 
                                       const groups = ACCOUNT_GROUPS.map(group => ({
                                         ...group,
-                                        accounts: filtered.filter(a => a.type === group.value)
+                                        accounts: filteredAccounts.filter(a => a.type === group.value)
                                       })).filter(g => g.accounts.length > 0);
 
                                       const groupedIds = groups.flatMap(g => g.accounts.map(a => a.id));
-                                      const others = filtered.filter(a => !groupedIds.includes(a.id));
+                                      const others = filteredAccounts.filter(a => !groupedIds.includes(a.id));
                                       if (others.length > 0) {
                                         groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others });
                                       }
@@ -689,13 +682,13 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                               selectedIndex === 0 ? "bg-rose-50 border-rose-100" : "hover:bg-rose-50 hover:border-rose-100"
                                             )}
                                           >
-                                            <span className={cn("text-[10px] font-semibold uppercase tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
+                                            <span className={cn("text-[10px] font-semibold tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
                                           </button>
                                           {groups.map(group => (
                                             <div key={group.value} className="mb-1 last:mb-0">
                                               <div className="px-2 py-1 text-[7px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">{group.label}</div>
                                               {group.accounts.map(a => {
-                                                const globalIndex = filtered.indexOf(a) + 1;
+                                                const globalIndex = filteredAccounts.indexOf(a) + 1;
                                                 const isSelected = selectedIndex === globalIndex;
                                                 return (
                                                   <button
@@ -713,7 +706,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                                   >
                                                     <div className="flex flex-col">
                                                       <span className={cn(
-                                                        "text-[10px] font-medium uppercase tracking-tight",
+                                                        "text-[10px] font-medium tracking-tight",
                                                         isSelected ? "text-white" : "text-slate-700"
                                                       )}>{a.name}</span>
                                                       <span className={cn(

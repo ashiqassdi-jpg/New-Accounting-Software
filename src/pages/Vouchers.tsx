@@ -46,6 +46,18 @@ export default function Vouchers() {
   const [isAccountSearchOpen, setIsAccountSearchOpen] = useState(false);
   const [accountSearchQuery, setAccountSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const filteredAccountsForSearch = React.useMemo(() => {
+    const q = accountSearchQuery.toLowerCase();
+    return accounts.filter(a => 
+      a.name.toLowerCase().includes(q) || 
+      (a.code || '').toLowerCase().includes(q)
+    );
+  }, [accounts, accountSearchQuery]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [accountSearchQuery]);
   const accountSearchRef = React.useRef<HTMLDivElement>(null);
   const accountSearchInputRef = React.useRef<HTMLInputElement>(null);
   const accountScrollContainerRef = React.useRef<HTMLDivElement>(null);
@@ -366,15 +378,15 @@ export default function Vouchers() {
 
                 <div className="flex flex-wrap md:flex-nowrap items-center gap-1.5 overflow-x-auto no-scrollbar">
                   {/* Simplified Search */}
-                  <div className="relative w-40 shrink-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
-                    <input 
-                      className="w-full bg-white border border-slate-100 rounded-xl pl-9 pr-3 py-1.5 text-[9px] font-medium uppercase text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
-                      placeholder="SCAN..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                    />
-                  </div>
+                    <div className="relative w-40 shrink-0">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+                      <input 
+                        className="w-full bg-white border border-slate-100 rounded-xl pl-9 pr-3 py-1.5 text-[9px] font-medium text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
+                        placeholder="Scan..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                      />
+                    </div>
 
                   <DateRangeFilter 
                     value={dateRange}
@@ -477,20 +489,19 @@ export default function Vouchers() {
                                       setSelectedIndex(0);
                                     }}
                                     onKeyDown={(e) => {
-                                      const filtered = accounts.filter(a => a.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) || a.code.includes(accountSearchQuery));
                                       if (e.key === 'ArrowDown') {
                                         e.preventDefault();
-                                        setSelectedIndex(prev => (prev + 1) % (filtered.length + 1));
+                                        setSelectedIndex(prev => (prev + 1) % (filteredAccountsForSearch.length + 1));
                                       } else if (e.key === 'ArrowUp') {
                                         e.preventDefault();
-                                        setSelectedIndex(prev => (prev - 1 + filtered.length + 1) % (filtered.length + 1));
+                                        setSelectedIndex(prev => (prev - 1 + filteredAccountsForSearch.length + 1) % (filteredAccountsForSearch.length + 1));
                                       } else if (e.key === 'Enter') {
                                         e.preventDefault();
                                         if (selectedIndex === 0) {
                                           setFilterAccountId(null);
                                           setIsAccountSearchOpen(false);
                                         } else {
-                                          const account = filtered[selectedIndex - 1];
+                                          const account = filteredAccountsForSearch[selectedIndex - 1];
                                           if (account) {
                                             setFilterAccountId(account.id);
                                             setIsAccountSearchOpen(false);
@@ -535,7 +546,7 @@ export default function Vouchers() {
                                 >
                                   Reset Account Selection
                                 </button>
-                                {accounts.filter(a => a.name.toLowerCase().includes(accountSearchQuery.toLowerCase()) || a.code.includes(accountSearchQuery)).map((a, idx) => {
+                                {filteredAccountsForSearch.map((a, idx) => {
                                   const isSelected = selectedIndex === idx + 1;
                                   return (
                                     <button

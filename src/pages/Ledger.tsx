@@ -28,8 +28,20 @@ export default function Ledger() {
   const [viewingVoucher, setViewingVoucher] = useState<any>(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [showDeepFilter, setShowDeepFilter] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [accountSearchQuery, setAccountSearchQuery] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const filteredAccounts = React.useMemo(() => {
+    const q = accountSearchQuery.toLowerCase();
+    return accounts.filter(a => 
+      a.name.toLowerCase().includes(q) || 
+      a.code.toLowerCase().includes(q)
+    );
+  }, [accounts, accountSearchQuery]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [accountSearchQuery]);
   const [narrationSearch, setNarrationSearch] = useState('');
   const [confirmedNarrationSearch, setConfirmedNarrationSearch] = useState('');
   const [amountRange, setAmountRange] = useState({ min: '', max: '' });
@@ -140,11 +152,6 @@ export default function Ledger() {
 
   const selectedAccount = accounts.find(a => a.id === selectedAccountId);
 
-  const filteredAccounts = accounts.filter(a => 
-    a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    a.code.includes(searchQuery)
-  );
-
   const handleExportPDF = () => {
     if (!selectedAccount) return;
     const doc = new jsPDF();
@@ -239,33 +246,26 @@ export default function Ledger() {
                         ref={searchInputRef}
                         className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
                         placeholder="Search Account Ledger..."
-                        value={searchQuery}
-                        onChange={(e) => {
-                          setSearchQuery(e.target.value);
-                          setSelectedIndex(0);
-                        }}
+                        value={accountSearchQuery}
+                        onChange={(e) => setAccountSearchQuery(e.target.value)}
                         onKeyDown={(e) => {
-                          const filtered = accounts.filter(a => 
-                            a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            a.code.toLowerCase().includes(searchQuery.toLowerCase())
-                          );
-
                           if (e.key === 'ArrowDown') {
                             e.preventDefault();
-                            setSelectedIndex(prev => (prev + 1) % (filtered.length + 1));
+                            setSelectedIndex(prev => (prev + 1) % (filteredAccounts.length + 1));
                           } else if (e.key === 'ArrowUp') {
                             e.preventDefault();
-                            setSelectedIndex(prev => (prev - 1 + filtered.length + 1) % (filtered.length + 1));
+                            setSelectedIndex(prev => (prev - 1 + filteredAccounts.length + 1) % (filteredAccounts.length + 1));
                           } else if (e.key === 'Enter') {
                             e.preventDefault();
                             if (selectedIndex === 0) {
                               setSelectedAccountId('');
                               setIsSearchOpen(false);
                             } else {
-                              const account = filtered[selectedIndex - 1];
+                              const account = filteredAccounts[selectedIndex - 1];
                               if (account) {
                                 setSelectedAccountId(account.id);
                                 setIsSearchOpen(false);
+                                setAccountSearchQuery('');
                               }
                             }
                           } else if (e.key === 'Escape') {
@@ -294,12 +294,7 @@ export default function Ledger() {
                     }}
                   >
                     {(() => {
-                      const filtered = accounts.filter(a => 
-                        a.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                        a.code.toLowerCase().includes(searchQuery.toLowerCase())
-                      );
-
-                      if (filtered.length === 0) {
+                      if (filteredAccounts.length === 0) {
                         return (
                           <div className="py-8 text-center text-[10px] font-semibold text-slate-300 uppercase tracking-widest italic">
                             No matching ledgers
@@ -309,11 +304,11 @@ export default function Ledger() {
 
                       const groups = ACCOUNT_GROUPS.map(group => ({
                         ...group,
-                        accounts: filtered.filter(a => a.type === group.value)
+                        accounts: filteredAccounts.filter(a => a.type === group.value)
                       })).filter(g => g.accounts.length > 0);
 
                       const groupedIds = groups.flatMap(g => g.accounts.map(a => a.id));
-                      const others = filtered.filter(a => !groupedIds.includes(a.id));
+                      const others = filteredAccounts.filter(a => !groupedIds.includes(a.id));
                       if (others.length > 0) {
                         groups.push({ value: 'OTHER', label: 'Other Ledgers', color: 'slate', accounts: others } as any);
                       }
@@ -332,14 +327,14 @@ export default function Ledger() {
                               selectedIndex === 0 ? "bg-rose-50 border-rose-100 shadow-sm" : "hover:bg-rose-50 hover:border-rose-100"
                             )}
                           >
-                            <span className={cn("text-[10px] font-semibold uppercase tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
+                            <span className={cn("text-[10px] font-semibold tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
                           </button>
                           {groups.map(group => (
                             <div key={group.value} className="mb-3 last:mb-0">
                               <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
                               <div className="grid grid-cols-1 gap-1">
                                 {group.accounts.map(a => {
-                                  const globalIndex = filtered.indexOf(a) + 1;
+                                  const globalIndex = filteredAccounts.indexOf(a) + 1;
                                   const isSelected = selectedIndex === globalIndex;
                                   return (
                                     <button
@@ -357,7 +352,7 @@ export default function Ledger() {
                                     >
                                       <div className="flex flex-col">
                                         <span className={cn(
-                                          "text-[11px] font-semibold uppercase tracking-tight",
+                                          "text-[11px] font-semibold tracking-tight",
                                           isSelected ? "text-white" : (selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")
                                         )}>{a.name}</span>
                                         <span className={cn(
