@@ -17,8 +17,14 @@ import {
   Smartphone,
   Coins,
   Printer,
-  X
+  X,
+  FileText,
+  BookOpen,
+  ArrowRight,
+  ClipboardList,
+  Scale
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
@@ -47,6 +53,7 @@ export default function Dashboard() {
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalExpenses: 0,
+    totalLiabilities: 0,
     cashBalance: 0,
     bankBalance: 0,
     bkashBalance: 0,
@@ -155,6 +162,7 @@ export default function Dashboard() {
 
       if (!accounts) return;
 
+      // 1. Fetch transactions WITHIN range for P&L items
       let transQuery = supabase
         .from('transactions')
         .select('account_id, debit, credit, accounts!inner(type)')
@@ -165,9 +173,33 @@ export default function Dashboard() {
 
       const { data: transactions } = await transQuery;
 
-      const getBalance = (name: string) => {
+      // 2. Fetch cumulative transactions UP TO end date for Balance Sheet items
+      let balanceQuery = supabase
+        .from('transactions')
+        .select('account_id, debit, credit')
+        .eq('company_id', selectedCompany!.id);
+      
+      if (confirmedDateRange.to) balanceQuery = balanceQuery.lte('date', confirmedDateRange.to);
+      const { data: balanceTransactions } = await balanceQuery;
+
+      // Helper to get cumulative balance from transactions
+      const calculateBalance = (accountId: string, type: string) => {
+        const accTrans = balanceTransactions?.filter(t => t.account_id === accountId) || [];
+        const totalDebit = accTrans.reduce((sum, t) => sum + (Number(t.debit) || 0), 0);
+        const totalCredit = accTrans.reduce((sum, t) => sum + (Number(t.credit) || 0), 0);
+        
+        let balance = 0;
+        if (['ASSET', 'EXPENSE'].includes(type)) {
+          balance = totalDebit - totalCredit;
+        } else {
+          balance = totalCredit - totalDebit;
+        }
+        return balance;
+      };
+
+      const getAccountBalance = (name: string) => {
         const acc = accounts.find(a => a.name.toLowerCase() === name.toLowerCase());
-        return acc ? getDisplayBalance(acc.type, acc.current_balance) : 0;
+        return acc ? calculateBalance(acc.id, acc.type) : 0;
       };
 
       // Aggregating revenue and expenses from transactions in date range
@@ -182,10 +214,13 @@ export default function Dashboard() {
       setStats({
         totalRevenue: Math.max(0, totalRevenue),
         totalExpenses: Math.max(0, totalExpenses),
-        cashBalance: getBalance('Cash'),
-        bankBalance: getBalance('Bank'),
-        bkashBalance: getBalance('bKash'),
-        nagadBalance: getBalance('Nagad')
+        totalLiabilities: accounts
+          .filter(a => a.type === 'LIABILITY')
+          .reduce((sum, a) => sum + calculateBalance(a.id, a.type), 0),
+        cashBalance: getAccountBalance('Cash'),
+        bankBalance: getAccountBalance('Bank'),
+        bkashBalance: getAccountBalance('bKash'),
+        nagadBalance: getAccountBalance('Nagad')
       });
     } catch (error) {
       console.error(error);
@@ -247,6 +282,12 @@ export default function Dashboard() {
           value={stats.totalExpenses} 
           icon={TrendingDown} 
           color="rose" 
+        />
+        <StatCard 
+          title="Total Liabilities" 
+          value={stats.totalLiabilities} 
+          icon={Wallet} 
+          color="amber" 
         />
         <StatCard 
           title="Cash Balance" 
@@ -331,7 +372,96 @@ export default function Dashboard() {
           </div>
         </ChartBox>
       </div>
+
+      {/* Reports Intelligence Hub */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
+              <ClipboardList size={14} className="text-indigo-500" />
+              Financial Intelligence Hub
+            </h2>
+            <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-1">Direct access to regulatory & analytical reporting</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ReportShortcut 
+            title="Daybook Register" 
+            desc="Chronological audit trail of all events"
+            icon={BookOpen}
+            to="/reports?tab=DAYBOOK"
+            color="indigo"
+          />
+          <ReportShortcut 
+            title="Ledger Statement" 
+            desc="Deep dive into specific account activity"
+            icon={FileText}
+            to="/reports?tab=LEDGER_REPORT"
+            color="emerald"
+          />
+          <ReportShortcut 
+            title="Trial Balance" 
+            desc="Verification of ledger equilibrium"
+            icon={Scale}
+            to="/reports?tab=TRIAL_BALANCE"
+            color="amber"
+          />
+          <ReportShortcut 
+            title="P&L Statement" 
+            desc="Performance analysis & profitability"
+            icon={BarChart3}
+            to="/reports?tab=PROFIT_LOSS"
+            color="rose"
+          />
+          <ReportShortcut 
+            title="Balance Sheet" 
+            desc="Snapshot of financial position"
+            icon={TrendingUp}
+            to="/reports?tab=BALANCE_SHEET"
+            color="slate"
+          />
+          <ReportShortcut 
+            title="Chart of Accounts" 
+            desc="Management of fiscal infrastructure"
+            icon={PieChartIcon}
+            to="/coa"
+            color="indigo"
+          />
+        </div>
+      </div>
     </div>
+  );
+}
+
+function ReportShortcut({ title, desc, icon: Icon, to, color }: any) {
+  const colors = {
+    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100/50 hover:bg-indigo-100/50",
+    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100/50 hover:bg-emerald-100/50",
+    amber: "bg-amber-50 text-amber-600 border-amber-100/50 hover:bg-amber-100/50",
+    rose: "bg-rose-50 text-rose-600 border-rose-100/50 hover:bg-rose-100/50",
+    slate: "bg-slate-50 text-slate-600 border-slate-100/50 hover:bg-slate-100/50",
+  }[color as keyof typeof colors] || "bg-slate-50 text-slate-600";
+
+  return (
+    <Link 
+      to={to}
+      className={cn(
+        "group p-4 rounded-2xl border transition-all duration-300 flex flex-col justify-between min-h-[120px] shadow-sm hover:shadow-md hover:-translate-y-1",
+        colors
+      )}
+    >
+      <div className="flex justify-between items-start">
+        <div className="p-2 bg-white rounded-lg shadow-sm">
+          <Icon size={18} />
+        </div>
+        <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
+      </div>
+      <div>
+        <h4 className="text-xs font-bold uppercase tracking-wider mb-1">{title}</h4>
+        <p className="text-[9px] font-medium leading-tight opacity-70">{desc}</p>
+      </div>
+    </Link>
   );
 }
 

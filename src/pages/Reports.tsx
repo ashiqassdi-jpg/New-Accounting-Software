@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
+import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { formatBDT, ACCOUNT_GROUPS, VOUCHER_TYPES, PAYMENT_CHANNELS, getDisplayBalance, calculateBalance } from '../constants';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
@@ -49,7 +50,14 @@ type ReportTab = 'TRIAL_BALANCE' | 'DAYBOOK' | 'LEDGER_REPORT' | 'PROFIT_LOSS' |
 export default function Reports() {
   const { selectedCompany } = useCompany();
   const { profile, canEdit, canDelete } = useAuth();
-  const [activeTab, setActiveTab] = useState<ReportTab>('DAYBOOK');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as ReportTab) || 'DAYBOOK';
+  const [activeTab, setActiveTab] = useState<ReportTab>(initialTab);
+
+  const handleTabChange = (tab: ReportTab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
+  };
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [showAccountSearch, setShowAccountSearch] = useState(false);
@@ -437,27 +445,27 @@ export default function Reports() {
             <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100/50 rounded-2xl w-fit border border-slate-100 no-print">
               <TabButton 
                 active={activeTab === 'DAYBOOK'} 
-                onClick={() => setActiveTab('DAYBOOK')}
+                onClick={() => handleTabChange('DAYBOOK')}
                 label="Daybook"
               />
               <TabButton 
                 active={activeTab === 'LEDGER_REPORT'} 
-                onClick={() => setActiveTab('LEDGER_REPORT')}
+                onClick={() => handleTabChange('LEDGER_REPORT')}
                 label="Ledger Statement"
               />
               <TabButton 
                 active={activeTab === 'TRIAL_BALANCE'} 
-                onClick={() => setActiveTab('TRIAL_BALANCE')}
+                onClick={() => handleTabChange('TRIAL_BALANCE')}
                 label="Trial Balance"
               />
               <TabButton 
                 active={activeTab === 'PROFIT_LOSS'} 
-                onClick={() => setActiveTab('PROFIT_LOSS')}
+                onClick={() => handleTabChange('PROFIT_LOSS')}
                 label="P & L"
               />
               <TabButton 
                 active={activeTab === 'BALANCE_SHEET'} 
-                onClick={() => setActiveTab('BALANCE_SHEET')}
+                onClick={() => handleTabChange('BALANCE_SHEET')}
                 label="Balance Sheet"
               />
             </div>
