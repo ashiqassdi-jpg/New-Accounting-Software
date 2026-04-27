@@ -551,8 +551,8 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                     <tr className="bg-slate-50/70 border-b border-slate-100">
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-12 text-center">#</th>
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Target Account Ledger</th>
-                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-30 text-right">Debit (৳)</th>
-                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-30 text-right">Credit (৳)</th>
+                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-44 text-right">Debit (৳)</th>
+                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-44 text-right">Credit (৳)</th>
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Narration</th>
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-14 text-center"></th>
                     </tr>
