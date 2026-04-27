@@ -11,6 +11,7 @@ import { VoucherType, PaymentChannel, Account, Voucher } from '../types';
 import { VOUCHER_TYPES, PAYMENT_CHANNELS, ACCOUNT_GROUPS, formatBDT } from '../constants';
 import { useAuth } from '../hooks/useAuth';
 import { useCompany } from '../hooks/useCompany';
+import { batchOperations } from '../store';
 import { motion, AnimatePresence } from 'motion/react';
 import VoucherPrintPreview from './VoucherPrintPreview';
 import { cn } from '../lib/utils';
@@ -49,12 +50,15 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   const [voucherNo, setVoucherNo] = useState('');
   const [manualVoucherNo, setManualVoucherNo] = useState(false);
   const [narration, setNarration] = useState('');
-  const [items, setItems] = useState<VoucherItem[]>([
-    { account_id: '', debit: 0, credit: 0 },
-    { account_id: '', debit: 0, credit: 0 }
+  const [items, setItems] = useState<VoucherItemWithNarration[]>([
+    { account_id: '', debit: 0, credit: 0, narration: '' }
   ]);
   const [activeAccountSearch, setActiveAccountSearch] = useState<{index: number, query: string, rect?: { top: number, left: number, width: number }} | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  interface VoucherItemWithNarration extends VoucherItem {
+    narration?: string;
+  }
 
   const filteredAccounts = React.useMemo(() => {
     const q = (activeAccountSearch?.query || '').toLowerCase();
@@ -170,32 +174,6 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     return matched;
   };
 
-  // Auto-update row when channel or type changes
-  useEffect(() => {
-    if (editingVoucher || loading || !accounts.length) return;
-    
-    // Only auto-map for Payment and Receipt
-    if (!['PAYMENT', 'RECEIPT'].includes(type)) return;
-
-    const matchedAcc = findAccountForChannel(channel);
-    if (matchedAcc) {
-      setItems(prev => {
-        const newItems = [...prev];
-        if (type === 'RECEIPT') {
-          // Map to FIRST row for Receipt
-          newItems[0] = { ...newItems[0], account_id: matchedAcc.id };
-        } else {
-          // Map to LAST row for Payment
-          const lastIdx = newItems.length - 1;
-          if (lastIdx >= 0) {
-            newItems[lastIdx] = { ...newItems[lastIdx], account_id: matchedAcc.id };
-          }
-        }
-        return newItems;
-      });
-    }
-  }, [channel, type, accounts.length, loading]);
-
   const fetchVoucherTransactions = async () => {
     if (!editingVoucher) return;
     const { data, error } = await supabase
@@ -205,10 +183,20 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       .order('created_at', { ascending: true });
 
     if (!error && data) {
-      setItems(data.map(t => ({
+      // For automated vouchers, we filter out the balancing engine row if it's there
+      // because we want the user to manage only target rows
+      const isAutoBalanced = editingVoucher.type === 'PAYMENT' || editingVoucher.type === 'RECEIPT';
+      const balancingAcc = isAutoBalanced ? findAccountForChannel(editingVoucher.payment_channel as PaymentChannel) : null;
+      
+      const targetTransactions = data.filter(t => 
+        !balancingAcc || t.account_id !== balancingAcc.id
+      );
+
+      setItems(targetTransactions.map(t => ({
         account_id: t.account_id,
         debit: t.debit,
-        credit: t.credit
+        credit: t.credit,
+        narration: t.narration || ''
       })));
     }
   };
@@ -275,26 +263,47 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   };
 
   useEffect(() => {
+    // Reset items to appropriate debit/credit columns when type changes
+    setItems(prev => prev.map(item => ({
+      ...item,
+      debit: type === 'RECEIPT' ? 0 : item.debit,
+      credit: type === 'PAYMENT' ? 0 : item.credit
+    })));
     generateVoucherNo();
   }, [type, selectedCompany]);
 
   const addItem = () => {
-    setItems([...items, { account_id: '', debit: 0, credit: 0 }]);
+    setItems([...items, { account_id: '', debit: 0, credit: 0, narration: '' }]);
   };
 
   const removeItem = (index: number) => {
-    if (items.length <= 2) return;
+    if (items.length <= 1) return;
     setItems(items.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof VoucherItem, value: any) => {
-    const newItems = [...items];
+  const updateItem = (index: number, field: keyof VoucherItemWithNarration, value: any) => {
+    const newItems = [...items as any];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
   };
 
-  const totalDebit = items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
-  const totalCredit = items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
+  const isAutoBalancedType = type === 'PAYMENT' || type === 'RECEIPT';
+  const balancingAccount = isAutoBalancedType ? findAccountForChannel(channel) : null;
+
+  const getAutoBalanceAmount = () => {
+    if (type === 'PAYMENT') return items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
+    if (type === 'RECEIPT') return items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
+    return 0;
+  };
+
+  const totalDebit = isAutoBalancedType 
+    ? (type === 'RECEIPT' ? getAutoBalanceAmount() + items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0) : items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0))
+    : items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
+
+  const totalCredit = isAutoBalancedType
+    ? (type === 'PAYMENT' ? getAutoBalanceAmount() + items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0) : items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0))
+    : items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
+
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.001;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -319,6 +328,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       return;
     }
 
+    if (isAutoBalancedType && !balancingAccount) {
+      toast.error('Payment Engine Mapping Error', { description: 'Could not resolve a ledger account for the selected Payment Engine.' });
+      return;
+    }
+
     if (!isBalanced) {
       toast.error('Voucher unbalanced', { description: 'Total Debit must equal Total Credit' });
       return;
@@ -331,69 +345,68 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     setLoading(true);
 
     try {
-      let voucherId = editingVoucher?.id;
+      // Check for duplicate voucher number
+      const { data: existingVoucherNo, error: duplicateError } = await supabase
+        .from('vouchers')
+        .select('id')
+        .eq('company_id', selectedCompany.id)
+        .eq('voucher_no', voucherNo)
+        .neq('id', editingVoucher?.id || '00000000-0000-0000-0000-000000000000')
+        .maybeSingle();
+
+      if (duplicateError) throw duplicateError;
+      if (existingVoucherNo) {
+        toast.error('Duplicate Voucher Number', { 
+          description: `Voucher reference ${voucherNo} is already registered in the system.` 
+        });
+        setLoading(false);
+        return;
+      }
+
+      const voucherData: any = {
+        company_id: selectedCompany.id,
+        voucher_no: voucherNo || `V-${Date.now()}`,
+        date,
+        type,
+        payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
+        narration,
+        amount: Math.max(totalDebit, totalCredit),
+      };
 
       if (editingVoucher) {
-        // Update existing voucher
-        const { error: vError } = await supabase
-          .from('vouchers')
-          .update({
-            voucher_no: voucherNo,
-            date,
-            type,
-            payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
-            narration,
-            amount: Math.max(totalDebit, totalCredit),
-            updated_by: user.id,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', editingVoucher.id);
-
-        if (vError) throw vError;
-
-        // Delete old transactions to re-insert new ones (safest way to handle splits)
-        const { error: dError } = await supabase
-          .from('transactions')
-          .delete()
-          .eq('voucher_id', editingVoucher.id);
-
-        if (dError) throw dError;
+        voucherData.id = editingVoucher.id;
+        voucherData.updated_by = user.id;
+        voucherData.updated_at = new Date().toISOString();
       } else {
-        // Create new voucher
-        const { data: voucher, error: vError } = await supabase
-          .from('vouchers')
-          .insert([{
-            company_id: selectedCompany.id,
-            voucher_no: voucherNo || `V-${Date.now()}`,
-            date,
-            type,
-            payment_channel: (type === 'PAYMENT' || type === 'RECEIPT' || type === 'CONTRA') ? channel : null,
-            narration,
-            amount: Math.max(totalDebit, totalCredit),
-            created_by: user.id
-          }])
-          .select()
-          .single();
-
-        if (vError) throw vError;
-        voucherId = voucher.id;
+        voucherData.created_by = user.id;
       }
 
       // Create Transactions (Double Entry)
       const transactions = items.map(item => ({
-        voucher_id: voucherId,
         company_id: selectedCompany.id,
         account_id: item.account_id,
-        debit: item.debit,
-        credit: item.credit,
+        debit: Number(item.debit) || 0,
+        credit: Number(item.credit) || 0,
+        narration: item.narration || null,
         date
       }));
 
-      const { error: tError } = await supabase
-        .from('transactions')
-        .insert(transactions);
+      // Inject balancing row for Payment/Receipt
+      if (isAutoBalancedType && balancingAccount) {
+        const amount = getAutoBalanceAmount();
+        if (amount > 0) {
+          transactions.push({
+            company_id: selectedCompany.id,
+            account_id: balancingAccount.id,
+            debit: type === 'RECEIPT' ? amount : 0,
+            credit: type === 'PAYMENT' ? amount : 0,
+            narration: narration || 'Auto-balancing entry',
+            date
+          });
+        }
+      }
 
-      if (tError) throw tError;
+      const resultVoucher = await batchOperations.postVoucher(voucherData, transactions);
 
       // Save date for next time
       localStorage.setItem(`last_date_${type}`, date);
@@ -401,12 +414,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       toast.success(editingVoucher ? 'Voucher Updated' : 'Voucher Posted Successfully');
 
       if (!editingVoucher) {
-        const { data: voucher } = await supabase.from('vouchers').select('*').eq('id', voucherId).single();
         setLastVoucher({
-          ...voucher,
-          items: items.map(i => ({
-            ...i,
-            account_name: accounts.find(a => a.id === i.account_id)?.name
+          ...resultVoucher,
+          items: transactions.map((t: any) => ({
+            ...t,
+            account_name: accounts.find(a => a.id === t.account_id)?.name
           }))
         });
         setShowPrintPreview(true);
@@ -539,8 +551,9 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                     <tr className="bg-slate-50/70 border-b border-slate-100">
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-12 text-center">#</th>
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Target Account Ledger</th>
-                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-36 text-right">Debit (৳)</th>
-                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-36 text-right">Credit (৳)</th>
+                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-30 text-right">Debit (৳)</th>
+                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-30 text-right">Credit (৳)</th>
+                      <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest">Narration</th>
                       <th className="px-6 py-3 text-[9px] font-semibold text-slate-400 uppercase tracking-widest w-14 text-center"></th>
                     </tr>
                   </thead>
@@ -551,11 +564,18 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                         <td className="px-6 py-3">
                           <div className="relative">
                             <div 
+                              tabIndex={0}
                               className={cn(
-                                "w-full bg-slate-50/30 border rounded-xl px-4 py-2 text-[11px] transition-all font-semibold flex items-center justify-between cursor-pointer group-hover:bg-white",
+                                "w-full bg-slate-50/30 border rounded-xl px-4 py-2 text-[11px] transition-all font-semibold flex items-center justify-between cursor-pointer group-hover:bg-white outline-none focus:ring-2 focus:ring-indigo-500/20",
                                 activeAccountSearch?.index === index ? "border-indigo-500 ring-2 ring-indigo-500/5 bg-white shadow-sm" : "border-slate-100 hover:border-slate-300"
                               )}
                               onClick={(e) => openSearch(index, e)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  openSearch(index, e as any);
+                                }
+                              }}
                             >
                               <div className="flex flex-col truncate pr-4">
                                 <span className={cn("truncate", item.account_id ? "text-slate-900" : "text-slate-300")}>
@@ -617,7 +637,6 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                           } else if (e.key === 'Escape') {
                                             setActiveAccountSearch(null);
                                           } else if (e.key === 'Tab') {
-                                            // Handle basic tabbing: if on input, Tab moves focus to the selected item in the list
                                             if (!e.shiftKey) {
                                               const selectedBtn = scrollContainerRef.current?.querySelector('[data-selected="true"]') as HTMLButtonElement;
                                               if (selectedBtn) {
@@ -635,14 +654,9 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                     className="max-h-[220px] overflow-y-auto custom-scrollbar p-1.5 space-y-0.5"
                                     onKeyDown={(e) => {
                                       if (e.key === 'Tab' && !e.shiftKey) {
-                                        // If tabbing at the end of results, loop to input?
-                                        // Actually, let's just make any Tab in this container return to input for circularity
-                                        // or allow normal tabbing within but the LAST item loops back.
-                                        // Simplified: Tab from results goes back to input
                                         e.preventDefault();
                                         searchInputRef.current?.focus();
                                       } else if (e.key === 'Tab' && e.shiftKey) {
-                                        // Shift+Tab from results goes back to input
                                         e.preventDefault();
                                         searchInputRef.current?.focus();
                                       }
@@ -737,9 +751,21 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            className="w-full bg-slate-50/30 border border-slate-100 rounded-xl px-4 py-2 text-[11px] text-right outline-none focus:ring-4 focus:ring-rose-500/5 focus:border-rose-300 transition-all font-mono font-semibold text-slate-900 group-hover:bg-white"
+                            className={cn(
+                              "w-full border rounded-xl px-4 py-2 text-[11px] text-right outline-none transition-all font-mono font-semibold text-slate-900 group-hover:bg-white",
+                              type === 'RECEIPT' ? "bg-slate-100 border-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-50/30 border-slate-100 focus:ring-4 focus:ring-rose-500/5 focus:border-rose-300"
+                            )}
                             value={item.debit === 0 ? '' : item.debit}
                             onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
+                            readOnly={type === 'RECEIPT'}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && e.currentTarget.value) {
+                                if (index === items.length - 1) {
+                                  addItem();
+                                }
+                              }
+                            }}
                           />
                         </td>
                         <td className="px-6 py-3">
@@ -747,9 +773,36 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            className="w-full bg-slate-50/30 border border-slate-100 rounded-xl px-4 py-2 text-[11px] text-right outline-none focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-300 transition-all font-mono font-semibold text-slate-900 group-hover:bg-white"
+                            className={cn(
+                              "w-full border rounded-xl px-4 py-2 text-[11px] text-right outline-none transition-all font-mono font-semibold text-slate-900 group-hover:bg-white",
+                              type === 'PAYMENT' ? "bg-slate-100 border-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-50/30 border-slate-100 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-300"
+                            )}
                             value={item.credit === 0 ? '' : item.credit}
                             onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
+                            onFocus={(e) => e.target.select()}
+                            readOnly={type === 'PAYMENT'}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && e.currentTarget.value) {
+                                if (index === items.length - 1) {
+                                  addItem();
+                                }
+                              }
+                            }}
+                          />
+                        </td>
+                        <td className="px-6 py-3">
+                          <input 
+                            className="w-full bg-slate-50/30 border border-slate-100 rounded-xl px-4 py-2 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium text-slate-700 group-hover:bg-white"
+                            placeholder="Specific Narration"
+                            value={item.narration}
+                            onChange={(e) => updateItem(index, 'narration', e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                if (index === items.length - 1) {
+                                  addItem();
+                                }
+                              }
+                            }}
                           />
                         </td>
                         <td className="px-6 py-3 text-center">
@@ -783,8 +836,31 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
               />
             </div>
 
-            <div className="flex flex-col justify-end space-y-4">
-              <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group">
+              <div className="flex flex-col justify-end space-y-4">
+                <AnimatePresence>
+                  {isAutoBalancedType && balancingAccount && getAutoBalanceAmount() > 0 && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 flex items-center justify-between"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest pl-1 mb-1">Auto-Balancing Engine</span>
+                        <span className="text-[11px] font-bold text-indigo-900 leading-none">{balancingAccount.name}</span>
+                        <span className="text-[8px] font-mono text-indigo-400 mt-1 uppercase tracking-wider">{balancingAccount.code}</span>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest block mb-1">
+                          {type === 'PAYMENT' ? 'Internal Credit' : 'Internal Debit'}
+                        </span>
+                        <span className="text-[13px] font-mono font-bold text-indigo-700 tracking-tight">{formatBDT(getAutoBalanceAmount())}</span>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden group">
                 <div className="relative z-10 grid grid-cols-2 gap-6 divide-x divide-white/10">
                   <div className="space-y-0.5">
                     <span className="text-[8px] font-semibold text-indigo-300 uppercase tracking-[0.2em] block">Aggregate Debit</span>

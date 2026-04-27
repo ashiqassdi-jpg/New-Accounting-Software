@@ -27,6 +27,7 @@ export default function ChartOfAccounts() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isBulkMode, setIsBulkMode] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [activeTab, setActiveTab] = useState<string>('ASSET');
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +38,110 @@ export default function ChartOfAccounts() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [type, setType] = useState<Account['type']>('ASSET');
+  const [bulkRows, setBulkRows] = useState<{name: string, code: string, type: Account['type']}[]>([
+    { name: '', code: '', type: 'ASSET' }
+  ]);
+
+  const getNextCode = (accType: Account['type'], currentRows: {code: string, type: Account['type']}[] = []) => {
+    const groupPrefix = accType === 'ASSET' ? '1' : 
+                        accType === 'LIABILITY' ? '2' : 
+                        accType === 'EQUITY' ? '3' : 
+                        accType === 'INCOME' ? '4' : '5';
+    
+    // Combine existing accounts and new bulk rows
+    const databaseCodes = accounts.filter(a => a.type === accType).map(a => a.code);
+    const bulkCodes = currentRows.filter(r => r.type === accType).map(r => r.code);
+    const allCodes = [...databaseCodes, ...bulkCodes];
+
+    if (allCodes.length === 0) return `${groupPrefix}001`;
+
+    const numericCodes = allCodes
+      .filter(c => c.startsWith(groupPrefix) && !isNaN(parseInt(c)))
+      .map(c => parseInt(c));
+
+    if (numericCodes.length === 0) return `${groupPrefix}001`;
+
+    const maxCode = Math.max(...numericCodes);
+    return (maxCode + 1).toString().padStart(allCodes[0].length || 4, '0');
+  };
+
+  const addBulkRow = () => {
+    const lastRow = bulkRows[bulkRows.length - 1];
+    const nextType = lastRow?.type || 'ASSET';
+    const nextCode = getNextCode(nextType, bulkRows);
+    setBulkRows([...bulkRows, { name: '', code: nextCode, type: nextType }]);
+  };
+
+  const removeBulkRow = (index: number) => {
+    if (bulkRows.length <= 1) return;
+    setBulkRows(bulkRows.filter((_, i) => i !== index));
+  };
+
+  const updateBulkRow = (index: number, field: string, value: string) => {
+    const newRows = [...bulkRows];
+    const oldRow = newRows[index];
+    (newRows[index] as any)[field] = value;
+
+    // If type changed, suggest new code if current code is empty or matches logic
+    if (field === 'type' && value !== oldRow.type) {
+      const suggestedCode = getNextCode(value as Account['type'], newRows.filter((_, i) => i < index));
+      newRows[index].code = suggestedCode;
+    }
+
+    setBulkRows(newRows);
+  };
+
+  const handleBulkSave = async () => {
+    if (isModerator || !selectedCompany) return;
+    
+    const validRows = bulkRows.filter(r => r.name && r.code);
+    if (validRows.length === 0) {
+      toast.error('Validation Error', { description: 'Please enter at least one valid ledger.' });
+      return;
+    }
+
+    // Check for duplicate codes within the batch
+    const codesInBatch = validRows.map(r => r.code);
+    const uniqueCodesInBatch = new Set(codesInBatch);
+    if (uniqueCodesInBatch.size !== codesInBatch.length) {
+      toast.error('Duplicate Codes Detected', { description: 'Multiple rows in this batch share the same code.' });
+      return;
+    }
+
+    // Check for duplicate codes against database
+    const existingCodes = new Set(accounts.map(a => a.code));
+    const conflicts = validRows.filter(r => existingCodes.has(r.code));
+    if (conflicts.length > 0) {
+      toast.error('Code Conflict', { 
+        description: `Code(s) ${conflicts.map(c => c.code).join(', ')} already exist in your chart of accounts.` 
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const dataToInsert = validRows.map(r => ({
+        company_id: selectedCompany.id,
+        name: r.name,
+        code: r.code,
+        type: r.type
+      }));
+
+      const { error } = await supabase.from('accounts').insert(dataToInsert);
+      if (error) throw error;
+
+      toast.success('Batch Processing Complete', { 
+        description: `Successfully incorporated ${validRows.length} new ledger nodes.` 
+      });
+      setIsModalOpen(false);
+      setIsBulkMode(false);
+      await fetchAccounts();
+    } catch (error: any) {
+      toast.error('Sync Error', { description: error.message });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const isModerator = profile?.role === 'MODERATOR';
 
@@ -64,6 +169,7 @@ export default function ChartOfAccounts() {
 
   const openModal = (account?: Account, defaultType?: string) => {
     if (isModerator) return;
+    setIsBulkMode(false);
     if (account) {
       setEditingAccount(account);
       setName(account.name);
@@ -83,16 +189,33 @@ export default function ChartOfAccounts() {
       
       const groupAccounts = accounts.filter(a => a.type === nextType);
       const lastCode = groupAccounts.length > 0 ? [...groupAccounts].sort((a,b) => b.code.localeCompare(a.code))[0].code : `${groupPrefix}000`;
-      const nextCode = (parseInt(lastCode) + 1).toString();
+      const nextCode = (parseInt(lastCode) + 1).toString().padStart(lastCode.length, '0');
       
       setCode(nextCode);
     }
     setIsModalOpen(true);
   };
 
+  const openBulkModal = () => {
+    if (isModerator) return;
+    setIsBulkMode(true);
+    setEditingAccount(null);
+    const initialType = (activeTab as Account['type']) || 'ASSET';
+    const initialCode = getNextCode(initialType);
+    setBulkRows([{ name: '', code: initialCode, type: initialType }]);
+    setIsModalOpen(true);
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isModerator || !selectedCompany) return;
+
+    // Duplicate check for single ledger
+    if (!editingAccount && accounts.some(a => a.code === code)) {
+      toast.error('Code Conflict', { description: `Code ${code} is already assigned to another ledger.` });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -221,12 +344,20 @@ export default function ChartOfAccounts() {
             <Download size={16} />
           </button>
           {!isModerator && (
-            <button 
-              onClick={() => openModal()}
-              className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
-            >
-              <Plus size={16} /> New Ledger
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={openBulkModal}
+                className="bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+              >
+                <Plus size={16} /> Bulk Create
+              </button>
+              <button 
+                onClick={() => openModal()}
+                className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
+              >
+                <Plus size={16} /> New Ledger
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -339,16 +470,18 @@ export default function ChartOfAccounts() {
         </section>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div 
-            className="relative bg-white w-full max-w-md rounded-[2.5rem] shadow-2xl overflow-hidden"
+            className={cn(
+              "relative bg-white w-full rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-300",
+              isBulkMode ? "max-w-4xl" : "max-w-md"
+            )}
           >
             <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
               <div className="flex flex-col">
                 <h2 className="text-lg font-semibold text-slate-900 leading-none">
-                  {editingAccount ? 'Refine Ledger' : 'Incorporate Ledger'}
+                  {isBulkMode ? 'Bulk Ledger Creation' : (editingAccount ? 'Refine Ledger' : 'Incorporate Ledger')}
                 </h2>
                 <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-widest">Protocol Assignment Mode</p>
               </div>
@@ -357,7 +490,87 @@ export default function ChartOfAccounts() {
               </button>
             </div>
             
-            <form onSubmit={handleSave} className="p-8 space-y-6">
+            {isBulkMode ? (
+              <div className="p-8 space-y-6">
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 max-h-[400px] overflow-y-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr>
+                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
+                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ledger Name</th>
+                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest w-32">Code</th>
+                        <th className="px-4 py-2 w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {bulkRows.map((row, idx) => (
+                        <tr key={idx} className="group">
+                          <td className="px-4 py-3">
+                            <select 
+                              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10"
+                              value={row.type}
+                              onChange={(e) => updateBulkRow(idx, 'type', e.target.value)}
+                            >
+                              {ACCOUNT_GROUPS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                            </select>
+                          </td>
+                          <td className="px-4 py-3">
+                            <input 
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10"
+                              placeholder="e.g. Sales Account"
+                              value={row.name}
+                              onChange={(e) => updateBulkRow(idx, 'name', e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && row.name && row.code) addBulkRow();
+                              }}
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <input 
+                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] font-mono font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10"
+                              placeholder="Code"
+                              value={row.code}
+                              onChange={(e) => updateBulkRow(idx, 'code', e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && row.name && row.code) addBulkRow();
+                              }}
+                            />
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button 
+                              onClick={() => removeBulkRow(idx)}
+                              className="p-1.5 text-slate-300 hover:text-rose-500 transition-colors"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <button 
+                    onClick={addBulkRow}
+                    className="mt-4 flex items-center gap-2 text-[10px] font-bold text-indigo-600 hover:text-indigo-700 transition-colors px-4 py-2 border-2 border-dashed border-indigo-100 rounded-xl w-full justify-center group hover:bg-indigo-50/50"
+                  >
+                    <Plus size={14} /> Add Row [Enter]
+                  </button>
+                </div>
+                
+                <div className="flex gap-3">
+                  <button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
+                    Dismiss
+                  </button>
+                  <button 
+                    disabled={loading}
+                    onClick={handleBulkSave}
+                    className="flex-1 px-4 py-3 bg-slate-900 text-white text-[10px] font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
+                  >
+                    {loading ? 'Processing...' : 'Save All Ledger Entities'}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleSave} className="p-8 space-y-6">
               <div className="grid grid-cols-5 gap-2 mb-4">
                 {ACCOUNT_GROUPS.map((g) => (
                   <button
@@ -414,6 +627,7 @@ export default function ChartOfAccounts() {
                 </button>
               </div>
             </form>
+            )}
           </div>
         </div>
       )}

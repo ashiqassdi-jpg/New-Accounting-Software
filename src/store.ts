@@ -67,3 +67,73 @@ export const useAppStore = create<AppState>((set, get) => ({
     return profile.role === 'SUPER_ADMIN' || profile.email === 'ashiq.assdi@gmail.com' || profile.can_wipe_data === true;
   }
 }));
+
+import { supabase } from './lib/supabase';
+
+export const batchOperations = {
+  async postVoucher(voucherData: any, transactionRows: any[]) {
+    let voucherId = voucherData.id;
+    let resultVoucher = null;
+
+    if (voucherId) {
+      // Update existing voucher
+      const { data, error: vError } = await supabase
+        .from('vouchers')
+        .update(voucherData)
+        .eq('id', voucherId)
+        .select()
+        .single();
+      
+      if (vError) throw vError;
+      resultVoucher = data;
+
+      // Delete existing transactions before re-inserting
+      const { error: dError } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('voucher_id', voucherId);
+      
+      if (dError) throw dError;
+    } else {
+      // Create new voucher
+      const { data, error: vError } = await supabase
+        .from('vouchers')
+        .insert([voucherData])
+        .select()
+        .single();
+
+      if (vError) throw vError;
+      resultVoucher = data;
+      voucherId = resultVoucher.id;
+    }
+
+    const transactions = transactionRows.map(row => ({
+      ...row,
+      voucher_id: voucherId
+    }));
+
+    const { error: tError } = await supabase
+      .from('transactions')
+      .insert(transactions);
+
+    if (tError) {
+      // If transactions fail on a NEW voucher, we might want to cleanup the voucher
+      if (!voucherData.id) {
+        await supabase.from('vouchers').delete().eq('id', voucherId);
+      }
+      throw tError;
+    }
+
+    return resultVoucher;
+  },
+
+  async bulkCreateAccounts(accounts: any[]) {
+    const { data, error } = await supabase
+      .from('accounts')
+      .insert(accounts)
+      .select();
+
+    if (error) throw error;
+    return data;
+  }
+};

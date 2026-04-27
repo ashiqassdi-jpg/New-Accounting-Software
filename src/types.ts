@@ -73,6 +73,7 @@ export interface Transaction {
   debit: number;
   credit: number;
   date: string;
+  narration?: string | null;
 }
 
 export interface DashboardStats {
