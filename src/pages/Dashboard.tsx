@@ -28,7 +28,8 @@ import { Link } from 'react-router-dom';
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell,
-  BarChart, Bar
+  BarChart, Bar,
+  Legend
 } from 'recharts';
 import { DateRangeFilter } from '../components/DateRangeFilter';
 import { motion } from 'motion/react';
@@ -122,30 +123,30 @@ export default function Dashboard() {
 
       if (!transactions) return;
 
-      const monthlyData: { [key: string]: { revenue: number; expenses: number } } = {};
+      const monthlyData: { [key: string]: { liabilities: number; equity: number } } = {};
       
       transactions.forEach((t: any) => {
         const month = format(new Date(t.date), 'MMM');
-        if (!monthlyData[month]) monthlyData[month] = { revenue: 0, expenses: 0 };
+        if (!monthlyData[month]) monthlyData[month] = { liabilities: 0, equity: 0 };
         
-        if (t.accounts.type === 'INCOME') {
-          monthlyData[month].revenue += (Number(t.credit) || 0) - (Number(t.debit) || 0);
-        } else if (t.accounts.type === 'EXPENSE') {
-          monthlyData[month].expenses += (Number(t.debit) || 0) - (Number(t.credit) || 0);
+        if (t.accounts.type === 'LIABILITY') {
+          monthlyData[month].liabilities += (Number(t.credit) || 0) - (Number(t.debit) || 0);
+        } else if (t.accounts.type === 'EQUITY') {
+          monthlyData[month].equity += (Number(t.credit) || 0) - (Number(t.debit) || 0);
         }
       });
 
       const formatted = Object.keys(monthlyData).map(month => ({
         name: month,
-        revenue: Math.max(0, monthlyData[month].revenue),
-        expenses: Math.max(0, monthlyData[month].expenses)
+        liabilities: monthlyData[month].liabilities,
+        equity: monthlyData[month].equity
       }));
 
       setChartData(formatted.length > 0 ? formatted.sort((a, b) => {
         const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         return months.indexOf(a.name) - months.indexOf(b.name);
       }) : [
-        { name: 'N/A', revenue: 0, expenses: 0 }
+        { name: 'N/A', liabilities: 0, equity: 0 }
       ]);
     } catch (err) {
       console.error(err);
@@ -317,13 +318,17 @@ export default function Dashboard() {
 
       {/* Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <ChartBox title="Revenue vs Expenses" icon={BarChart3}>
+        <ChartBox title="Liabilities vs Equity" icon={BarChart3}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={chartData}>
               <defs>
-                <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                <linearGradient id="colorLiab" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorEq" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -333,39 +338,45 @@ export default function Dashboard() {
                 contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
                 formatter={(val: number) => formatBDT(val)}
               />
-              <Area type="monotone" dataKey="revenue" stroke="#6366f1" strokeWidth={2} fillOpacity={1} fill="url(#colorRev)" />
-              <Area type="monotone" dataKey="expenses" stroke="#94a3b8" strokeWidth={2} fill="transparent" strokeDasharray="5 5" />
+              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+              <Area type="monotone" dataKey="liabilities" name="Liabilities" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorLiab)" />
+              <Area type="monotone" dataKey="equity" name="Equity" stroke="#fbbf24" strokeWidth={2} fillOpacity={1} fill="url(#colorEq)" />
             </AreaChart>
           </ResponsiveContainer>
         </ChartBox>
 
         <ChartBox title="Operating Expenses" icon={PieChartIcon}>
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <ResponsiveContainer width="100%" height={320}>
-              <PieChart>
-                <Pie
-                  data={expenseDistribution}
-                  innerRadius={80}
-                  outerRadius={110}
-                  paddingAngle={8}
-                  dataKey="value"
-                  stroke="none"
-                >
-                  {expenseDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} radius={4} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                  formatter={(val: number) => formatBDT(val)}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="shrink-0 space-y-4 px-6 border-l border-slate-50">
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="flex-1 w-full flex justify-center">
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={expenseDistribution}
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                    cx="50%"
+                    cy="50%"
+                  >
+                    {expenseDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} radius={4} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val: number) => formatBDT(val)}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="shrink-0 space-y-3 px-6 border-l border-slate-50 md:min-w-[200px]">
               {expenseDistribution.map((item, index) => (
                 <div key={item.name} className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
                 </div>
               ))}
             </div>
