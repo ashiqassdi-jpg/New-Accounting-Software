@@ -43,6 +43,27 @@ import { cn } from '../lib/utils';
 
 const COLORS = ['#6366f1', '#94a3b8', '#fbbf24', '#f43f5e', '#8b5cf6'];
 
+function ActionShortcut({ title, icon: Icon, to, color }: any) {
+  const colors = {
+    indigo: "text-indigo-600 bg-indigo-50 hover:bg-indigo-100",
+    emerald: "text-emerald-600 bg-emerald-50 hover:bg-emerald-100",
+    rose: "text-rose-600 bg-rose-50 hover:bg-rose-100",
+  }[color as keyof typeof colors] || "text-slate-600 bg-slate-50 hover:bg-slate-100";
+
+  return (
+    <Link 
+      to={to}
+      className={cn(
+        "flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent hover:border-slate-100",
+        colors
+      )}
+    >
+      <Icon size={16} />
+      <span className="text-[10px] font-bold uppercase tracking-widest">{title}</span>
+    </Link>
+  );
+}
+
 export default function Dashboard() {
   const { selectedCompany } = useCompany();
   const [dateRange, setDateRange] = useState({
@@ -55,6 +76,7 @@ export default function Dashboard() {
     totalRevenue: 0,
     totalExpenses: 0,
     totalLiabilities: 0,
+    totalAssets: 0,
     cashBalance: 0,
     bankBalance: 0,
     bkashBalance: 0,
@@ -64,16 +86,153 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
 
   const [chartData, setChartData] = useState<any[]>([]);
-
   const [expenseDistribution, setExpenseDistribution] = useState<any[]>([]);
+  const [revenueVsExpenseData, setRevenueVsExpenseData] = useState<any[]>([]);
+  const [assetDistribution, setAssetDistribution] = useState<any[]>([]);
+  const [recentTransactions, setRecentTransactions] = useState<any[]>([]);
+  const [cashFlowTrend, setCashFlowTrend] = useState<any[]>([]);
 
   useEffect(() => {
     if (selectedCompany) {
       fetchStats();
       fetchChartData();
       fetchExpenseDistribution();
+      fetchAssetDistribution();
+      fetchRevenueVsExpenseTrend();
+      fetchRecentTransactions();
+      fetchCashFlowTrend();
     }
   }, [selectedCompany, confirmedDateRange]);
+
+  const fetchCashFlowTrend = async () => {
+    try {
+      const { data: quickAccounts } = await supabase
+        .from('accounts')
+        .select('id')
+        .eq('company_id', selectedCompany!.id)
+        .in('name', ['Cash', 'Bank', 'bKash', 'Nagad']);
+
+      if (!quickAccounts || quickAccounts.length === 0) return;
+      const accountIds = quickAccounts.map(a => a.id);
+
+      let query = supabase
+        .from('transactions')
+        .select('date, debit, credit')
+        .eq('company_id', selectedCompany!.id)
+        .in('account_id', accountIds);
+
+      if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
+
+      const { data: transactions } = await query;
+      if (!transactions) return;
+
+      const monthly: { [key: string]: number } = {};
+      const sortedTrans = [...transactions].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      let runningBalance = 0;
+      const monthsProcessed = new Set();
+
+      sortedTrans.forEach((t: any) => {
+        const month = format(new Date(t.date), 'MMM');
+        runningBalance += (Number(t.debit) || 0) - (Number(t.credit) || 0);
+        monthly[month] = runningBalance;
+        monthsProcessed.add(month);
+      });
+
+      const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const formatted = Array.from(monthsProcessed)
+        .map((month: any) => ({ name: month, balance: monthly[month] }))
+        .sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
+
+      setCashFlowTrend(formatted.length > 0 ? formatted : [{ name: 'N/A', balance: 0 }]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+ 
+  const fetchRecentTransactions = async () => {
+    try {
+      const { data } = await supabase
+        .from('transactions')
+        .select('*, accounts(name), vouchers(voucher_no)')
+        .eq('company_id', selectedCompany!.id)
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      setRecentTransactions(data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchAssetDistribution = async () => {
+    try {
+      const { data: accounts } = await supabase
+        .from('accounts')
+        .select('*')
+        .eq('company_id', selectedCompany!.id)
+        .eq('type', 'ASSET');
+
+      if (!accounts) return;
+
+      let query = supabase
+        .from('transactions')
+        .select('account_id, debit, credit')
+        .eq('company_id', selectedCompany!.id);
+
+      if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
+
+      const { data: transactions } = await query;
+      if (!transactions) return;
+
+      const formatted = accounts.map(acc => {
+        const accTrans = transactions.filter(t => t.account_id === acc.id);
+        const balance = accTrans.reduce((sum, t) => sum + (Number(t.debit) || 0) - (Number(t.credit) || 0), 0);
+        return { name: acc.name, value: Math.max(0, balance) };
+      }).filter(a => a.value > 0).sort((a,b) => b.value - a.value).slice(0, 5);
+
+      setAssetDistribution(formatted.length > 0 ? formatted : [{ name: 'N/A', value: 0 }]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchRevenueVsExpenseTrend = async () => {
+    try {
+      let query = supabase
+        .from('transactions')
+        .select('date, debit, credit, accounts!inner(type)')
+        .eq('company_id', selectedCompany!.id)
+        .in('accounts.type', ['INCOME', 'EXPENSE']);
+
+      if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
+      if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
+
+      const { data: transactions } = await query;
+      if (!transactions) return;
+
+      const monthly: { [key: string]: { revenue: number, expense: number } } = {};
+      transactions.forEach((t: any) => {
+        const month = format(new Date(t.date), 'MMM');
+        if (!monthly[month]) monthly[month] = { revenue: 0, expense: 0 };
+        if (t.accounts.type === 'INCOME') {
+          monthly[month].revenue += (Number(t.credit) || 0) - (Number(t.debit) || 0);
+        } else {
+          monthly[month].expense += (Number(t.debit) || 0) - (Number(t.credit) || 0);
+        }
+      });
+
+      const monthsOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const formatted = Object.keys(monthly)
+        .map(month => ({ name: month, ...monthly[month] }))
+        .sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
+
+      setRevenueVsExpenseData(formatted.length > 0 ? formatted : [{ name: 'N/A', revenue: 0, expense: 0 }]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchExpenseDistribution = async () => {
     try {
@@ -212,12 +371,19 @@ export default function Dashboard() {
         ?.filter(t => (t as any).accounts.type === 'EXPENSE')
         .reduce((sum, t) => sum + (Number(t.debit) || 0) - (Number(t.credit) || 0), 0) || 0;
 
+      const totalAssets = accounts
+        .filter(a => a.type === 'ASSET')
+        .reduce((sum, a) => sum + calculateBalance(a.id, a.type), 0);
+
+      const totalLiabilities = accounts
+        .filter(a => a.type === 'LIABILITY')
+        .reduce((sum, a) => sum + calculateBalance(a.id, a.type), 0);
+
       setStats({
         totalRevenue: Math.max(0, totalRevenue),
         totalExpenses: Math.max(0, totalExpenses),
-        totalLiabilities: accounts
-          .filter(a => a.type === 'LIABILITY')
-          .reduce((sum, a) => sum + calculateBalance(a.id, a.type), 0),
+        totalLiabilities,
+        totalAssets,
         cashBalance: getAccountBalance('Cash'),
         bankBalance: getAccountBalance('Bank'),
         bkashBalance: getAccountBalance('bKash'),
@@ -270,8 +436,22 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Quick Access Actions */}
+      <div className="flex flex-wrap items-center gap-3 no-print">
+        <ActionShortcut title="New Voucher" icon={BookOpen} to="/vouchers" color="indigo" />
+        <ActionShortcut title="Manage Accounts" icon={PieChartIcon} to="/coa" color="emerald" />
+        <ActionShortcut title="Audit Daybook" icon={ClipboardList} to="/reports?tab=DAYBOOK" color="rose" />
+        <ActionShortcut title="Balance Check" icon={Scale} to="/reports?tab=TRIAL_BALANCE" color="indigo" />
+      </div>
+
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <StatCard 
+          title="Total Assets" 
+          value={stats.totalAssets} 
+          icon={BarChart3} 
+          color="emerald" 
+        />
         <StatCard 
           title="Total Revenue" 
           value={stats.totalRevenue} 
@@ -306,7 +486,7 @@ export default function Dashboard() {
           title="bKash Balance" 
           value={stats.bkashBalance} 
           icon={Smartphone} 
-          color="amber" 
+          color="rose" 
         />
         <StatCard 
           title="Nagad Balance" 
@@ -318,33 +498,6 @@ export default function Dashboard() {
 
       {/* Analytics Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <ChartBox title="Liabilities vs Equity" icon={BarChart3}>
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorLiab" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorEq" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                formatter={(val: number) => formatBDT(val)}
-              />
-              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-              <Area type="monotone" dataKey="liabilities" name="Liabilities" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorLiab)" />
-              <Area type="monotone" dataKey="equity" name="Equity" stroke="#fbbf24" strokeWidth={2} fillOpacity={1} fill="url(#colorEq)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartBox>
-
         <ChartBox title="Operating Expenses" icon={PieChartIcon}>
           <div className="flex flex-col md:flex-row items-center gap-4">
             <div className="flex-1 w-full flex justify-center">
@@ -382,6 +535,160 @@ export default function Dashboard() {
             </div>
           </div>
         </ChartBox>
+
+        <ChartBox title="Performance Trend (Revenue vs Expense)" icon={BarChart3}>
+          <ResponsiveContainer width="100%" height={320}>
+            <BarChart data={revenueVsExpenseData}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                formatter={(val: number) => formatBDT(val)}
+              />
+              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+              <Bar dataKey="revenue" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartBox>
+
+        <ChartBox title="Asset Allocation" icon={PieChartIcon}>
+          <div className="flex flex-col md:flex-row items-center gap-4">
+            <div className="flex-1 w-full flex justify-center">
+              <ResponsiveContainer width="100%" height={280}>
+                <PieChart>
+                  <Pie
+                    data={assetDistribution}
+                    innerRadius={70}
+                    outerRadius={100}
+                    paddingAngle={2}
+                    dataKey="value"
+                    stroke="none"
+                    cx="50%"
+                    cy="50%"
+                  >
+                    {assetDistribution.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} radius={4} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    formatter={(val: number) => formatBDT(val)}
+                  />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="shrink-0 space-y-3 px-6 border-l border-slate-50 md:min-w-[200px]">
+              {assetDistribution.map((item, index) => (
+                <div key={item.name} className="flex items-center gap-3">
+                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </ChartBox>
+
+        <ChartBox title="Liabilities vs Equity" icon={Scale}>
+          <ResponsiveContainer width="100%" height={320}>
+            <AreaChart data={chartData}>
+              <defs>
+                <linearGradient id="colorLiab" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorEq" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                formatter={(val: number) => formatBDT(val)}
+              />
+              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+              <Area type="monotone" dataKey="liabilities" name="Liabilities" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorLiab)" />
+              <Area type="monotone" dataKey="equity" name="Equity" stroke="#fbbf24" strokeWidth={2} fillOpacity={1} fill="url(#colorEq)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartBox>
+
+        <ChartBox title="Liquidity Trend (Cash & Bank)" icon={Banknote}>
+          <ResponsiveContainer width="100%" height={320}>
+            <AreaChart data={cashFlowTrend}>
+              <defs>
+                <linearGradient id="colorCash" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
+              <Tooltip 
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                formatter={(val: number) => formatBDT(val)}
+              />
+              <Area type="monotone" dataKey="balance" name="Quick Assets" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorCash)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </ChartBox>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
+        <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest flex items-center gap-2">
+            <ClipboardList size={14} className="text-indigo-500" />
+            Recent Financial Narrative
+          </h3>
+          <Link to="/reports?tab=DAYBOOK" className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors">
+            View Register <ArrowRight size={10} className="inline ml-1" />
+          </Link>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-slate-50/50">
+                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Date</th>
+                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Account</th>
+                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Description</th>
+                <th className="px-6 py-4 text-right text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Debit</th>
+                <th className="px-6 py-4 text-right text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Credit</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-50">
+              {recentTransactions.map((t) => (
+                <tr key={t.id} className="hover:bg-slate-50/30 transition-colors">
+                  <td className="px-6 py-4 text-[11px] font-medium text-slate-500">{format(new Date(t.date), 'dd MMM')}</td>
+                  <td className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-tight">{t.accounts?.name}</td>
+                  <td className="px-6 py-4">
+                    <p className="text-[11px] text-slate-500 truncate max-w-[200px] italic">{t.narration || t.vouchers?.narration || 'N/A'}</p>
+                    <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">Voucher: {t.vouchers?.voucher_no}</p>
+                  </td>
+                  <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-rose-500">
+                    {t.debit > 0 ? formatBDT(t.debit).replace(/[৳,]/g, '') : '-'}
+                  </td>
+                  <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-emerald-500">
+                    {t.credit > 0 ? formatBDT(t.credit).replace(/[৳,]/g, '') : '-'}
+                  </td>
+                </tr>
+              ))}
+              {recentTransactions.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">
+                    No recent digital footprints found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Reports Intelligence Hub */}
