@@ -288,9 +288,13 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     const uniqueLedgers = items
       .map(item => accounts.find(a => a.id === item.account_id)?.name)
       .filter(Boolean)
-      .filter((v, i, a) => a.indexOf(v) === i);
+      .filter((v, i, a) => a.indexOf(v) === i) as string[];
     
-    const ledgersStr = uniqueLedgers.join(', ');
+    const maxLedgers = 2;
+    const ledgersStr = uniqueLedgers.length > maxLedgers 
+      ? uniqueLedgers.slice(0, maxLedgers).join(', ') + ' etc.'
+      : uniqueLedgers.join(', ');
+      
     const count = items.filter(i => i.account_id).length;
 
     const formattedAmount = new Intl.NumberFormat('en-IN', { 
@@ -298,7 +302,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       maximumFractionDigits: 2 
     }).format(amount);
 
-    const newNarration = `${type} of ${formattedAmount} BDT via ${paymentMethodLabel} on ${formattedDate}.`;
+    const newNarration = `${type} of ${formattedAmount} BDT via ${paymentMethodLabel} on ${formattedDate} for ${ledgersStr || '...'} (${count} entries).`;
     
     setNarration(newNarration);
   }, [type, channel, date, items, accounts, isAutoNarration]);
