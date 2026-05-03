@@ -135,5 +135,31 @@ export const batchOperations = {
 
     if (error) throw error;
     return data;
+  },
+
+  getNextLedgerCode(accType: string, existingAccounts: any[], currentBulkRows: any[] = []) {
+    const defaults: Record<string, string> = {
+      'ASSET': '1000',
+      'EXPENSE': '2000',
+      'INCOME': '3000',
+      'LIABILITY': '4000',
+      'EQUITY': '5000'
+    };
+
+    const defaultCode = defaults[accType] || '1000';
+
+    const allCodes = [
+      ...existingAccounts.filter(a => a.type === accType).map(a => a.code),
+      ...currentBulkRows.filter(r => r.type === accType).map(r => r.code)
+    ];
+
+    const numericCodes = allCodes
+      .map(c => parseInt(c))
+      .filter(n => !isNaN(n));
+
+    if (numericCodes.length === 0) return defaultCode;
+
+    const maxCode = Math.max(...numericCodes);
+    return (maxCode + 1).toString();
   }
 };

@@ -11,6 +11,7 @@ import {
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
+import { batchOperations } from '../store';
 import { Account } from '../types';
 import { ACCOUNT_GROUPS, formatBDT, getDisplayBalance } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
@@ -43,26 +44,7 @@ export default function ChartOfAccounts() {
   ]);
 
   const getNextCode = (accType: Account['type'], currentRows: {code: string, type: Account['type']}[] = []) => {
-    const groupPrefix = accType === 'ASSET' ? '1' : 
-                        accType === 'LIABILITY' ? '2' : 
-                        accType === 'EQUITY' ? '3' : 
-                        accType === 'INCOME' ? '4' : '5';
-    
-    // Combine existing accounts and new bulk rows
-    const databaseCodes = accounts.filter(a => a.type === accType).map(a => a.code);
-    const bulkCodes = currentRows.filter(r => r.type === accType).map(r => r.code);
-    const allCodes = [...databaseCodes, ...bulkCodes];
-
-    if (allCodes.length === 0) return `${groupPrefix}001`;
-
-    const numericCodes = allCodes
-      .filter(c => c.startsWith(groupPrefix) && !isNaN(parseInt(c)))
-      .map(c => parseInt(c));
-
-    if (numericCodes.length === 0) return `${groupPrefix}001`;
-
-    const maxCode = Math.max(...numericCodes);
-    return (maxCode + 1).toString().padStart(allCodes[0].length || 4, '0');
+    return batchOperations.getNextLedgerCode(accType, accounts, currentRows);
   };
 
   const addBulkRow = () => {
@@ -84,7 +66,7 @@ export default function ChartOfAccounts() {
 
     // If type changed, suggest new code if current code is empty or matches logic
     if (field === 'type' && value !== oldRow.type) {
-      const suggestedCode = getNextCode(value as Account['type'], newRows.filter((_, i) => i < index));
+      const suggestedCode = getNextCode(value as Account['type'], newRows.filter((_, i) => i !== index));
       newRows[index].code = suggestedCode;
     }
 
@@ -181,16 +163,7 @@ export default function ChartOfAccounts() {
       
       const nextType = (defaultType || activeTab) as Account['type'];
       setType(nextType);
-      
-      const groupPrefix = nextType === 'ASSET' ? '1' : 
-                          nextType === 'LIABILITY' ? '2' : 
-                          nextType === 'EQUITY' ? '3' : 
-                          nextType === 'INCOME' ? '4' : '5';
-      
-      const groupAccounts = accounts.filter(a => a.type === nextType);
-      const lastCode = groupAccounts.length > 0 ? [...groupAccounts].sort((a,b) => b.code.localeCompare(a.code))[0].code : `${groupPrefix}000`;
-      const nextCode = (parseInt(lastCode) + 1).toString().padStart(lastCode.length, '0');
-      
+      const nextCode = getNextCode(nextType);
       setCode(nextCode);
     }
     setIsModalOpen(true);
