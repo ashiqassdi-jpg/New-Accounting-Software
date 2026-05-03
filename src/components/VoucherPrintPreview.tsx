@@ -167,7 +167,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
               </div>
 
               {/* Transaction Table */}
-              <div className="border-2 border-black min-h-[400px] relative flex flex-col">
+              <div className="border-2 border-black min-h-[300px] relative flex flex-col">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b-2 border-black bg-slate-50">
@@ -193,7 +193,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                       </tr>
                     ))}
                     {/* Empty spacer rows */}
-                    <tr className="flex-1 min-h-[120px]">
+                    <tr className="flex-1 min-h-[80px]">
                       <td className="border-r-2 border-black"></td>
                       <td></td>
                     </tr>
@@ -229,7 +229,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
               </div>
 
               {/* Signatures Row 1 */}
-              <div className="grid grid-cols-2 pt-24 text-xs font-black uppercase tracking-widest px-8">
+              <div className="grid grid-cols-2 pt-12 text-xs font-black uppercase tracking-widest px-8">
                 <div className="border-t-2 border-black pt-4 inline-block w-fit min-w-[220px] text-black">
                   Receiver's Signature
                 </div>
@@ -241,7 +241,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
               </div>
 
               {/* Signatures Row 2 */}
-              <div className="grid grid-cols-3 pt-28 text-[11px] font-black uppercase tracking-[0.25em] px-8 text-slate-800">
+              <div className="grid grid-cols-3 pt-16 text-[11px] font-black uppercase tracking-[0.25em] px-8 text-slate-800">
                 <div className="text-left">
                    <div className="border-t-2 border-slate-300 pt-3 inline-block w-fit min-w-[150px] text-center">
                     Prepared by
