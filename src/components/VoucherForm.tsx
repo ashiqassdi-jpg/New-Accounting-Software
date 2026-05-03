@@ -50,6 +50,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   const [voucherNo, setVoucherNo] = useState('');
   const [manualVoucherNo, setManualVoucherNo] = useState(false);
   const [narration, setNarration] = useState('');
+  const [isAutoNarration, setIsAutoNarration] = useState(!editingVoucher);
   const [items, setItems] = useState<VoucherItemWithNarration[]>([
     { account_id: '', debit: 0, credit: 0, narration: '' }
   ]);
@@ -271,6 +272,36 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     })));
     generateVoucherNo();
   }, [type, selectedCompany]);
+
+  // Enhanced Auto-Narration Logic
+  useEffect(() => {
+    if (!isAutoNarration || (type !== 'PAYMENT' && type !== 'RECEIPT')) return;
+
+    const amount = getAutoBalanceAmount();
+    if (amount <= 0) {
+      setNarration('');
+      return;
+    }
+
+    const paymentMethodLabel = PAYMENT_CHANNELS.find(c => c.value === channel)?.label || channel;
+    const formattedDate = format(new Date(date), 'dd-MMM-yyyy');
+    const uniqueLedgers = items
+      .map(item => accounts.find(a => a.id === item.account_id)?.name)
+      .filter(Boolean)
+      .filter((v, i, a) => a.indexOf(v) === i);
+    
+    const ledgersStr = uniqueLedgers.join(', ');
+    const count = items.filter(i => i.account_id).length;
+
+    const formattedAmount = new Intl.NumberFormat('en-IN', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    }).format(amount);
+
+    const newNarration = `${type} of ${formattedAmount} BDT via ${paymentMethodLabel} on ${formattedDate} for ${ledgersStr || '...'} (${count} entries).`;
+    
+    setNarration(newNarration);
+  }, [type, channel, date, items, accounts, isAutoNarration]);
 
   const addItem = () => {
     setItems([...items, { account_id: '', debit: 0, credit: 0, narration: '' }]);
@@ -831,7 +862,10 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
               <textarea 
                 className="w-full bg-slate-50/50 border border-slate-200 rounded-2xl px-5 py-3 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all resize-none h-28 font-medium leading-relaxed"
                 value={narration}
-                onChange={(e) => setNarration(e.target.value)}
+                onChange={(e) => {
+                  setNarration(e.target.value);
+                  setIsAutoNarration(false);
+                }}
                 placeholder="Detail the transaction purpose here..."
               />
             </div>
