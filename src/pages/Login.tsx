@@ -90,44 +90,54 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-[#fcfcfb] relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-50/50 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-50/50 rounded-full blur-[120px] pointer-events-none" />
+      
       <motion.div
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full space-y-8 bg-white p-10 rounded-3xl shadow-2xl border border-slate-100"
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-xl p-10 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-white relative z-10"
       >
         <div>
           <div className="flex justify-center">
-            <div className="bg-indigo-600 p-4 rounded-2xl shadow-lg shadow-indigo-100">
-              <Lock className="h-8 w-8 text-white" />
-            </div>
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className="bg-slate-900 p-4 rounded-2xl shadow-xl shadow-slate-200"
+            >
+              <Lock className="h-7 w-7 text-white" />
+            </motion.div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 font-sans tracking-tight">
+          <h2 className="mt-8 text-center text-4xl font-serif font-bold text-slate-900 tracking-tight">
             Ashiq's Creation
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-500 font-medium">
-            {mode === 'signin' ? 'Sign in to your accounting platform' : 'Create your professional account'}
+          <p className="mt-3 text-center text-sm text-slate-500 font-medium tracking-wide">
+            {mode === 'signin' ? 'Welcome back to your dashboard' : 'Join our professional accounting network'}
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleAuth}>
+        <form className="mt-10 space-y-5" onSubmit={handleAuth}>
           <div className="space-y-4">
             <AnimatePresence mode="popLayout">
               {mode === 'signup' && (
                 <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  exit={{ opacity: 0, height: 0 }}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                   className="relative"
                 >
-                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                  <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
                   <input
                     id="full-name"
                     name="name"
                     type="text"
                     required
-                    className="appearance-none relative block w-full px-12 py-3.5 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all sm:text-sm font-medium bg-slate-50/50"
+                    className="appearance-none relative block w-full px-12 py-4 border border-slate-100 placeholder-slate-400 text-slate-900 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all sm:text-sm font-medium bg-slate-50/30"
                     placeholder="Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -136,59 +146,82 @@ export default function Login() {
               )}
             </AnimatePresence>
 
-            <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="relative"
+            >
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none relative block w-full px-12 py-3.5 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all sm:text-sm font-medium bg-slate-50/50"
+                className="appearance-none relative block w-full px-12 py-4 border border-slate-100 placeholder-slate-400 text-slate-900 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all sm:text-sm font-medium bg-slate-50/30"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-            </div>
-            <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+            </motion.div>
+            
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="relative"
+            >
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 pointer-events-none" />
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none relative block w-full px-12 py-3.5 border border-gray-200 placeholder-gray-400 text-gray-900 rounded-2xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all sm:text-sm font-medium bg-slate-50/50"
+                className="appearance-none relative block w-full px-12 py-4 border border-slate-100 placeholder-slate-400 text-slate-900 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all sm:text-sm font-medium bg-slate-50/30"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-            </div>
+            </motion.div>
           </div>
 
-          {error && (
-            <div className="flex items-center gap-2 bg-red-50 text-red-600 p-4 rounded-2xl text-xs font-bold border border-red-100 italic">
-              <AlertCircle size={16} />
-              <span>{error}</span>
-            </div>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center gap-2 bg-rose-50 text-rose-600 p-4 rounded-2xl text-xs font-bold border border-rose-100 italic"
+              >
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </motion.div>
+            )}
 
-          {success && (
-            <div className="flex items-center gap-2 bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-xs font-bold border border-emerald-100">
-              <CheckCircle2 size={16} />
-              <span>{success}</span>
-            </div>
-          )}
+            {success && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="flex items-center gap-2 bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-xs font-bold border border-emerald-100"
+              >
+                <CheckCircle2 size={16} />
+                <span>{success}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="space-y-4">
+          <div className="space-y-6 pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-4 px-4 border border-transparent text-sm font-bold rounded-2xl text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-100"
+              className="group relative w-full flex justify-center py-4.5 px-4 border border-transparent text-[15px] font-bold rounded-2xl text-white bg-slate-900 hover:bg-black focus:outline-none focus:ring-4 focus:ring-slate-900/10 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-slate-200"
             >
               {loading 
-                ? (mode === 'signin' ? 'Signing in...' : 'Creating account...') 
-                : (mode === 'signin' ? 'Sign in' : 'Create Account')}
+                ? (mode === 'signin' ? 'Securing entrance...' : 'Building profile...') 
+                : (mode === 'signin' ? 'Sign in to creation' : 'Create professional account')}
             </button>
 
             <button
@@ -198,11 +231,11 @@ export default function Login() {
                 setError(null);
                 setSuccess(null);
               }}
-              className="w-full text-center text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors"
+              className="w-full text-center text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest text-[10px]"
             >
               {mode === 'signin' 
-                ? "Don't have an account? Create one" 
-                : "Already have an account? Sign In"}
+                ? "Don't have an account? Join us" 
+                : "Already a member? Sign In"}
             </button>
           </div>
         </form>

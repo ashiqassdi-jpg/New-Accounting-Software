@@ -140,7 +140,9 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 <h1 className="text-4xl company-name text-black leading-tight whitespace-nowrap">
                   {company?.name || 'As-Sunnah Skill Development Institute'}
                 </h1>
-                <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em] leading-none">E-Mail : {profile?.email || 'ashiq.assdi@gmail.com'}</p>
+                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-tight max-w-[600px] mx-auto">
+                  {company?.address || 'Your Company Address'}
+                </p>
                 <div className="pt-2">
                   <h2 className="text-xs font-black border-y border-black/20 py-1.5 inline-block px-10 uppercase tracking-[0.4em] text-slate-600">
                     {voucher.type} VOUCHER
