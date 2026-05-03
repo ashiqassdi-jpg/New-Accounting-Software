@@ -97,7 +97,7 @@ export default function Ledger() {
       supabase.from('accounts')
         .select('*')
         .eq('company_id', selectedCompany.id)
-        .order('name')
+        .order('code')
         .then(({ data }) => setAccounts(data || []));
     }
   }, [selectedCompany]);
@@ -505,17 +505,13 @@ export default function Ledger() {
 
       {selectedAccount ? (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
-          <LedgerStat label="Total Assets / Type" value={selectedAccount.type} isType icon={<ArrowUpRight size={16} />} />
-          <LedgerStat label="In-Period Debit" value={transactions.reduce((acc, t) => acc + (t.debit || 0), 0)} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
-          <LedgerStat label="In-Period Credit" value={transactions.reduce((acc, t) => acc + (t.credit || 0), 0)} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
+          <LedgerStat label="Account Type" value={selectedAccount.type} isType icon={<ArchiveX size={16} />} />
+          <LedgerStat label="Total Debit" value={transactions.reduce((acc, t) => acc + (t.debit || 0), 0)} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
+          <LedgerStat label="Total Credit" value={transactions.reduce((acc, t) => acc + (t.credit || 0), 0)} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
           <LedgerStat 
-            label="Net Variance (Period)" 
-            value={calculateBalance(
-              selectedAccount?.type || 'ASSET',
-              transactions.reduce((acc, t) => acc + (t.debit || 0), 0),
-              transactions.reduce((acc, t) => acc + (t.credit || 0), 0)
-            )} 
-            icon={<Filter size={16} className="text-indigo-500" />}
+            label="Current Balance" 
+            value={transactions.length > 0 ? transactions[0].balance : calculateBalance(selectedAccount.type, 0, 0)} 
+            icon={<BookOpen size={16} className="text-indigo-500" />}
           />
         </div>
       ) : (
@@ -586,9 +582,7 @@ export default function Ledger() {
                       {t.voucher?.voucher_no}
                     </td>
                     <td className="px-10 py-6 text-[13px] font-medium text-slate-500 max-w-lg leading-relaxed">
-                      {t.narration 
-                        ? `${t.narration} - ${t.voucher?.narration}`
-                        : t.voucher?.narration}
+                      {t.narration || t.voucher?.narration}
                     </td>
                     <td className="px-10 py-6 text-xs font-semibold text-rose-600 text-right font-mono tabular-nums">
                       {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
@@ -617,17 +611,33 @@ export default function Ledger() {
                 ))}
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-32 text-center">
-                      <div className="mx-auto w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
-                        <ArchiveX className="text-slate-200" size={32} />
-                      </div>
-                      <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-widest italic">
-                        No financial events detected for this period
-                      </p>
+                    <td colSpan={6} className="py-32 text-center text-slate-300 font-semibold uppercase tracking-widest text-[11px] italic">
+                      No financial events detected for this period
                     </td>
                   </tr>
                 )}
               </tbody>
+              {transactions.length > 0 && (
+                <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
+                  <tr>
+                    <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em]">
+                      Analytical Totals
+                    </td>
+                    <td className="px-10 py-8 text-sm font-mono text-rose-600 text-right tabular-nums">
+                      {formatBDT(transactions.reduce((acc, t) => acc + (t.debit || 0), 0)).replace(/[^0-9.,]/g, '')}
+                    </td>
+                    <td className="px-10 py-8 text-sm font-mono text-emerald-600 text-right tabular-nums">
+                      {formatBDT(transactions.reduce((acc, t) => acc + (t.credit || 0), 0)).replace(/[^0-9.,]/g, '')}
+                    </td>
+                    <td className={cn(
+                      "px-10 py-8 text-sm font-mono text-right tabular-nums pr-12",
+                      transactions[0].balance < 0 ? "text-rose-600" : "text-indigo-700"
+                    )}>
+                      {formatBDT(transactions[0].balance).replace(/[^0-9.,]/g, '')}
+                    </td>
+                  </tr>
+                </tfoot>
+              )}
             </table>
           </div>
         </div>

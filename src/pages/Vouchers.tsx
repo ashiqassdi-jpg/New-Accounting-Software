@@ -116,7 +116,7 @@ export default function Vouchers() {
       .from('accounts')
       .select('*')
       .eq('company_id', selectedCompany.id)
-      .order('name');
+      .order('code');
     setAccounts(data || []);
   };
 

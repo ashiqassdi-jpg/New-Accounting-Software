@@ -27,7 +27,10 @@ import {
   Check,
   CheckCircle2,
   AlertCircle,
-  BookOpen
+  BookOpen,
+  ArchiveX,
+  ArrowUpRight,
+  ArrowDownLeft
 } from 'lucide-react';
 import { useCompany } from '../hooks/useCompany';
 import { useAuth } from '../hooks/useAuth';
@@ -73,7 +76,7 @@ export default function Reports() {
 
   useEffect(() => {
     if (selectedCompany) {
-      supabase.from('accounts').select('*').eq('company_id', selectedCompany.id).order('name').then(({ data }) => setAccounts(data || []));
+      supabase.from('accounts').select('*').eq('company_id', selectedCompany.id).order('code').then(({ data }) => setAccounts(data || []));
     }
   }, [selectedCompany]);
 
@@ -550,7 +553,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   const fetchTrialBalance = async () => {
     setLoading(true);
-    let accQuery = supabase.from('accounts').select('*').eq('company_id', companyId);
+    let accQuery = supabase.from('accounts').select('*').eq('company_id', companyId).order('code');
     if (filters.accountType) accQuery = accQuery.eq('type', filters.accountType);
 
     const { data: accounts, error: accError } = await accQuery;
@@ -921,9 +924,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                                     <td className="px-6 py-3 text-[11px] font-medium text-slate-600 uppercase italic pl-10 border-l-4 border-indigo-500/20">
                                       <div>{t.account?.name}</div>
                                       <div className="text-[9px] text-slate-400 mt-0.5 normal-case">
-                                        {t.narration 
-                                          ? `${t.narration} - ${v.narration}`
-                                          : v.narration}
+                                        {t.narration || v.narration}
                                       </div>
                                     </td>
                                     <td className="px-6 py-3 text-[11px] font-mono font-semibold text-right text-rose-500">
@@ -1181,6 +1182,27 @@ function BalanceRow({ label, value, bold }: any) {
   );
 }
 
+function ReportStat({ label, value, isType, icon }: any) {
+  return (
+    <div className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group overflow-hidden relative">
+      <div className="flex flex-col gap-1 relative z-10 text-left">
+        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+          {icon} {label}
+        </span>
+        <span className={cn(
+          "text-xl font-bold tracking-tight",
+          isType ? "text-indigo-600 uppercase" : "text-slate-900 font-mono"
+        )}>
+          {isType ? value : formatBDT(value)}
+        </span>
+      </div>
+      <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform text-slate-900">
+        {icon && React.cloneElement(icon, { size: 64 })}
+      </div>
+    </div>
+  );
+}
+
 function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExcel }: any) {
   const { profile } = useAuth();
   const { selectedCompany } = useCompany();
@@ -1192,7 +1214,39 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   const [viewingVoucher, setViewingVoucher] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [activeAccountSearch, setActiveAccountSearch] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
   const searchContainerRef = React.useRef<HTMLDivElement>(null);
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  const filteredAccountsForSearch = React.useMemo(() => {
+    return accounts.filter(a => 
+      a.name.toLowerCase().includes(search.toLowerCase()) || 
+      a.code.includes(search)
+    );
+  }, [accounts, search]);
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [search]);
+
+  useEffect(() => {
+    if (activeAccountSearch) {
+      setTimeout(() => searchInputRef.current?.focus(), 10);
+    }
+  }, [activeAccountSearch]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current && selectedIndex >= 0) {
+      const selectedElement = scrollContainerRef.current.querySelector('[data-selected="true"]');
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: 'instant',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -1206,7 +1260,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   useEffect(() => {
     if (companyId) {
-      supabase.from('accounts').select('*').eq('company_id', companyId).order('name').then(({ data }) => setAccounts(data || []));
+      supabase.from('accounts').select('*').eq('company_id', companyId).order('code').then(({ data }) => setAccounts(data || []));
     }
   }, [companyId]);
 
@@ -1283,7 +1337,21 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   const displayRows = [...filteredRows].reverse();
 
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+    <div className="space-y-6">
+      {selectedAccountId && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
+          <ReportStat label="Account Type" value={targetAcc?.type} isType icon={<ArchiveX size={16} />} />
+          <ReportStat label="Total Debit" value={totalDebit} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
+          <ReportStat label="Total Credit" value={totalCredit} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
+          <ReportStat 
+            label="Current Balance" 
+            value={closingBalance} 
+            icon={<BookOpen size={16} className="text-indigo-500" />}
+          />
+        </div>
+      )}
+
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
       <div className="p-10 border-b border-slate-50 space-y-10 no-print">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-end">
           <div className="lg:col-span-2 space-y-3 relative" ref={searchContainerRef}>
@@ -1325,20 +1393,44 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                     <div className="relative">
                       <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
-                        autoFocus
+                        ref={searchInputRef}
                         className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-4 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold uppercase placeholder:text-slate-300"
                         placeholder="Search by name or reference ID..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'ArrowDown') {
+                            e.preventDefault();
+                            setSelectedIndex(prev => (prev + 1) % (filteredAccountsForSearch.length + 1));
+                          } else if (e.key === 'ArrowUp') {
+                            e.preventDefault();
+                            setSelectedIndex(prev => (prev - 1 + filteredAccountsForSearch.length + 1) % (filteredAccountsForSearch.length + 1));
+                          } else if (e.key === 'Enter') {
+                            e.preventDefault();
+                            if (selectedIndex === 0) {
+                              setSelectedAccountId('');
+                              setActiveAccountSearch(false);
+                            } else {
+                              const account = filteredAccountsForSearch[selectedIndex - 1];
+                              if (account) {
+                                setSelectedAccountId(account.id);
+                                setActiveAccountSearch(false);
+                                setSearch('');
+                              }
+                            }
+                          } else if (e.key === 'Escape') {
+                            setActiveAccountSearch(false);
+                          }
+                        }}
                       />
                     </div>
                   </div>
-                  <div className="max-h-[350px] overflow-y-auto custom-scrollbar p-3 space-y-1">
+                  <div 
+                    ref={scrollContainerRef}
+                    className="max-h-[350px] overflow-y-auto custom-scrollbar p-3 space-y-1"
+                  >
                     {(() => {
-                      const filtered = accounts.filter(a => 
-                        a.name.toLowerCase().includes(search.toLowerCase()) || 
-                        a.code.includes(search)
-                      );
+                      const filtered = filteredAccountsForSearch;
 
                       const groups = ACCOUNT_GROUPS.map(group => ({
                         ...group,
@@ -1356,45 +1448,49 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                           <div className="mb-4">
                             <button
                               type="button"
+                              data-selected={selectedIndex === 0}
                               onClick={() => {
                                 setSelectedAccountId('');
                                 setActiveAccountSearch(false);
                                 setSearch('');
                               }}
-                              className="w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all hover:bg-rose-50 border border-transparent hover:border-rose-100"
+                              className={cn(
+                                "w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all border border-transparent",
+                                selectedIndex === 0 ? "bg-rose-50 border-rose-100" : "hover:bg-rose-50 hover:border-rose-100"
+                              )}
                             >
-                              <span className="text-xs font-semibold text-rose-500 uppercase tracking-tight">No Selection</span>
+                              <span className={cn("text-xs font-semibold uppercase tracking-tight", selectedIndex === 0 ? "text-rose-600 font-bold" : "text-rose-500")}>No Selection</span>
                             </button>
                           </div>
                           {groups.map(group => (
                             <div key={group.value} className="mb-4 last:mb-0">
                               <div className="px-5 py-2 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.3em] mb-1">{group.label}</div>
                               <div className="grid grid-cols-1 gap-1">
-                                {group.accounts.map(a => (
-                                  <button
-                                    key={a.id}
-                                    type="button"
-                                    onClick={() => {
-                                      setSelectedAccountId(a.id);
-                                      setActiveAccountSearch(false);
-                                      setSearch('');
-                                    }}
-                                    className={cn(
-                                      "w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all",
-                                      selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50"
-                                    )}
-                                  >
-                                    <div className="flex flex-col">
-                                      <span className={cn("text-xs font-semibold uppercase tracking-tight", selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700")}>{a.name}</span>
-                                      <span className={cn("text-[9px] font-mono font-semibold tracking-[0.2em] mt-0.5", selectedAccountId === a.id ? "text-indigo-400" : "text-slate-400")}>{a.code}</span>
-                                    </div>
-                                    {selectedAccountId === a.id && (
-                                      <div className="bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-200">
-                                        <CheckCircle2 size={14} />
+                                {group.accounts.map(a => {
+                                  const globalIndex = filtered.indexOf(a) + 1;
+                                  const isSelected = selectedIndex === globalIndex;
+                                  return (
+                                    <button
+                                      key={a.id}
+                                      type="button"
+                                      data-selected={isSelected}
+                                      onClick={() => {
+                                        setSelectedAccountId(a.id);
+                                        setActiveAccountSearch(false);
+                                        setSearch('');
+                                      }}
+                                      className={cn(
+                                        "w-full text-left px-5 py-4 rounded-2xl group flex items-center justify-between transition-all",
+                                        isSelected ? "bg-indigo-600 text-white shadow-lg scale-[1.02] ring-2 ring-indigo-300 ring-offset-1" : (selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50")
+                                      )}
+                                    >
+                                      <div className="flex flex-col">
+                                        <span className={cn("text-xs font-semibold uppercase tracking-tight", isSelected ? "text-white" : (selectedAccountId === a.id ? "text-indigo-800" : "text-slate-700"))}>{a.name}</span>
+                                        <span className={cn("text-[9px] font-mono mt-0.5", isSelected ? "text-indigo-100" : "text-slate-400")}>{a.code}</span>
                                       </div>
-                                    )}
-                                  </button>
-                                ))}
+                                    </button>
+                                  );
+                                })}
                               </div>
                             </div>
                           ))}
@@ -1424,7 +1520,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             <button 
               onClick={() => onExportExcel(filteredRows.map(r => ({ 
                 Date: r.date, 
-                Narration: r.narration ? `${r.narration} - ${r.voucher?.narration}` : r.voucher?.narration, 
+                Narration: r.narration || r.voucher?.narration, 
                 Type: r.voucher?.type, 
                 Debit: r.debit, 
                 Credit: r.credit, 
@@ -1440,7 +1536,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
               onClick={() => {
                 const docData = filteredRows.map(r => [
                   format(new Date(r.date), 'dd/MM/yyyy'), 
-                  r.narration ? `${r.narration} - ${r.voucher?.narration}` : r.voucher?.narration, 
+                  r.narration || r.voucher?.narration, 
                   r.voucher?.type, 
                   r.debit, 
                   r.credit, 
@@ -1481,9 +1577,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                   <td className="px-10 py-5 text-xs font-semibold text-slate-400 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
                   <td className="px-10 py-5">
                     <p className="text-[11px] font-medium text-slate-600 whitespace-pre-wrap max-w-sm italic leading-relaxed">
-                      {r.narration 
-                        ? `${r.narration} - ${r.voucher?.narration}`
-                        : r.voucher?.narration}
+                      {r.narration || r.voucher?.narration}
                     </p>
                     <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Ref: {r.voucher?.voucher_no}</p>
                   </td>
@@ -1553,6 +1647,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             onClose={() => setViewingVoucher(null)}
           />
         )}
+      </div>
     </div>
   );
 }

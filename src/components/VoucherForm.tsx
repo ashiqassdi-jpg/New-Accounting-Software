@@ -246,7 +246,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       .from('accounts')
       .select('*')
       .eq('company_id', selectedCompany!.id)
-      .order('name');
+      .order('code');
     setAccounts(data || []);
   };
 
