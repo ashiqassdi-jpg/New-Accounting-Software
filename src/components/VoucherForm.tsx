@@ -78,6 +78,39 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLElement | null>(null);
+  const firstInputRef = useRef<HTMLSelectElement>(null);
+
+  // Body scroll lock
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    return () => document.body.classList.remove('modal-open');
+  }, []);
+
+  // Auto-focus first field
+  useEffect(() => {
+    setTimeout(() => firstInputRef.current?.focus(), 100);
+  }, []);
+
+  // Global Esc to cancel + Alt+S to save
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !activeAccountSearch) {
+        onCancel();
+      }
+    };
+    
+    const handleGlobalSave = () => {
+      containerRef.current?.requestSubmit();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('app-save-triggered', handleGlobalSave);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('app-save-triggered', handleGlobalSave);
+    };
+  }, [onCancel, activeAccountSearch]);
 
   // Focus search input when modal opens and restore focus on close
   useEffect(() => {
@@ -492,13 +525,14 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form ref={containerRef} onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Metadata Grid */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-5 bg-slate-50/50 rounded-2xl border border-slate-100">
             <div className="space-y-1.5">
               <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest block pl-1">Document Type</label>
               <div className="relative group">
                 <select 
+                  ref={firstInputRef}
                   className="appearance-none w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold text-slate-900 cursor-pointer uppercase tracking-tight"
                   value={type}
                   onChange={(e) => setType(e.target.value as VoucherType)}
@@ -749,8 +783,10 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                                       setActiveAccountSearch(null);
                                                     }}
                                                     className={cn(
-                                                      "w-full text-left px-2 py-1.5 rounded-lg group flex items-center justify-between transition-all",
-                                                      isSelected ? "bg-indigo-600 shadow-md" : "hover:bg-indigo-50"
+                                                      "w-full text-left px-2 py-1.5 rounded-lg group flex items-center justify-between transition-all outline-none",
+                                                      isSelected 
+                                                        ? "bg-indigo-600 shadow-md scale-[1.02] ring-2 ring-indigo-300 ring-offset-1" 
+                                                        : "hover:bg-indigo-50 border border-transparent"
                                                     )}
                                                   >
                                                     <div className="flex flex-col">

@@ -35,6 +35,23 @@ export default function Companies() {
   const [address, setAddress] = useState('');
   const [taxId, setTaxId] = useState('');
   const [bin, setBin] = useState('');
+  const firstInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Esc shortcut + Auto focus
+  React.useEffect(() => {
+    if (isModalOpen) {
+      document.body.classList.add('modal-open');
+      const handleEsc = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') setIsModalOpen(false);
+      };
+      window.addEventListener('keydown', handleEsc);
+      setTimeout(() => firstInputRef.current?.focus(), 100);
+      return () => {
+        document.body.classList.remove('modal-open');
+        window.removeEventListener('keydown', handleEsc);
+      };
+    }
+  }, [isModalOpen]);
 
   const openModal = (company?: Company) => {
     if (company) {
@@ -256,6 +273,7 @@ export default function Companies() {
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Company Name</label>
                 <input 
+                  ref={firstInputRef}
                   required
                   className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
                   value={name}

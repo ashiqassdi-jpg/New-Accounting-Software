@@ -17,6 +17,7 @@ import { DateRangeFilter } from '../components/DateRangeFilter';
 import { useAuth } from '../hooks/useAuth';
 import { motion, AnimatePresence } from 'motion/react';
 import { format } from 'date-fns';
+import { useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
 import { jsPDF } from 'jspdf';
@@ -26,12 +27,25 @@ import * as XLSX from 'xlsx';
 export default function Vouchers() {
   const { user, profile, canEdit, canDelete, canAdd } = useAuth();
   const { selectedCompany } = useCompany();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [vouchers, setVouchers] = useState<Voucher[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFormType, setActiveFormType] = useState<VoucherType | null>(null);
-  const [search, setSearch] = useState('');
+
   const [viewingVoucher, setViewingVoucher] = useState<Voucher | null>(null);
   const [editingVoucher, setEditingVoucher] = useState<Voucher | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get('new') === 'true' && !activeFormType && !editingVoucher) {
+      setActiveFormType('PAYMENT');
+      // Clean up the URL
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('new');
+      setSearchParams(newParams, { replace: true });
+    }
+  }, [searchParams, activeFormType, editingVoucher, setSearchParams]);
+
+  const [search, setSearch] = useState('');
   const [showDeepFilter, setShowDeepFilter] = useState(false);
   const [filterMode, setFilterMode] = useState<'RECENT' | 'ALL'>('RECENT');
   const [filterType, setFilterType] = useState<VoucherType | 'ALL'>('ALL');
@@ -558,8 +572,10 @@ export default function Vouchers() {
                                         setAccountSearchQuery('');
                                       }}
                                       className={cn(
-                                        "w-full text-left px-3 py-2 rounded-md flex items-center justify-between transition-colors",
-                                        isSelected ? "bg-indigo-600 text-white" : (filterAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50")
+                                        "w-full text-left px-3 py-2 rounded-md flex items-center justify-between transition-all",
+                                        isSelected 
+                                          ? "bg-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-indigo-300 ring-offset-1" 
+                                          : (filterAccountId === a.id ? "bg-indigo-50 border border-indigo-100" : "hover:bg-slate-50 border border-transparent")
                                       )}
                                     >
                                       <div className="flex flex-col truncate pr-2">

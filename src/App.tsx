@@ -7,6 +7,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { CompanyProvider } from './hooks/useCompany';
+import KeyboardManager from './components/KeyboardManager';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -29,6 +30,7 @@ export default function App() {
       <CompanyProvider>
         <Toaster position="top-right" richColors />
         <BrowserRouter>
+          <KeyboardManager />
           <Routes>
             <Route path="/login" element={<Login />} />
             

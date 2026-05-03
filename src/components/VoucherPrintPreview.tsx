@@ -57,6 +57,19 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
     documentTitle: `Voucher_${voucher.voucher_no}`,
   });
 
+  // Esc shortcut + Body lock
+  useEffect(() => {
+    document.body.classList.add('modal-open');
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      document.body.classList.remove('modal-open');
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto">
       <motion.div 
