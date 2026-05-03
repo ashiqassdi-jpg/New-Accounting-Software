@@ -273,7 +273,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     generateVoucherNo();
   }, [type, selectedCompany]);
 
-  // Enhanced Auto-Narration Logic
+  // Enhanced Auto-Narration Logic - Only for Primary Narration
   useEffect(() => {
     if (!isAutoNarration || (type !== 'PAYMENT' && type !== 'RECEIPT')) return;
 
@@ -851,6 +851,17 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                     ))}
                   </tbody>
                 </table>
+              </div>
+              
+              {/* Secondary Add Button for easier workflow */}
+              <div className="p-4 border-t border-slate-50 bg-slate-50/20 flex justify-center">
+                <button 
+                  type="button" 
+                  onClick={addItem}
+                  className="flex items-center gap-2 bg-white text-indigo-600 border border-indigo-200 px-6 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-sm active:scale-95"
+                >
+                  <Plus size={14} /> Add Transaction Line
+                </button>
               </div>
             </div>
           </div>
