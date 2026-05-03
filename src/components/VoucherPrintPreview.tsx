@@ -63,10 +63,15 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
+    const handleGlobalEscape = () => {
+      onClose();
+    };
     window.addEventListener('keydown', handleEsc);
+    window.addEventListener('app-escape-pressed', handleGlobalEscape);
     return () => {
       document.body.classList.remove('modal-open');
       window.removeEventListener('keydown', handleEsc);
+      window.removeEventListener('app-escape-pressed', handleGlobalEscape);
     };
   }, [onClose]);
 

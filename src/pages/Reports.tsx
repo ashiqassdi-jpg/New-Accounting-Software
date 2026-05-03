@@ -1219,6 +1219,16 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   const scrollContainerRef = React.useRef<HTMLDivElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    const handleGlobalEscape = () => {
+      if (activeAccountSearch) {
+        setActiveAccountSearch(false);
+      }
+    };
+    window.addEventListener('app-escape-pressed', handleGlobalEscape);
+    return () => window.removeEventListener('app-escape-pressed', handleGlobalEscape);
+  }, [activeAccountSearch]);
+
   const filteredAccountsForSearch = React.useMemo(() => {
     return accounts.filter(a => 
       a.name.toLowerCase().includes(search.toLowerCase()) || 
@@ -1227,7 +1237,27 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   }, [accounts, search]);
 
   useEffect(() => {
-    setSelectedIndex(0);
+    const handleScrollOrResize = (e: Event) => {
+      // Don't close if scrolling inside the search list itself
+      if (activeAccountSearch && scrollContainerRef.current && scrollContainerRef.current.contains(e.target as Node)) {
+        return;
+      }
+      if (activeAccountSearch) setActiveAccountSearch(false);
+    };
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [activeAccountSearch]);
+
+  useEffect(() => {
+    if (search) {
+      setSelectedIndex(1);
+    } else {
+      setSelectedIndex(0);
+    }
   }, [search]);
 
   useEffect(() => {
@@ -1449,6 +1479,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                             <button
                               type="button"
                               data-selected={selectedIndex === 0}
+                              onMouseEnter={() => setSelectedIndex(0)}
                               onClick={() => {
                                 setSelectedAccountId('');
                                 setActiveAccountSearch(false);
@@ -1474,6 +1505,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                                       key={a.id}
                                       type="button"
                                       data-selected={isSelected}
+                                      onMouseEnter={() => setSelectedIndex(filtered.indexOf(a) + 1)}
                                       onClick={() => {
                                         setSelectedAccountId(a.id);
                                         setActiveAccountSearch(false);

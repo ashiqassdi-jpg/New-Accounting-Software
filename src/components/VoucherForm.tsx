@@ -70,7 +70,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   }, [accounts, activeAccountSearch?.query]);
 
   useEffect(() => {
-    setSelectedIndex(0); // Reset index when query changes
+    if (activeAccountSearch?.query) {
+      setSelectedIndex(1);
+    } else {
+      setSelectedIndex(0);
+    }
   }, [activeAccountSearch?.query]);
 
   const searchRef = useRef<HTMLDivElement>(null);
@@ -103,12 +107,22 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       containerRef.current?.requestSubmit();
     };
 
+    const handleGlobalEscape = () => {
+      if (!activeAccountSearch) {
+        onCancel();
+      } else {
+        setActiveAccountSearch(null);
+      }
+    };
+
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('app-save-triggered', handleGlobalSave);
+    window.addEventListener('app-escape-pressed', handleGlobalEscape);
     
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('app-save-triggered', handleGlobalSave);
+      window.removeEventListener('app-escape-pressed', handleGlobalEscape);
     };
   }, [onCancel, activeAccountSearch]);
 
@@ -161,7 +175,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   };
 
   useEffect(() => {
-    const handleScrollOrResize = () => {
+    const handleScrollOrResize = (e: Event) => {
+      // Don't close if scrolling inside the search list itself
+      if (activeAccountSearch && scrollContainerRef.current && scrollContainerRef.current.contains(e.target as Node)) {
+        return;
+      }
       if (activeAccountSearch) setActiveAccountSearch(null);
     };
     window.addEventListener('scroll', handleScrollOrResize, true);
@@ -756,6 +774,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                           <button
                                             type="button"
                                             data-selected={selectedIndex === 0}
+                                            onMouseEnter={() => setSelectedIndex(0)}
                                             onClick={() => {
                                               updateItem(index, 'account_id', '');
                                               setActiveAccountSearch(null);
@@ -778,6 +797,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                                     key={a.id}
                                                     type="button"
                                                     data-selected={isSelected}
+                                                    onMouseEnter={() => setSelectedIndex(globalIndex)}
                                                     onClick={() => {
                                                       updateItem(index, 'account_id', a.id);
                                                       setActiveAccountSearch(null);
