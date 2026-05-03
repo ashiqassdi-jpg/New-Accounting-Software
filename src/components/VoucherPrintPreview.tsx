@@ -140,32 +140,32 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 <h1 className="text-4xl company-name text-black leading-tight whitespace-nowrap">
                   {company?.name || 'As-Sunnah Skill Development Institute'}
                 </h1>
-                <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em] leading-tight max-w-[600px] mx-auto">
+                <p className="text-[10px] font-bold text-black uppercase tracking-[0.2em] leading-tight max-w-full mx-auto whitespace-nowrap overflow-hidden text-ellipsis">
                   {company?.address || 'Your Company Address'}
                 </p>
-                <div className="pt-2">
-                  <h2 className="text-xs font-black border-y border-black/20 py-1.5 inline-block px-10 uppercase tracking-[0.4em] text-slate-600">
+                <div className="pt-3">
+                  <h2 className="text-sm font-black border-y-2 border-black py-2 inline-block px-12 uppercase tracking-[0.4em] text-black">
                     {voucher.type} VOUCHER
                   </h2>
                 </div>
               </div>
 
               {/* Reference Info */}
-              <div className="flex justify-between items-end text-[11px] font-bold uppercase tracking-widest">
+              <div className="flex justify-between items-end text-[11px] font-black uppercase tracking-widest">
                 <div className="flex gap-2">
-                  <span className="text-slate-400">Voucher No :</span>
+                  <span className="text-black">Voucher No :</span>
                   <span className="border-b-2 border-black min-w-[120px] inline-block text-center text-sm">{voucher.voucher_no}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-slate-400">Date :</span>
+                  <span className="text-black">Date :</span>
                   <span className="border-b-2 border-black min-w-[140px] inline-block text-center text-sm">{format(new Date(voucher.date), 'dd-MMM-yyyy')}</span>
                 </div>
               </div>
 
               {/* Through Line */}
-              <div className="flex gap-2 text-xs font-bold uppercase tracking-widest">
-                <span className="text-slate-400">Through :</span>
-                <span className="border-b-2 border-black flex-1 text-sm">{throughAccount}</span>
+              <div className="flex gap-2 text-xs font-black uppercase tracking-widest">
+                <span className="text-black">Through :</span>
+                <span className="border-b-2 border-black flex-1 text-sm font-bold">{throughAccount}</span>
               </div>
 
               {/* Transaction Table */}
@@ -206,14 +206,14 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 <div className="mt-auto border-t-2 border-black">
                    <div className="p-6 space-y-5">
                       <div className="flex gap-4 text-xs items-center">
-                        <span className="font-black uppercase tracking-widest text-[10px] text-slate-500 min-w-[120px]">On Account of :</span>
-                        <div className="flex-1 font-bold text-slate-900 border-b-2 border-slate-100 pb-1 text-[12px]">
+                        <span className="font-black uppercase tracking-widest text-[11px] text-black min-w-[130px]">On Account of :</span>
+                        <div className="flex-1 font-bold text-slate-900 border-b-2 border-slate-200 pb-1 text-[13px]">
                           {voucher.narration || 'N/A'}
                         </div>
                       </div>
                       <div className="flex gap-4 text-xs items-center">
-                        <span className="font-black uppercase tracking-widest text-[10px] text-slate-500 min-w-[120px]">Amount in Words :</span>
-                        <div className="flex-1 font-black italic text-black border-b-2 border-slate-100 pb-1 text-[12px] capitalize">
+                        <span className="font-black uppercase tracking-widest text-[11px] text-black min-w-[130px]">Amount in Words :</span>
+                        <div className="flex-1 font-black italic text-black border-b-2 border-slate-200 pb-1 text-[13px] capitalize">
                           {numberToWords(voucher.amount)}
                         </div>
                       </div>
@@ -243,19 +243,19 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
               </div>
 
               {/* Signatures Row 2 */}
-              <div className="grid grid-cols-3 pt-16 text-[11px] font-black uppercase tracking-[0.25em] px-8 text-slate-800">
+              <div className="grid grid-cols-3 pt-16 text-[11px] font-black uppercase tracking-[0.25em] px-8 text-black">
                 <div className="text-left">
-                   <div className="border-t-2 border-slate-300 pt-3 inline-block w-fit min-w-[150px] text-center">
+                   <div className="border-t-2 border-slate-800 pt-3 inline-block w-fit min-w-[150px] text-center">
                     Prepared by
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="border-t-2 border-slate-300 pt-3 inline-block w-fit min-w-[150px] text-center">
+                  <div className="border-t-2 border-slate-800 pt-3 inline-block w-fit min-w-[150px] text-center">
                     Checked by
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="border-t-2 border-slate-300 pt-3 inline-block w-fit min-w-[150px] text-center">
+                  <div className="border-t-2 border-slate-800 pt-3 inline-block w-fit min-w-[150px] text-center">
                     Verified by
                   </div>
                 </div>
