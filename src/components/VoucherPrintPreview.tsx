@@ -169,11 +169,11 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                       <tr key={idx}>
                         <td className="px-4 py-3">
                           <p className="text-[11px] font-bold text-slate-700 uppercase">{item.account_name}</p>
-                          <p className="text-[9px] text-slate-400 mt-1 italic leading-tight">
-                            {item.narration 
-                              ? `${item.narration} - ${voucher.narration}`
-                              : voucher.narration}
-                          </p>
+                          {item.narration && (
+                            <p className="text-[9px] text-slate-400 mt-1 italic leading-tight">
+                              {item.narration}
+                            </p>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-right font-mono text-[11px] font-bold text-slate-900">
                           {item.debit > 0 ? formatBDT(item.debit).replace(/[^0-9.,]/g, '') : ''}
@@ -194,11 +194,12 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 </table>
               </div>
 
-              {/* Primary Narration Section */}
+              {/* Narration Section */}
               {voucher.narration && (
-                <div className="mt-6 p-4 bg-slate-50 border border-slate-100 rounded-lg">
-                  <p className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Primary Narration</p>
-                  <p className="text-[10px] text-slate-600 font-medium leading-relaxed">{voucher.narration}</p>
+                <div className="mt-6 px-1">
+                  <p className="text-[10px] text-slate-600 font-medium leading-relaxed italic border-l-2 border-slate-200 pl-4">
+                    {voucher.narration}
+                  </p>
                 </div>
               )}
 

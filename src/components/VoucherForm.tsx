@@ -298,7 +298,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       maximumFractionDigits: 2 
     }).format(amount);
 
-    const newNarration = `${type} of ${formattedAmount} BDT via ${paymentMethodLabel} on ${formattedDate} for ${ledgersStr || '...'} (${count} entries).`;
+    const newNarration = `${type} of ${formattedAmount} BDT via ${paymentMethodLabel} on ${formattedDate}.`;
     
     setNarration(newNarration);
   }, [type, channel, date, items, accounts, isAutoNarration]);
