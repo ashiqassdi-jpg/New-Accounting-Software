@@ -68,7 +68,7 @@ export default function Sidebar() {
         {!collapsed && (
           <div className="flex flex-col">
             <span className="font-bold text-xl text-slate-900 truncate tracking-tight font-sans leading-none">
-              Ashiq's Creation
+              Ashik's Creation
             </span>
             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1.5 pl-0.5">Enterprise</span>
           </div>
