@@ -13,34 +13,42 @@
   }
 
   body {
-    @apply bg-[#F9FAFB] text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    @apply bg-[#FBFBFC] text-slate-900 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
 
   /* Compact form controls */
   input, select, textarea {
-    @apply text-[13px] leading-tight transition-all duration-200 border border-slate-100 bg-white rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-400;
+    @apply text-[13px] font-medium leading-tight transition-all duration-200 border border-slate-200 bg-white rounded-lg px-3 py-1.5 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500;
   }
 
   button {
-    @apply active:scale-95 transition-transform duration-100 cursor-pointer;
+    @apply active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
 @layer components {
+  /* Elegant Button Styles */
+  .btn-primary {
+    @apply bg-slate-900 text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 shadow-sm transition-all;
+  }
+
+  .btn-secondary {
+    @apply bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-50 hover:border-slate-300 transition-all;
+  }
+
+  /* Compact section header */
+  .section-header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  .section-title {
+    @apply text-xl font-bold text-slate-900 tracking-tight leading-none;
+  }
+
   /* Italic serif column headers—humanizes the data */
   .col-header {
-    @apply font-sans font-bold text-[10px] text-slate-400 uppercase tracking-[0.15em];
-  }
-
-  /* Monospace for data values—signals precision */
-  .data-value {
-    @apply font-mono tracking-tighter tabular-nums;
-  }
-
-  /* Professional Currency Styling */
-  .currency-symbol {
-    @apply text-slate-300 font-sans mr-0.5 font-normal;
+    @apply font-sans font-black text-[10px] text-slate-400 uppercase tracking-[0.2em];
   }
 
   /* Custom Scrollbar - Cleaner, more professional */
@@ -79,9 +87,19 @@
     background-color: theme('colors.slate.300');
   }
 
+  /* Monospace for data values—signals precision */
+  .data-value {
+    @apply font-mono text-[13px] tracking-tight tabular-nums font-medium;
+  }
+
+  /* Professional Currency Styling */
+  .currency-symbol {
+    @apply text-slate-300 font-sans mr-0.5 font-normal;
+  }
+
   /* Compact card styling */
   .card-compact {
-    @apply bg-white border border-slate-100 rounded-2xl p-4 shadow-[0_1px_3px_0_rgba(0,0,0,0.02)];
+    @apply bg-white border border-slate-100 rounded-2xl p-5 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] transition-shadow duration-300;
   }
 }
 

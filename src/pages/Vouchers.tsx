@@ -274,51 +274,53 @@ export default function Vouchers() {
 
   return (
     <div className="space-y-6 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
+          <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none text-center md:text-left">
             Voucher Management
           </h1>
-          <p className="text-[10px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest leading-none text-center md:text-left truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl" title={`Vanguard Entries for ${selectedCompany?.name || 'Vanguard'}`}>
-            Vanguard Entries for {selectedCompany?.name || 'Vanguard'}
+          <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-widest leading-none text-center md:text-left truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl">
+            Vanguard Entries Hub • {selectedCompany?.name || 'Vanguard'}
           </p>
         </div>
 
-        <div className="flex items-center justify-center md:justify-end gap-2 no-print">
+        <div className="flex items-center justify-center md:justify-end gap-1.5 no-print">
           <button 
             onClick={() => setShowDeepFilter(!showDeepFilter)}
             className={cn(
-              "px-3 py-2.5 rounded-lg transition-all shadow-sm border flex items-center gap-2",
+              "px-3 py-1.5 rounded-lg transition-all border flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider",
               showDeepFilter 
                 ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
                 : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
             )}
           >
-            <Filter size={16} />
-            <span className="text-sm font-medium">Deep Filter</span>
+            <Filter size={14} />
+            <span>Filter</span>
           </button>
-          <div className="w-px h-8 bg-slate-100 mx-1 hidden md:block" />
-          <button 
-            onClick={() => window.print()}
-            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
-            title="Print List"
-          >
-            <Printer size={16} />
-          </button>
-          <button 
-            onClick={handleExportExcel}
-            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
-            title="Export Excel"
-          >
-            <Download size={16} />
-          </button>
-          <button 
-            onClick={handleExportPDF}
-            className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
-            title="Export PDF"
-          >
-            <FileText size={16} />
-          </button>
+          <div className="w-px h-6 bg-slate-100 mx-0.5 hidden md:block" />
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={() => window.print()}
+              className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+              title="Print List"
+            >
+              <Printer size={14} />
+            </button>
+            <button 
+              onClick={handleExportExcel}
+              className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
+              title="Export Excel"
+            >
+              <Download size={14} />
+            </button>
+            <button 
+              onClick={handleExportPDF}
+              className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
+              title="Export PDF"
+            >
+              <FileText size={14} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -340,15 +342,15 @@ export default function Vouchers() {
         <div className="space-y-12">
           {/* Quick Actions Grid */}
           {canAdd && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {VOUCHER_TYPES.map((vt) => (
                 <button
                   key={vt.value}
                   onClick={() => setActiveFormType(vt.value as VoucherType)}
-                  className="flex flex-col items-center justify-center p-6 bg-white border border-slate-100 rounded-[2rem] shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-100 hover:-translate-y-1 transition-all group"
+                  className="flex flex-col items-center justify-center p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-100 hover:-translate-y-0.5 transition-all group"
                 >
                   <div className={cn(
-                    "w-12 h-12 rounded-2xl mb-4 flex items-center justify-center transition-all duration-500 group-hover:scale-110",
+                    "w-10 h-10 rounded-xl mb-3 flex items-center justify-center transition-all duration-300",
                     vt.value === 'PAYMENT' && "bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white",
                     vt.value === 'RECEIPT' && "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white",
                     vt.value === 'JOURNAL' && "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white",
@@ -356,23 +358,23 @@ export default function Vouchers() {
                     vt.value === 'SALES' && "bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white",
                     vt.value === 'PURCHASE' && "bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white",
                   )}>
-                    <Receipt size={24} />
+                    <Receipt size={20} />
                   </div>
-                  <span className="text-xs font-semibold text-slate-900 uppercase tracking-wider">{vt.label}</span>
+                  <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{vt.label}</span>
                 </button>
               ))}
             </div>
           )}
 
           <div className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xs font-semibold text-slate-900 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Transactions' : 'All Transactions'}</h2>
-                  <div className="flex bg-slate-100 p-0.5 rounded-xl">
+                  <h2 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Activity' : 'Full Ledger'}</h2>
+                  <div className="flex bg-slate-100 p-0.5 rounded-lg">
                     <button 
                       onClick={() => setFilterMode('RECENT')}
                       className={cn(
-                        "px-2.5 py-1 text-[9px] font-semibold rounded-lg transition-all",
+                        "px-2 py-0.5 text-[9px] font-bold rounded-md transition-all",
                         filterMode === 'RECENT' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -381,7 +383,7 @@ export default function Vouchers() {
                     <button 
                       onClick={() => setFilterMode('ALL')}
                       className={cn(
-                        "px-2.5 py-1 text-[9px] font-semibold rounded-lg transition-all",
+                        "px-2 py-0.5 text-[9px] font-bold rounded-md transition-all",
                         filterMode === 'ALL' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -391,12 +393,11 @@ export default function Vouchers() {
                 </div>
 
                 <div className="flex flex-wrap md:flex-nowrap items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  {/* Simplified Search */}
-                    <div className="relative w-40 shrink-0">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={13} />
+                    <div className="relative w-36 shrink-0">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
                       <input 
-                        className="w-full bg-white border border-slate-100 rounded-xl pl-9 pr-3 py-1.5 text-[9px] font-medium text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
-                        placeholder="Scan..."
+                        className="w-full bg-white border border-slate-100 rounded-lg pl-8 pr-2.5 py-1 text-[11px] font-medium text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
+                        placeholder="Scan ID/Narration..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                       />
@@ -413,23 +414,10 @@ export default function Vouchers() {
                       setConfirmedDateRange(dateRange);
                       fetchVouchers();
                     }}
-                    className="px-3 py-2 bg-slate-900 text-white rounded-xl text-[9px] font-semibold uppercase tracking-wider hover:bg-indigo-600 transition-all shadow-lg active:scale-95 flex items-center gap-1.5 shrink-0"
+                    className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-1.5 shrink-0"
                   >
-                    <Search size={12} />
-                    Search
-                  </button>
-
-                  <button 
-                    onClick={() => setShowDeepFilter(!showDeepFilter)}
-                    className={cn(
-                      "px-3 py-2 rounded-lg transition-all shadow-sm border flex items-center gap-1.5 shrink-0",
-                      showDeepFilter 
-                        ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                        : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                    )}
-                  >
-                    <Filter size={16} />
-                    <span className="text-sm font-medium">Deep Filter</span>
+                    <Search size={11} />
+                    Run
                   </button>
                 </div>
               </div>
@@ -679,24 +667,24 @@ export default function Vouchers() {
             )}
 
             {/* List */}
-            <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50/50">
-                      <th className="px-8 py-5 text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-10">Type</th>
-                      <th className="px-8 py-5 text-[10px] font-medium text-slate-400 uppercase tracking-widest">Date</th>
-                      <th className="px-8 py-5 text-[10px] font-medium text-slate-400 uppercase tracking-widest">Description</th>
-                      <th className="px-8 py-5 text-[10px] font-medium text-slate-400 uppercase tracking-widest text-right">Amount</th>
-                      <th className="px-8 py-5 text-[10px] font-medium text-slate-400 uppercase tracking-widest text-right pr-10">Actions</th>
+                      <th className="px-6 py-3 col-header pl-8">Type</th>
+                      <th className="px-6 py-3 col-header">Date</th>
+                      <th className="px-6 py-3 col-header">Description</th>
+                      <th className="px-6 py-3 col-header text-right">Amount</th>
+                      <th className="px-6 py-3 col-header text-right pr-8">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {filteredVouchers.map((v) => (
-                      <tr key={v.id} className="hover:bg-slate-50/50 transition-colors group">
-                        <td className="px-8 py-5 pl-10">
+                      <tr key={v.id} className="hover:bg-slate-50/20 transition-colors group">
+                        <td className="px-6 py-3 pl-8">
                           <span className={cn(
-                            "text-[10px] font-medium px-2.5 py-1 rounded-md uppercase tracking-wider",
+                            "text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-widest",
                             v.type === 'PAYMENT' && "bg-rose-50 text-rose-600",
                             v.type === 'RECEIPT' && "bg-emerald-50 text-emerald-600",
                             v.type === 'JOURNAL' && "bg-amber-50 text-amber-600",
@@ -707,47 +695,44 @@ export default function Vouchers() {
                             {v.type}
                           </span>
                         </td>
-                        <td className="px-8 py-5 text-sm font-medium text-slate-400">
-                          {format(new Date(v.date), 'dd/MM/yyyy')}
+                        <td className="px-6 py-3 text-xs font-bold text-slate-400">
+                          {format(new Date(v.date), 'dd MMM yyyy')}
                         </td>
-                        <td className="px-8 py-5">
+                        <td className="px-6 py-3">
                           <div className="flex flex-col">
-                            <span className="text-sm font-medium text-slate-900">{v.voucher_no}</span>
-                            <span className="text-xs text-slate-400 font-medium truncate max-w-xs">{v.narration}</span>
+                            <span className="text-[13px] font-bold text-slate-900 tracking-tight">{v.voucher_no}</span>
+                            <span className="text-[11px] text-slate-400 font-medium truncate max-w-[200px]">{v.narration}</span>
                           </div>
                         </td>
-                        <td className="px-8 py-5 text-sm font-mono font-semibold text-slate-900 text-right">
+                        <td className="px-6 py-3 data-value text-right text-slate-900">
                           {formatBDT(v.amount)}
                         </td>
-                        <td className="px-8 py-5 text-right pr-10">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-6 py-3 text-right pr-8">
+                          <div className="flex items-center justify-end gap-1">
                             <button 
-                              className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all disabled:opacity-30"
+                              className="p-1.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all disabled:opacity-30"
                               onClick={() => setViewingVoucher(v)}
-                              title="Print View"
                               disabled={loading}
                             >
-                              <Eye size={16} />
+                              <Eye size={14} />
                             </button>
                             
                             {canEdit && (
                               <button 
-                                className="p-2 text-slate-300 hover:text-amber-600 hover:bg-amber-50 rounded-lg transition-all disabled:opacity-30"
+                                className="p-1.5 text-slate-300 hover:text-amber-600 hover:bg-amber-50 transition-all disabled:opacity-30"
                                 onClick={() => setEditingVoucher(v)}
-                                title="Edit Voucher"
                                 disabled={loading}
                               >
-                                <Pencil size={16} />
+                                <Pencil size={14} />
                               </button>
                             )}
                             {canDelete && (
                               <button 
-                                className="p-2 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all disabled:opacity-30"
+                                className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-30"
                                 onClick={() => handleDeleteVoucher(v.id, v.voucher_no)}
-                                title="Delete Voucher"
                                 disabled={loading}
                               >
-                                <Trash2 size={16} />
+                                <Trash2 size={14} />
                               </button>
                             )}
                           </div>

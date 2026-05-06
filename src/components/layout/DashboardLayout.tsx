@@ -29,7 +29,7 @@ export default function DashboardLayout() {
     <div className="flex bg-[#F9FAFB] min-h-screen">
       <Sidebar />
       <main className="flex-1 overflow-y-auto max-h-screen h-screen">
-        <div className="px-6 py-8 md:px-12 w-full max-w-[1600px]">
+        <div className="px-5 py-6 md:px-8 w-full max-w-[1600px] mx-auto">
           <Outlet />
         </div>
       </main>

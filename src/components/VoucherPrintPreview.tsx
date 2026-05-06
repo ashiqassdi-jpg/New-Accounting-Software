@@ -115,174 +115,141 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
             <p className="font-bold uppercase tracking-widest text-[10px]">Processing Financial Document...</p>
           </div>
         ) : (
-          <div ref={componentRef} className="p-12 text-black bg-white mx-auto w-full">
+            <div ref={componentRef} className="p-16 text-black bg-white mx-auto w-full">
             <style type="text/css" media="print">
               {`
                 @page { 
                   size: A4 portrait; 
-                  margin: 15mm; 
+                  margin: 20mm; 
                 }
                 body { 
                   -webkit-print-color-adjust: exact; 
-                  font-family: 'Inter', sans-serif;
                   color: black;
-                }
-                .company-name {
-                  font-family: "Times New Roman", Times, serif !important;
-                  font-weight: 400 !important;
+                  background: white;
                 }
                 .no-print { display: none !important; }
               `}
             </style>
             
-            <div className="max-w-[700px] mx-auto space-y-8 font-sans">
+            <div className="max-w-[800px] mx-auto font-sans">
               {/* Header */}
-              <div className="text-center space-y-3">
-                <div className="space-y-1">
-                  <h1 className="text-4xl company-name text-black leading-tight">
-                    {company?.name || "As-Sunnah Skill Development Institute (New Shade)"}
-                  </h1>
-                  <p className="text-[10px] font-bold text-black uppercase tracking-[0.2em] max-w-3xl mx-auto">
-                    {company?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
-                  </p>
-                </div>
+              <div className="text-center">
+                <h1 
+                  className="text-[38px] text-black tracking-tight whitespace-nowrap"
+                  style={{ fontFamily: '"Times New Roman", Times, serif' }}
+                >
+                  {company?.name || "As-Sunnah Skill Development Institute (New Shade)"}
+                </h1>
+                <p className="text-[11px] font-bold text-slate-800 uppercase tracking-widest mt-2 whitespace-nowrap">
+                  {company?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
+                </p>
                 
-                <div className="pt-4 flex flex-col items-center">
-                  <div className="w-full max-w-lg border-t-2 border-black" />
-                  <h2 className="py-3 text-lg font-black text-black uppercase tracking-[0.4em]">
-                    {voucher.type} VOUCHER
-                  </h2>
-                  <div className="w-full max-w-lg border-t-2 border-black" />
+                <div className="mt-8 flex justify-center">
+                  <div className="border-y-[1.5px] border-black py-2 px-12">
+                    <h2 className="text-[14px] font-bold text-black uppercase tracking-[0.3em]">
+                      {voucher.type} VOUCHER
+                    </h2>
+                  </div>
                 </div>
               </div>
 
               {/* Reference Info */}
-              <div className="flex justify-between items-end text-[11px] font-black uppercase tracking-widest">
-                <div className="flex gap-2">
-                  <span className="text-black">Voucher No :</span>
-                  <span className="border-b-2 border-black min-w-[120px] inline-block text-center text-sm">{voucher.voucher_no}</span>
+              <div className="flex justify-between items-end mt-8">
+                <div className="flex items-end gap-2 text-[10px] font-bold uppercase tracking-widest">
+                  <span className="mb-0.5">VOUCHER NO :</span>
+                  <span className="border-b-2 border-black w-40 text-center pb-0.5 text-sm">{voucher.voucher_no}</span>
                 </div>
-                <div className="flex gap-2">
-                  <span className="text-black">Date :</span>
-                  <span className="border-b-2 border-black min-w-[140px] inline-block text-center text-sm">{format(new Date(voucher.date), 'dd-MMM-yyyy')}</span>
+                <div className="flex items-end gap-2 text-[10px] font-bold uppercase tracking-widest">
+                  <span className="mb-0.5">DATE :</span>
+                  <span className="border-b-2 border-black w-40 text-center pb-0.5 text-sm">{format(new Date(voucher.date), 'dd-MMM-yyyy').toUpperCase()}</span>
                 </div>
               </div>
 
-              {/* Through Line */}
-              <div className="flex gap-2 text-xs font-black uppercase tracking-widest">
-                <span className="text-black">Through :</span>
-                <span className="border-b-2 border-black flex-1 text-sm font-bold">{throughAccount}</span>
+              <div className="flex items-end gap-2 text-[10px] font-bold uppercase tracking-widest mt-6 mb-6">
+                <span className="mb-0.5">THROUGH :</span>
+                <span className="border-b-2 border-black flex-1 pl-2 pb-0.5 text-sm uppercase">{throughAccount}</span>
               </div>
 
               {/* Transaction Table */}
-              <div className="border-2 border-black min-h-[300px] relative flex flex-col">
+              <div className="border border-black flex flex-col">
                 <table className="w-full border-collapse">
                   <thead>
-                    <tr className="border-b-2 border-black bg-slate-50">
-                      <th className="py-4 px-6 text-left border-r-2 border-black font-black text-[11px] uppercase tracking-widest w-full">Particulars</th>
-                      <th className="py-4 px-6 text-center w-44 font-black text-[11px] uppercase tracking-widest">Amount</th>
+                    <tr className="border-b border-black">
+                      <th className="py-3 px-6 text-left border-r border-black font-bold uppercase text-[11px] tracking-widest w-[75%]">PARTICULARS</th>
+                      <th className="py-3 px-6 text-center font-bold uppercase text-[11px] tracking-widest w-[25%]">AMOUNT</th>
                     </tr>
                   </thead>
                   <tbody>
                     {particularItems.map((item, idx) => (
-                      <tr key={idx} className="border-b border-slate-100 last:border-0">
-                        <td className="px-6 py-5 border-r-2 border-black">
-                          <p className="text-[12px] font-black uppercase text-black">Account :</p>
-                          <p className="pl-6 text-[13px] font-bold text-slate-800">{item.account_name}</p>
+                      <tr key={idx} className="align-top">
+                        <td className="px-6 py-6 border-r border-black pb-0">
+                          <div className="font-bold text-[11px] uppercase tracking-wider mb-1 text-black">ACCOUNT :</div>
+                          <div className="pl-6 text-[14px] text-black font-semibold">{item.account_name}</div>
                           {item.narration && (
-                            <p className="pl-6 pt-1.5 text-[11px] text-slate-600 italic font-bold">
+                            <div className="pl-6 pt-1 text-[11px] italic text-slate-700">
                               "{item.narration}"
-                            </p>
+                            </div>
                           )}
                         </td>
-                        <td className="px-6 py-5 text-right font-bold text-sm font-mono text-black">
-                          {formatBDT(Math.abs(item.debit || item.credit)).replace(/[৳]/g, '').trim()}
+                        <td className="px-6 py-6 text-center pb-0">
+                          <div className="pt-5 text-[14px] font-mono text-black font-semibold">
+                            {formatBDT(Math.abs(item.debit || item.credit)).replace(/[৳]/g, '').trim()}
+                          </div>
                         </td>
                       </tr>
                     ))}
-                    {/* Empty spacer rows */}
-                    <tr className="flex-1 min-h-[80px]">
-                      <td className="border-r-2 border-black"></td>
+                    {/* Spacer for minimum height */}
+                    <tr className="h-[200px]">
+                      <td className="border-r border-black"></td>
                       <td></td>
                     </tr>
                   </tbody>
                 </table>
 
                 {/* Footer details inside border */}
-                <div className="mt-auto border-t-2 border-black">
-                   <div className="p-6 space-y-5">
-                      <div className="flex gap-4 text-xs items-center">
-                        <span className="font-black uppercase tracking-widest text-[11px] text-black min-w-[130px]">On Account of :</span>
-                        <div className="flex-1 font-bold text-slate-900 border-b-2 border-slate-200 pb-1 text-[13px]">
-                          {voucher.narration || 'N/A'}
-                        </div>
-                      </div>
-                      <div className="flex gap-4 text-xs items-center">
-                        <span className="font-black uppercase tracking-widest text-[11px] text-black min-w-[130px]">Amount in Words :</span>
-                        <div className="flex-1 font-black italic text-black border-b-2 border-slate-200 pb-1 text-[13px] capitalize">
-                          {numberToWords(voucher.amount)}
-                        </div>
-                      </div>
-                   </div>
-                   
-                   <div className="border-t-2 border-black flex items-center justify-end px-8 py-4">
-                      <div className="flex items-center gap-4 font-bold text-sm">
-                        <span className="uppercase tracking-widest text-black">Total :</span>
-                        <span className="text-lg border-b-2 border-black pb-0.5 min-w-[120px] text-right">
-                          TK. {formatBDT(voucher.amount).replace(/[৳]/g, '').trim()}
-                        </span>
-                      </div>
-                   </div>
-                </div>
-              </div>
-
-              {/* Audit Info (On-screen only) */}
-              <div className="no-print pt-4 border-t border-slate-100 flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                {voucher.creator && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-300">Added by:</span>
-                    <span className="text-slate-600">{voucher.creator.name}</span>
-                    <span className="text-slate-300">@</span>
-                    <span className="text-slate-500 font-mono">{format(new Date(voucher.created_at), 'dd-MMM-yyyy HH:mm')}</span>
+                <div className="border-t border-black p-6 space-y-6">
+                  <div className="flex gap-4 items-end">
+                    <span className="font-bold uppercase tracking-widest text-[11px] min-w-[130px] pb-1 text-slate-600">ON ACCOUNT OF :</span>
+                    <span className="text-[14px] text-black flex-1 leading-snug border-b border-slate-300 pb-1">{voucher.narration || '-'}</span>
                   </div>
-                )}
-                {voucher.updated_by && voucher.editor && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-300">Modified by:</span>
-                    <span className="text-slate-600">{voucher.editor.name}</span>
-                    <span className="text-slate-300">@</span>
-                    <span className="text-slate-500 font-mono">{voucher.updated_at ? format(new Date(voucher.updated_at), 'dd-MMM-yyyy HH:mm') : 'N/A'}</span>
+                  <div className="flex gap-4 items-end">
+                    <span className="font-bold uppercase tracking-widest text-[11px] min-w-[130px] pb-1 text-slate-600">AMOUNT IN WORDS :</span>
+                    <span className="text-[16px] text-black font-bold flex-1 capitalize leading-snug border-b border-slate-300 pb-1">{numberToWords(voucher.amount)} Only</span>
                   </div>
-                )}
-              </div>
-
-              {/* Signatures Row 1 */}
-              <div className="grid grid-cols-2 pt-12 text-xs font-black uppercase tracking-widest px-8">
-                <div className="border-t-2 border-black pt-4 inline-block w-fit min-w-[220px] text-black">
-                  Receiver's Signature
                 </div>
-                <div className="text-right">
-                  <div className="border-t-2 border-black pt-4 inline-block w-fit min-w-[220px] text-center text-black">
-                    Authorised Signatory
+                 
+                <div className="border-t border-black flex justify-end items-center px-8 py-5">
+                  <div className="flex items-center gap-6">
+                    <span className="font-bold uppercase tracking-widest text-[11px]">TOTAL :</span>
+                    <span className="text-[18px] font-mono text-black font-semibold border-b border-black pb-0.5">
+                      TK. {formatBDT(voucher.amount).replace(/[৳]/g, '').trim()}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Signatures Row 2 */}
-              <div className="grid grid-cols-3 pt-16 text-[11px] font-black uppercase tracking-[0.25em] px-8 text-black">
-                <div className="text-left">
-                   <div className="border-t-2 border-slate-800 pt-3 inline-block w-fit min-w-[150px] text-center">
-                    Prepared by
+              {/* Signatures */}
+              <div className="mt-16 mb-8 pt-8">
+                {/* First row of signatures */}
+                <div className="flex justify-between px-8 text-[10px] font-bold uppercase tracking-widest">
+                  <div className="w-56 text-center border-t border-black pt-2">
+                    RECEIVER'S SIGNATURE
+                  </div>
+                  <div className="w-56 text-center border-t border-black pt-2">
+                    AUTHORISED SIGNATORY
                   </div>
                 </div>
-                <div className="text-center">
-                  <div className="border-t-2 border-slate-800 pt-3 inline-block w-fit min-w-[150px] text-center">
-                    Checked by
+
+                {/* Second row of signatures */}
+                <div className="flex justify-between mt-24 px-8 text-[10px] font-bold uppercase tracking-widest">
+                  <div className="w-40 text-center border-t border-black pt-2">
+                    PREPARED BY
                   </div>
-                </div>
-                <div className="text-right">
-                  <div className="border-t-2 border-slate-800 pt-3 inline-block w-fit min-w-[150px] text-center">
-                    Verified by
+                  <div className="w-40 text-center border-t border-black pt-2">
+                    CHECKED BY
+                  </div>
+                  <div className="w-40 text-center border-t border-black pt-2">
+                    VERIFIED BY
                   </div>
                 </div>
               </div>

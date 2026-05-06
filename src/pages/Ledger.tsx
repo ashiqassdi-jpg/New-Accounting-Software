@@ -199,65 +199,65 @@ export default function Ledger() {
   };
 
   return (
-    <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
+    <div className="space-y-4 pb-10 max-w-[1600px] mx-auto">
       {/* Integrated Professional Header */}
       {selectedAccount && (
-        <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50 mb-8">
-          <div className="space-y-0.5">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
-              {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
+        <div className="bg-white text-slate-900 py-4 px-8 text-center space-y-0.5 border-b border-slate-50 mb-4">
+          <div className="space-y-0">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight uppercase">
+              {selectedCompany?.name || "As-Sunnah Skill Development Institute"}
             </h1>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
-              {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-2xl mx-auto">
+              {selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA'}
             </p>
           </div>
           
-          <div className="pt-2 flex flex-col items-center">
-            <div className="w-full max-w-md border-t-2 border-slate-900" />
-            <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <div className="pt-1 flex flex-col items-center">
+            <div className="w-full max-w-xs border-t border-slate-900" />
+            <h2 className="py-0.5 text-base font-black text-slate-900 uppercase tracking-[0.4em]">
               General Ledger
             </h2>
-            <div className="w-full max-w-md border-t-2 border-slate-900" />
+            <div className="w-full max-w-xs border-t border-slate-900" />
             
-            <div className="mt-2 space-y-2 font-bold uppercase tracking-widest text-slate-900">
-              <div className="px-6 py-1.5 bg-white border border-slate-200 rounded-lg inline-block text-xs">
+            <div className="mt-1 space-y-1 font-bold uppercase tracking-widest text-slate-900">
+              <div className="px-4 py-1 bg-slate-900 text-white rounded text-[10px] inline-block">
                 {selectedAccount?.name} ({selectedAccount?.code})
               </div>
-              <p className="text-[11px]">
-                Audit Range: {confirmedDateRange.from || 'Commencement'} — {confirmedDateRange.to || 'Present'}
+              <p className="text-[10px] text-slate-500">
+                Range: {confirmedDateRange.from || 'Opening'} — {confirmedDateRange.to || 'Present'}
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Professional Header */}
-      <div className="bg-white rounded-[2rem] p-8 border border-slate-50 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-8 no-print">
+      {/* Action Header */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center shadow-lg shadow-slate-900/10">
-              <BookOpen className="text-white" size={24} />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-lg shadow-slate-900/10">
+              <BookOpen className="text-white" size={16} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none">
+              <h1 className="text-sm font-bold text-slate-900 tracking-tight leading-none uppercase">
                 General Ledger
               </h1>
-              <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-[0.2em] truncate max-w-[200px] sm:max-w-[240px] md:max-w-[300px]" title={`${selectedCompany?.name || 'Academic Institution'} Protocol`}>
-                {selectedCompany?.name || 'Academic Institution'} Protocol
+              <p className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-widest truncate max-w-[200px]">
+                {selectedCompany?.name || 'Protocol'}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center gap-4 flex-1 max-w-4xl justify-end">
+        <div className="flex flex-col md:flex-row items-center gap-3 flex-1 max-w-2xl justify-end">
           {/* Pro Account Searcher */}
-          <div className="relative flex-1 max-w-sm" ref={searchRef}>
+          <div className="relative flex-1 max-w-xs" ref={searchRef}>
             <div 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3 text-xs font-semibold text-slate-700 cursor-pointer flex items-center justify-between hover:bg-white hover:border-indigo-500 transition-all shadow-sm"
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold text-slate-700 cursor-pointer flex items-center justify-between hover:border-indigo-500 transition-all shadow-sm"
             >
               <span className={cn("truncate", selectedAccount ? "text-slate-900" : "text-slate-400")}>
-                {selectedAccount ? `${selectedAccount.name} (${selectedAccount.code})` : "Select Account Ledger..."}
+                {selectedAccount ? `${selectedAccount.name}` : "Select Account..."}
               </span>
               <ChevronDown size={14} className={cn("text-slate-400 transition-transform", isSearchOpen && "rotate-180")} />
             </div>
@@ -410,14 +410,14 @@ export default function Ledger() {
           <button 
             onClick={() => setShowDeepFilter(!showDeepFilter)}
             className={cn(
-              "px-6 py-2.5 rounded-xl transition-all shadow-lg text-[10px] font-semibold uppercase tracking-[0.2em] flex items-center gap-2 active:scale-95",
+              "px-4 py-2 rounded-xl transition-all shadow-md text-[10px] font-black uppercase tracking-widest flex items-center gap-2 active:scale-95",
               showDeepFilter 
                 ? "bg-indigo-600 text-white" 
                 : "bg-slate-900 text-white hover:bg-indigo-600 shadow-slate-900/10"
             )}
           >
-            <Filter size={14} />
-            Deep Filter
+            <Filter size={13} />
+            Analyze
           </button>
         </div>
       </div>
@@ -430,69 +430,65 @@ export default function Ledger() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDeepFilter(false)}
-              className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[100] no-print"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-xl bg-white rounded-[2.5rem] shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+              exit={{ opacity: 0, scale: 0.98, y: 10 }}
+              className="fixed inset-x-4 top-[15%] md:left-1/2 md:-translate-x-1/2 md:max-w-lg bg-white rounded-3xl shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
             >
-              <div className="p-10 space-y-8 text-left">
+              <div className="p-6 space-y-6 text-left">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-                      <Filter className="text-indigo-600" size={20} />
-                      Ledger Analytical Parameters
+                    <h2 className="text-sm font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
+                      <Filter className="text-indigo-600" size={16} />
+                      Ledger Filter
                     </h2>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Refining financial traceability</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Parameters refinement</p>
                   </div>
                   <button 
                     onClick={() => setShowDeepFilter(false)}
-                    className="p-3 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-2xl transition-all shadow-sm"
+                    className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-xl transition-all"
                   >
-                    <X size={20} />
+                    <X size={16} />
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
-                    <div className="pt-1">
+                <div className="space-y-5">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
+                    <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
                       <DateRangeFilter value={dateRange} onChange={setDateRange} />
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Narration Search</label>
-                    <div className="relative group">
-                      <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
-                      <input 
-                        className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-11 pr-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold"
-                        placeholder="Search narration..."
-                        value={narrationSearch}
-                        onChange={(e) => setNarrationSearch(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-2 space-y-4">
-                    <label className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Transaction Value Thresholds (৳)</label>
-                    <div className="flex gap-4">
-                      <div className="flex-1 space-y-1">
-                        <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Minimum Amount</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Narration Key</label>
+                      <div className="relative">
+                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
                         <input 
-                          placeholder="0.00"
-                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-semibold"
+                          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900"
+                          placeholder="Text search..."
+                          value={narrationSearch}
+                          onChange={(e) => setNarrationSearch(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Value Bounds (৳)</label>
+                      <div className="flex gap-2">
+                        <input 
+                          placeholder="Min"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
                           value={amountRange.min}
                           onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
                         />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <label className="text-[9px] font-semibold text-slate-300 uppercase pl-1">Maximum Amount</label>
                         <input 
-                          placeholder="∞"
-                          className="w-full bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-semibold"
+                          placeholder="Max"
+                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
                           value={amountRange.max}
                           onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
                         />
@@ -501,20 +497,19 @@ export default function Ledger() {
                   </div>
                 </div>
 
-                <div className="pt-8 border-t border-slate-50 flex gap-4">
+                <div className="pt-4 border-t border-slate-50 flex gap-3">
                   <button 
                     onClick={() => {
                       setDateRange({ from: '', to: '' });
                       setAmountRange({ min: '', max: '' });
                       setNarrationSearch('');
-                      // Instantly reset
                       setConfirmedDateRange({ from: '', to: '' });
                       setConfirmedAmountRange({ min: '', max: '' });
                       setConfirmedNarrationSearch('');
                     }}
-                    className="flex-1 px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-[0.2em] hover:bg-slate-50 rounded-2xl transition-all"
+                    className="flex-1 px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:bg-slate-50 rounded-xl transition-all"
                   >
-                    Reset Parameters
+                    Reset
                   </button>
                   <button 
                     onClick={() => {
@@ -523,9 +518,9 @@ export default function Ledger() {
                       setConfirmedNarrationSearch(narrationSearch);
                       setShowDeepFilter(false);
                     }}
-                    className="flex-1 px-6 py-4 bg-slate-900 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95"
+                    className="flex-1 px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 transition-all shadow-md active:scale-95"
                   >
-                    Execute Analysis
+                    Apply Filter
                   </button>
                 </div>
               </div>
@@ -535,58 +530,58 @@ export default function Ledger() {
       </AnimatePresence>
 
       {selectedAccount ? (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
-          <LedgerStat label="Account Type" value={selectedAccount.type} isType icon={<ArchiveX size={16} />} />
-          <LedgerStat label="Total Debit" value={transactions.reduce((acc, t) => acc + (t.debit || 0), 0)} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
-          <LedgerStat label="Total Credit" value={transactions.reduce((acc, t) => acc + (t.credit || 0), 0)} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 no-print">
+          <LedgerStat label="Type" value={selectedAccount.type} isType icon={<ArchiveX size={14} />} />
+          <LedgerStat label="Total Debit" value={transactions.reduce((acc, t) => acc + (t.debit || 0), 0)} icon={<ArrowUpRight size={14} className="text-rose-500" />} />
+          <LedgerStat label="Total Credit" value={transactions.reduce((acc, t) => acc + (t.credit || 0), 0)} icon={<ArrowDownLeft size={14} className="text-emerald-500" />} />
           <LedgerStat 
             label="Current Balance" 
             value={transactions.length > 0 ? transactions[0].balance : calculateBalance(selectedAccount.type, 0, 0)} 
-            icon={<BookOpen size={16} className="text-indigo-500" />}
+            icon={<BookOpen size={14} className="text-indigo-500" />}
           />
         </div>
       ) : (
-        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-[2rem] p-20 text-center space-y-4 no-print">
-          <div className="w-20 h-20 bg-white rounded-3xl border border-slate-100 shadow-sm flex items-center justify-center mx-auto">
-            <Search className="text-slate-300" size={32} />
+        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center space-y-3 no-print">
+          <div className="w-14 h-14 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center mx-auto">
+            <Search className="text-slate-200" size={24} />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-800 tracking-tight">Analytical Readiness Pending</h3>
-            <p className="text-xs font-medium text-slate-400 uppercase tracking-widest mt-1">Select an account ledger to initiate real-time traceability</p>
+            <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase">Analytical State Idle</h3>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Select an account to initiate record analysis</p>
           </div>
         </div>
       )}
 
       {selectedAccount && (
-        <div className="bg-white rounded-[2rem] border border-slate-50 shadow-2xl shadow-indigo-100/10 overflow-hidden">
-          <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between no-print">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-                <FileText size={20} />
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between no-print">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
+                <FileText size={16} />
               </div>
               <div>
-                <h3 className="font-semibold text-slate-900 uppercase text-xs tracking-widest">Transaction Traceability</h3>
-                <p className="text-[9px] font-semibold text-slate-400 mt-0.5 tracking-widest">Deep-dive record analysis</p>
+                <h3 className="font-bold text-slate-900 uppercase text-[10px] tracking-widest">Transaction Traceability</h3>
+                <p className="text-[9px] font-bold text-slate-400 mt-0.5 tracking-widest">Deep-dive financial records</p>
               </div>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => window.print()}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-50 text-slate-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-100"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200"
               >
-                <Printer size={14} /> Print
+                <Printer size={13} /> Print
               </button>
               <button 
                 onClick={handleExportExcel}
-                className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-600 rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-100"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-200"
               >
-                <FileDown size={14} /> Excel
+                <FileDown size={13} /> Excel
               </button>
               <button 
                 onClick={handleExportPDF}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-[10px] font-semibold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm"
               >
-                <FileText size={14} /> PDF Report
+                <FileText size={13} /> PDF Report
               </button>
             </div>
           </div>
@@ -595,46 +590,42 @@ export default function Ledger() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-slate-900 text-white border-b border-slate-800">
-                  <th className="px-10 py-5 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Date</th>
-                  <th className="px-10 py-5 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Ref ID</th>
-                  <th className="px-10 py-5 text-left text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Transaction Narrative</th>
-                  <th className="px-10 py-5 text-right text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Debit</th>
-                  <th className="px-10 py-5 text-right text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Credit</th>
-                  <th className="px-10 py-5 text-right text-[10px] font-semibold uppercase tracking-widest pr-12">Balance</th>
+                  <th className="px-6 py-3 text-left text-[9px] font-black uppercase tracking-widest">Date</th>
+                  <th className="px-6 py-3 text-left text-[9px] font-black uppercase tracking-widest">Ref ID</th>
+                  <th className="px-6 py-3 text-left text-[9px] font-black uppercase tracking-widest">Narrative</th>
+                  <th className="px-6 py-3 text-right text-[9px] font-black uppercase tracking-widest w-32">Debit</th>
+                  <th className="px-6 py-3 text-right text-[9px] font-black uppercase tracking-widest w-32">Credit</th>
+                  <th className="px-6 py-3 text-right text-[9px] font-black uppercase tracking-widest w-40 pr-10">Balance</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {transactions.map((t, idx) => (
-                  <tr key={t.id} className="hover:bg-slate-50/80 transition-colors group">
-                    <td className="px-10 py-6 text-[11px] font-semibold text-slate-400 whitespace-nowrap font-mono tabular-nums">
+              <tbody className="divide-y divide-slate-50">
+                {transactions.map((t) => (
+                  <tr key={t.id} className="hover:bg-slate-50/20 transition-colors group">
+                    <td className="px-6 py-3 text-[11px] font-bold text-slate-400 whitespace-nowrap font-mono">
                       {format(new Date(t.date), 'dd/MM/yyyy')}
                     </td>
-                    <td className="px-10 py-6 text-xs font-semibold text-slate-700 font-mono tracking-tighter">
+                    <td className="px-6 py-3 text-[11px] font-bold text-slate-700 font-mono tracking-tighter">
                       {t.voucher?.voucher_no}
                     </td>
-                    <td className="px-10 py-6 text-[13px] font-medium text-slate-500 max-w-lg leading-relaxed">
+                    <td className="px-6 py-3 text-[12px] font-bold text-slate-500 max-w-sm leading-snug">
                       {t.narration || t.voucher?.narration}
                     </td>
-                    <td className="px-10 py-6 text-xs font-semibold text-rose-600 text-right font-mono tabular-nums">
+                    <td className="px-6 py-3 text-[11px] font-bold text-rose-600 text-right font-mono tabular-nums">
                       {t.debit > 0 ? formatBDT(t.debit).replace(/[^0-9.,]/g, '') : '-'}
                     </td>
-                    <td className="px-10 py-6 text-xs font-semibold text-emerald-600 text-right font-mono tabular-nums">
+                    <td className="px-6 py-3 text-[11px] font-bold text-emerald-600 text-right font-mono tabular-nums">
                       {t.credit > 0 ? formatBDT(t.credit).replace(/[^0-9.,]/g, '') : '-'}
                     </td>
-                    <td className="px-10 py-6 text-xs font-semibold text-slate-900 text-right pr-12 font-mono tabular-nums relative">
-                      <div className="flex items-center justify-end gap-3 translate-x-4">
+                    <td className="px-6 py-3 text-[11px] font-bold text-slate-900 text-right pr-10 font-mono tabular-nums relative">
+                      <div className="flex items-center justify-end gap-2">
                         <span className={cn(t.balance < 0 ? "text-rose-600" : "text-slate-900")}>
                           {formatBDT(t.balance).replace(/[^0-9.,]/g, '')}
                         </span>
-                        <div className={cn(
-                          "w-1.5 h-1.5 rounded-full shrink-0",
-                          t.balance >= 0 ? "bg-emerald-400" : "bg-rose-400"
-                        )} />
                         <button 
-                          className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-slate-100 rounded-xl transition-all opacity-0 group-hover:opacity-100 no-print"
+                          className="p-1.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 no-print"
                           onClick={() => setViewingVoucher(t.voucher)}
                         >
-                          <Eye size={16} />
+                          <Eye size={12} />
                         </button>
                       </div>
                     </td>
@@ -642,26 +633,26 @@ export default function Ledger() {
                 ))}
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-32 text-center text-slate-300 font-semibold uppercase tracking-widest text-[11px] italic">
-                      No financial events detected for this period
+                    <td colSpan={6} className="py-20 text-center text-slate-300 font-black uppercase tracking-widest text-[10px] italic">
+                      No records found
                     </td>
                   </tr>
                 )}
               </tbody>
               {transactions.length > 0 && (
-                <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
+                <tfoot className="bg-slate-50/50 border-t-2 border-slate-100 font-bold">
                   <tr>
-                    <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em]">
-                      Analytical Totals
+                    <td colSpan={3} className="px-6 py-4 text-[9px] text-slate-900 text-right uppercase tracking-widest">
+                      Ledger Totals
                     </td>
-                    <td className="px-10 py-8 text-sm font-mono text-rose-600 text-right tabular-nums">
+                    <td className="px-6 py-4 text-[11px] font-mono text-rose-600 text-right tabular-nums">
                       {formatBDT(transactions.reduce((acc, t) => acc + (t.debit || 0), 0)).replace(/[^0-9.,]/g, '')}
                     </td>
-                    <td className="px-10 py-8 text-sm font-mono text-emerald-600 text-right tabular-nums">
+                    <td className="px-6 py-4 text-[11px] font-mono text-emerald-600 text-right tabular-nums">
                       {formatBDT(transactions.reduce((acc, t) => acc + (t.credit || 0), 0)).replace(/[^0-9.,]/g, '')}
                     </td>
                     <td className={cn(
-                      "px-10 py-8 text-sm font-mono text-right tabular-nums pr-12",
+                      "px-6 py-4 text-[11px] font-mono text-right tabular-nums pr-10",
                       transactions[0].balance < 0 ? "text-rose-600" : "text-indigo-700"
                     )}>
                       {formatBDT(transactions[0].balance).replace(/[^0-9.,]/g, '')}
@@ -703,20 +694,20 @@ export default function Ledger() {
 
 function LedgerStat({ label, value, isType, icon }: any) {
   return (
-    <div className="bg-white p-6 rounded-[2rem] border border-slate-50 shadow-sm hover:shadow-xl hover:shadow-indigo-500/5 transition-all group overflow-hidden relative">
-      <div className="flex flex-col gap-1 relative z-10">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+      <div className="flex flex-col gap-0.5 relative z-10">
+        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 leading-none mb-1">
           {icon} {label}
         </span>
         <span className={cn(
-          "text-xl font-bold tracking-tight",
+          "text-base font-black tracking-tight",
           isType ? "text-indigo-600 uppercase" : "text-slate-900 font-mono"
         )}>
           {isType ? value : formatBDT(value)}
         </span>
       </div>
-      <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform text-slate-900">
-        {icon && React.cloneElement(icon, { size: 64 })}
+      <div className="absolute top-0 right-0 p-3 opacity-[0.03] translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform text-slate-900">
+        {icon && React.cloneElement(icon, { size: 48 })}
       </div>
     </div>
   );

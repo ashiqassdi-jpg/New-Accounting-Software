@@ -61,41 +61,38 @@ export default function Sidebar() {
         collapsed ? "w-20" : "w-80"
       )}
     >
-      <div className="flex items-center gap-4 px-6 h-24 border-b border-slate-50 overflow-hidden">
-        <div className="bg-slate-900 p-2.5 rounded-2xl shadow-lg shadow-slate-100 shrink-0">
-          <BookOpen className="h-6 w-6 text-white" />
+      <div className="flex items-center gap-3 px-6 h-16 border-b border-slate-50 overflow-hidden">
+        <div className="bg-slate-900 p-2 rounded-xl shadow-md shrink-0">
+          <BookOpen className="h-4 w-4 text-white" />
         </div>
         {!collapsed && (
           <div className="flex flex-col">
-            <span className="font-bold text-xl text-slate-900 truncate tracking-tight font-sans leading-none">
-              Ashiq's Creation
+            <span className="font-bold text-base text-slate-900 truncate tracking-tight font-sans leading-none">
+              Control Panel
             </span>
-            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mt-1.5 pl-0.5">Enterprise</span>
+            <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest mt-1 pl-0.5">Audit Pro</span>
           </div>
         )}
       </div>
 
-      <div className="px-3 py-6 flex flex-col gap-1 overflow-y-auto flex-1 custom-scrollbar">
+      <div className="px-3 py-4 flex flex-col gap-1 overflow-y-auto flex-1 custom-scrollbar">
         {!collapsed && companies.length > 0 && (
-          <div className="mb-8 px-3">
-            <label className="text-[10px] font-black text-slate-300 uppercase tracking-[0.3em] mb-3.5 block pl-1">
-              Active Organization
+          <div className="mb-4 px-2">
+            <label className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2 block pl-1">
+              Active Org
             </label>
             <div className="relative group">
               <div 
-                className="w-full bg-slate-50/80 border border-slate-100 rounded-2xl px-5 py-4.5 flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all shadow-[0_2px_10px_rgba(0,0,0,0.02)] hover:shadow-xl hover:shadow-indigo-500/5 group"
+                className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all group"
                 onClick={() => navigate('/companies')}
               >
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[13px] font-black text-slate-900 uppercase tracking-tight truncate">
-                    {selectedCompany?.name || 'No Organization'}
-                  </span>
-                  <span className="text-[10px] font-mono text-slate-400 mt-1 tracking-widest font-black uppercase">
-                    ID: {selectedCompany?.id.split('-')[0]}
+                  <span className="text-[11px] font-bold text-slate-900 uppercase tracking-tight truncate">
+                    {selectedCompany?.name || 'Select Org'}
                   </span>
                 </div>
-                <div className="bg-white p-2 rounded-xl border border-slate-100 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors">
-                  <Building2 size={14} className="text-slate-400 group-hover:text-indigo-600" />
+                <div className="bg-white p-1 rounded-lg border border-slate-100 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors shrink-0 ml-2">
+                  <Building2 size={12} className="text-slate-400 group-hover:text-indigo-600" />
                 </div>
               </div>
             </div>
@@ -107,24 +104,23 @@ export default function Sidebar() {
             key={item.path}
             to={item.path}
             className={({ isActive }) => cn(
-              "flex items-center gap-4 px-5 py-4 rounded-2xl transition-all relative overflow-hidden group",
+              "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all relative overflow-hidden group",
               isActive 
-                ? "bg-slate-900 text-white font-bold shadow-xl shadow-slate-200" 
+                ? "bg-slate-900 text-white font-bold" 
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
             )}
           >
             {({ isActive }) => (
               <>
                 <item.icon className={cn(
-                  "h-6 w-6 shrink-0 transition-transform duration-500 group-hover:scale-110",
-                  "group-hover:rotate-3"
+                  "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-105"
                 )} />
-                {!collapsed && <span className="text-[15px] font-bold tracking-tight">{item.name}</span>}
+                {!collapsed && <span className="text-[13px] font-medium tracking-tight">{item.name}</span>}
                 {/* Active Indicator */}
                 {isActive && (
                   <motion.div 
                     layoutId="active-pill"
-                    className="absolute right-0 top-0 bottom-0 w-1 bg-indigo-500 rounded-l-full"
+                    className="absolute right-0 top-1 bottom-1 w-1 bg-indigo-500 rounded-l-full"
                   />
                 )}
               </>
@@ -133,13 +129,13 @@ export default function Sidebar() {
         ))}
       </div>
 
-      <div className="p-6 border-t border-slate-50 mt-auto">
+      <div className="p-4 border-t border-slate-50 mt-auto">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-4 w-full px-4 py-4 text-rose-500 hover:bg-rose-50 rounded-2xl transition-all font-black group"
+          className="flex items-center gap-3 w-full px-4 py-2.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50/50 rounded-xl transition-all font-black group text-[11px] uppercase tracking-widest"
         >
-          <LogOut className="h-5 w-5 shrink-0 group-hover:-translate-x-1 transition-transform" />
-          {!collapsed && <span className="text-[15px] uppercase tracking-widest">Terminate</span>}
+          <LogOut className="h-4 w-4 shrink-0 transition-transform" />
+          {!collapsed && <span>Exit</span>}
         </button>
       </div>
 
