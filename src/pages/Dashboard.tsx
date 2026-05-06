@@ -536,61 +536,6 @@ export default function Dashboard() {
           </div>
         </ChartBox>
 
-        <ChartBox title="Performance Trend (Revenue vs Expense)" icon={BarChart3}>
-          <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={revenueVsExpenseData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                formatter={(val: number) => formatBDT(val)}
-              />
-              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-              <Bar dataKey="revenue" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="expense" name="Expense" fill="#f43f5e" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartBox>
-
-        <ChartBox title="Asset Allocation" icon={PieChartIcon}>
-          <div className="flex flex-col md:flex-row items-center gap-4">
-            <div className="flex-1 w-full flex justify-center">
-              <ResponsiveContainer width="100%" height={280}>
-                <PieChart>
-                  <Pie
-                    data={assetDistribution}
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={2}
-                    dataKey="value"
-                    stroke="none"
-                    cx="50%"
-                    cy="50%"
-                  >
-                    {assetDistribution.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} radius={4} />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
-                    formatter={(val: number) => formatBDT(val)}
-                  />
-                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="shrink-0 space-y-3 px-6 border-l border-slate-50 md:min-w-[200px]">
-              {assetDistribution.map((item, index) => (
-                <div key={item.name} className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </ChartBox>
-
         <ChartBox title="Liabilities vs Equity" icon={Scale}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={chartData}>
@@ -618,26 +563,6 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </ChartBox>
 
-        <ChartBox title="Liquidity Trend (Cash & Bank)" icon={Banknote}>
-          <ResponsiveContainer width="100%" height={320}>
-            <AreaChart data={cashFlowTrend}>
-              <defs>
-                <linearGradient id="colorCash" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                formatter={(val: number) => formatBDT(val)}
-              />
-              <Area type="monotone" dataKey="balance" name="Quick Assets" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorCash)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </ChartBox>
       </div>
 
       {/* Recent Activity */}
