@@ -870,13 +870,13 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         <div className="flex gap-3">
           <button 
             onClick={() => onExportExcel(exportData)}
-            className="p-3 bg-white text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100 shadow-sm"
+            className="p-2.5 bg-white text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100 shadow-sm"
           >
             <FileDown size={20} />
           </button>
           <button 
             onClick={() => onExportPDF(exportData.map(d => Object.values(d)))}
-            className="p-3 bg-white text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100 shadow-sm"
+            className="p-2.5 bg-white text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100 shadow-sm"
           >
             <Printer size={20} />
           </button>
@@ -1633,7 +1633,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-widest block pl-1">Primary Analytical Ledger</label>
             <div 
               className={cn(
-                "w-full bg-white border border-slate-200 rounded-xl px-5 py-3 text-sm transition-all font-semibold flex items-center justify-between cursor-pointer group shadow-sm h-14",
+                "w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs transition-all font-semibold flex items-center justify-between cursor-pointer group shadow-sm min-h-[44px]",
                 activeAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5 shadow-indigo-100" : "hover:border-slate-300"
               )}
               onClick={() => setActiveAccountSearch(!activeAccountSearch)}
@@ -1664,7 +1664,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                       <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                       <input 
                         ref={searchInputRef}
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-11 pr-4 py-3 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold uppercase placeholder:text-slate-300"
+                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold uppercase placeholder:text-slate-300"
                         placeholder="Type to filter accounts..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -1751,26 +1751,26 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 group-focus-within:text-indigo-500 transition-colors" size={18} />
               <input 
                 placeholder="Narrative search..."
-                className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold placeholder:text-slate-300 h-14 shadow-sm"
+                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold placeholder:text-slate-300 shadow-sm min-h-[44px]"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
           
-          <div className="flex gap-2 justify-end h-14 lg:col-span-1">
+          <div className="flex gap-2 justify-end min-h-[44px] lg:col-span-1">
             <button 
               onClick={() => onExportExcel(filteredRows.map(r => ({ Date: r.date, Particulars: r.narration || r.voucher?.narration, Type: r.voucher?.type, Debit: r.debit, Credit: r.credit, Balance: r.runningBalance })))}
-              className="px-6 bg-white text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-200 shadow-sm flex items-center gap-2"
+              className="px-4 bg-white text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-200 shadow-sm flex items-center gap-2"
             >
-              <FileDown size={20} />
+              <FileDown size={18} />
               <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">Excel</span>
             </button>
             <button 
               onClick={() => onExportPDF(filteredRows.map(r => [format(new Date(r.date), 'dd/MM/yyyy'), r.narration || r.voucher?.narration, r.voucher?.type, r.debit, r.credit, r.runningBalance]))}
-              className="px-6 bg-slate-900 text-white rounded-xl transition-all shadow-xl flex items-center gap-2 hover:bg-indigo-600"
+              className="px-4 bg-slate-900 text-white rounded-xl transition-all shadow-xl flex items-center gap-2 hover:bg-indigo-600"
             >
-              <FileText size={20} />
+              <FileText size={18} />
               <span className="text-[10px] font-bold uppercase tracking-widest hidden sm:inline">PDF</span>
             </button>
           </div>
