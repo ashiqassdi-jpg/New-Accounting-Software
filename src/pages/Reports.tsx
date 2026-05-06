@@ -672,8 +672,8 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
-        <div className="space-y-2">
+      <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
+        <div className="space-y-0.5">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
@@ -682,14 +682,14 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
           </p>
         </div>
         
-        <div className="pt-4 flex flex-col items-center">
+        <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Trial Balance
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
-          <div className="mt-4 space-y-1">
+          <div className="mt-2 space-y-1">
             <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
               Audit Period: {dateRange.from || 'Opening'} — {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
             </p>
@@ -883,8 +883,8 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
-        <div className="space-y-2">
+      <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
+        <div className="space-y-0.5">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
@@ -893,14 +893,14 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
           </p>
         </div>
         
-        <div className="pt-4 flex flex-col items-center">
+        <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Daybook Register
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
-          <div className="mt-4 space-y-1">
+          <div className="mt-2 space-y-1">
             <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
               Audit Period: {dateRange.from || 'Start'} — {dateRange.to || 'Today'}
             </p>
@@ -1164,8 +1164,8 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
-        <div className="space-y-2">
+      <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
+        <div className="space-y-0.5">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
@@ -1174,14 +1174,14 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
           </p>
         </div>
         
-        <div className="pt-4 flex flex-col items-center">
+        <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Profit & Loss Statement
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
-          <div className="mt-4 space-y-1">
+          <div className="mt-2 space-y-1">
             <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
               Reporting Period: {dateRange.from || 'Inception'} — {dateRange.to || 'Current'}
             </p>
@@ -1313,8 +1313,8 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
-        <div className="space-y-2">
+      <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
+        <div className="space-y-0.5">
           <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
@@ -1323,14 +1323,14 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           </p>
         </div>
         
-        <div className="pt-4 flex flex-col items-center">
+        <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Balance Sheet
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
-          <div className="mt-4 space-y-1">
+          <div className="mt-2 space-y-1">
             <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
               Appraisal Date: As on {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
             </p>
@@ -1833,8 +1833,8 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       </div>
 
       {selectedAccountId && (
-        <div className="bg-white text-slate-900 py-16 px-10 text-center space-y-3 border-b border-slate-100">
-          <div className="space-y-2">
+        <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-100">
+          <div className="space-y-0.5">
             <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
             </h1>
@@ -1843,15 +1843,15 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             </p>
           </div>
           
-          <div className="pt-4 flex flex-col items-center">
+          <div className="pt-2 flex flex-col items-center">
             <div className="w-full max-w-md border-t-2 border-slate-900" />
-            <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+            <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
               Account Ledger
             </h2>
             <div className="w-full max-w-md border-t-2 border-slate-900" />
             
-            <div className="mt-4 space-y-3">
-              <div className="px-6 py-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+            <div className="mt-2 space-y-2">
+              <div className="px-6 py-1.5 bg-white border border-slate-200 rounded-lg shadow-sm">
                 <span className="text-xs font-black text-slate-900 uppercase tracking-widest">{targetAcc?.name}</span>
               </div>
               <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">

@@ -202,8 +202,8 @@ export default function Ledger() {
     <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
       {/* Integrated Professional Header */}
       {selectedAccount && (
-        <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50 mb-8">
-          <div className="space-y-2">
+        <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50 mb-8">
+          <div className="space-y-0.5">
             <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
             </h1>
@@ -212,15 +212,15 @@ export default function Ledger() {
             </p>
           </div>
           
-          <div className="pt-4 flex flex-col items-center">
+          <div className="pt-2 flex flex-col items-center">
             <div className="w-full max-w-md border-t-2 border-slate-900" />
-            <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+            <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
               General Ledger
             </h2>
             <div className="w-full max-w-md border-t-2 border-slate-900" />
             
-            <div className="mt-4 space-y-3 font-bold uppercase tracking-widest text-slate-900">
-              <div className="px-6 py-2 bg-white border border-slate-200 rounded-lg inline-block text-xs">
+            <div className="mt-2 space-y-2 font-bold uppercase tracking-widest text-slate-900">
+              <div className="px-6 py-1.5 bg-white border border-slate-200 rounded-lg inline-block text-xs">
                 {selectedAccount?.name} ({selectedAccount?.code})
               </div>
               <p className="text-[11px]">

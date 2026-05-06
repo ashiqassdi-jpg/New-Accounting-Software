@@ -133,8 +133,8 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
             
             <div className="max-w-[700px] mx-auto space-y-8 font-sans">
               {/* Header */}
-              <div className="text-center space-y-3">
-                <div className="space-y-2">
+              <div className="text-center space-y-1">
+                <div className="space-y-0.5">
                   <h1 className="text-4xl font-black text-black tracking-tight leading-tight">
                     {company?.name || "As-Sunnah Skill Development Institute (New Shade)"}
                   </h1>
@@ -143,9 +143,9 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                   </p>
                 </div>
                 
-                <div className="pt-4 flex flex-col items-center">
+                <div className="pt-2 flex flex-col items-center">
                   <div className="w-full max-w-md border-t-2 border-black" />
-                  <h2 className="py-3 text-lg font-black text-black uppercase tracking-[0.4em]">
+                  <h2 className="py-1 text-lg font-black text-black uppercase tracking-[0.4em]">
                     {voucher.type} VOUCHER
                   </h2>
                   <div className="w-full max-w-md border-t-2 border-black" />
