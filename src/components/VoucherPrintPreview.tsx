@@ -214,7 +214,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                   </div>
                   <div className="flex gap-4 items-end">
                     <span className="font-bold uppercase tracking-widest text-[11px] min-w-[130px] pb-1 text-slate-600">AMOUNT IN WORDS :</span>
-                    <span className="text-[16px] text-black font-bold flex-1 capitalize leading-snug border-b border-slate-300 pb-1">{numberToWords(voucher.amount)} Only</span>
+                    <span className="text-[16px] text-black font-bold flex-1 capitalize leading-snug border-b border-slate-300 pb-1">{numberToWords(voucher.amount)}</span>
                   </div>
                 </div>
                  
