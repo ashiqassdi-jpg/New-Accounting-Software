@@ -303,20 +303,20 @@ export default function ChartOfAccounts() {
           <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
         <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
             Chart of Accounts
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
           <div className="mt-2 space-y-1">
-            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+            <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest">
               Verified Protocol Online • {format(new Date(), 'dd-MM-yyyy HH:mm')}
             </p>
           </div>

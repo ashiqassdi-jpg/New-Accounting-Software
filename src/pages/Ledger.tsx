@@ -207,23 +207,23 @@ export default function Ledger() {
             <h1 className="text-2xl font-normal text-slate-900 tracking-tight leading-tight uppercase">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute"}
             </h1>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-2xl mx-auto">
+            <p className="text-[9px] font-normal text-slate-400 uppercase tracking-[0.2em] max-w-2xl mx-auto">
               {selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA'}
             </p>
           </div>
           
           <div className="pt-1 flex flex-col items-center">
             <div className="w-full max-w-xs border-t border-slate-900" />
-            <h2 className="py-0.5 text-base font-black text-slate-900 uppercase tracking-[0.4em]">
+            <h2 className="py-0.5 text-base font-normal text-slate-900 uppercase tracking-[0.4em]">
               General Ledger
             </h2>
             <div className="w-full max-w-xs border-t border-slate-900" />
             
-            <div className="mt-1 space-y-1 font-bold uppercase tracking-widest text-slate-900">
-              <div className="px-4 py-1 bg-slate-900 text-white rounded text-[10px] inline-block">
+            <div className="mt-1 space-y-1 font-normal uppercase tracking-widest text-slate-900">
+              <div className="px-4 py-1 bg-slate-900 text-white rounded text-[10px] inline-block font-normal">
                 {selectedAccount?.name} ({selectedAccount?.code})
               </div>
-              <p className="text-[10px] text-slate-500">
+              <p className="text-[10px] text-slate-500 font-normal">
                 Range: {confirmedDateRange.from || 'Opening'} — {confirmedDateRange.to || 'Present'}
               </p>
             </div>

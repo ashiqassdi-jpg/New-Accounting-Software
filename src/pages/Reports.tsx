@@ -677,20 +677,20 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
           <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
         <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
             Trial Balance
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
           <div className="mt-2 text-center">
-            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+            <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest">
               Audit Period: {dateRange.from || 'Start'} — {dateRange.to || 'Today'}
             </p>
           </div>
@@ -888,20 +888,20 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
           <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
         <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
             Daybook Register
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
           <div className="mt-2 text-center">
-            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+            <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest">
               Audit Period: {dateRange.from || 'Opening'} — {dateRange.to || 'Current'}
             </p>
           </div>
@@ -1169,20 +1169,20 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
           <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
         <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
             P & L Statement
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
           <div className="mt-2 text-center">
-            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+            <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest">
               Reporting Period: {dateRange.from || 'Inception'} — {dateRange.to || 'Current'}
             </p>
           </div>
@@ -1321,20 +1321,20 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
              {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
         <div className="pt-2 flex flex-col items-center">
           <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+          <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
             Balance Sheet
           </h2>
           <div className="w-full max-w-md border-t-2 border-slate-900" />
           
           <div className="mt-2 text-center">
-            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+            <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest">
               Financial Position as on: {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
             </p>
           </div>
@@ -1783,23 +1783,23 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight uppercase">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
             </h1>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
               {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
             </p>
           </div>
           
           <div className="pt-2 flex flex-col items-center">
             <div className="w-full max-w-md border-t-2 border-slate-900" />
-            <h2 className="py-1 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+            <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
               Account Ledger
             </h2>
             <div className="w-full max-w-md border-t-2 border-slate-900" />
             
             <div className="mt-2 space-y-1">
-               <h3 className="text-base font-black text-slate-900 uppercase tracking-widest px-6 py-1 bg-slate-50 border border-slate-100 rounded-lg inline-block">
+               <h3 className="text-base font-normal text-slate-900 uppercase tracking-widest px-6 py-1 bg-slate-50 border border-slate-100 rounded-lg inline-block">
                 {targetAcc?.name}
               </h3>
-              <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest block">
+              <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest block">
                 Audit Period: {dateRange.from || 'Opening'} — {dateRange.to || 'Current'}
               </p>
             </div>
