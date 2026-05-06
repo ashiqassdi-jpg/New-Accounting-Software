@@ -134,7 +134,7 @@ export default function Reports() {
     const doc = new jsPDF();
     
     // Professional Centered Header for PDF
-    doc.setFont("helvetica", "bold");
+    doc.setFont("helvetica", "normal");
     doc.setFontSize(24);
     doc.setTextColor(15, 23, 42);
     doc.text(selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)", 105, 25, { align: 'center' });
@@ -302,7 +302,7 @@ export default function Reports() {
                           <div className="relative">
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                             <input 
-                              placeholder="Search Narrative or #..."
+                              placeholder="Search Narrative or Number..."
                               className="w-full bg-white border border-slate-300 rounded-lg pl-9 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-colors placeholder:text-slate-400"
                               value={filters.searchQuery}
                               onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
@@ -491,22 +491,22 @@ export default function Reports() {
               <TabButton 
                 active={activeTab === 'LEDGER_REPORT'} 
                 onClick={() => handleTabChange('LEDGER_REPORT')}
-                label="Ledger"
+                label="Accounts Ledger"
               />
               <TabButton 
                 active={activeTab === 'TRIAL_BALANCE'} 
                 onClick={() => handleTabChange('TRIAL_BALANCE')}
-                label="Trial Bal"
+                label="Trial Balance"
               />
               <TabButton 
                 active={activeTab === 'PROFIT_LOSS'} 
                 onClick={() => handleTabChange('PROFIT_LOSS')}
-                label="P & L"
+                label="Profit and Loss"
               />
               <TabButton 
                 active={activeTab === 'BALANCE_SHEET'} 
                 onClick={() => handleTabChange('BALANCE_SHEET')}
-                label="B. Sheet"
+                label="Balance Sheet"
               />
             </div>
 
@@ -517,7 +517,7 @@ export default function Reports() {
                     dateRange={confirmedDateRange} 
                     filters={confirmedFilters}
                     onEdit={setEditingVoucher}
-                    onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Date', 'Voucher #', 'Main Account', 'Type', 'Description', 'Amount'], 'daybook')}
+                    onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Date', 'Voucher Number', 'Main Account', 'Type', 'Description', 'Amount'], 'daybook')}
                     onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
                   />
                 )}
@@ -674,7 +674,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
 
       <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
         <div className="space-y-0.5">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
@@ -885,7 +885,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
 
       <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
         <div className="space-y-0.5 text-center">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
@@ -1166,7 +1166,7 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
 
       <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
         <div className="space-y-0.5 text-center">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
@@ -1318,7 +1318,7 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
 
       <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
         <div className="space-y-0.5 text-center">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
@@ -1780,7 +1780,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       {selectedAccountId && (
         <div className="bg-white text-slate-900 py-8 px-10 text-center space-y-1 border-b border-slate-50">
           <div className="space-y-0.5 text-center">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight uppercase">
+            <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight uppercase">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
             </h1>
             <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">

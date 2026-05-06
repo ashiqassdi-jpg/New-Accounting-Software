@@ -300,7 +300,7 @@ export default function ChartOfAccounts() {
     <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
       <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
         <div className="space-y-0.5">
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
           <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">

@@ -155,19 +155,19 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
 
               {/* Reference Info */}
               <div className="flex justify-between items-end mt-8">
-                <div className="flex items-end gap-2 text-[10px] font-bold uppercase tracking-widest">
+                <div className="flex items-end gap-2 text-[12px] font-bold uppercase tracking-widest">
                   <span className="mb-0.5">VOUCHER NO :</span>
-                  <span className="border-b-2 border-black w-40 text-center pb-0.5 text-sm">{voucher.voucher_no}</span>
+                  <span className="border-b border-black w-40 text-center pb-0.5 text-[15px]">{voucher.voucher_no}</span>
                 </div>
-                <div className="flex items-end gap-2 text-[10px] font-bold uppercase tracking-widest">
+                <div className="flex items-end gap-2 text-[12px] font-bold uppercase tracking-widest">
                   <span className="mb-0.5">DATE :</span>
-                  <span className="border-b-2 border-black w-40 text-center pb-0.5 text-sm">{format(new Date(voucher.date), 'dd-MMM-yyyy').toUpperCase()}</span>
+                  <span className="border-b border-black w-40 text-center pb-0.5 text-[15px]">{format(new Date(voucher.date), 'dd-MMM-yyyy').toUpperCase()}</span>
                 </div>
               </div>
 
-              <div className="flex items-end gap-2 text-[10px] font-bold uppercase tracking-widest mt-6 mb-6">
+              <div className="flex items-end gap-2 text-[12px] font-bold uppercase tracking-widest mt-6 mb-6">
                 <span className="mb-0.5">THROUGH :</span>
-                <span className="border-b-2 border-black flex-1 pl-2 pb-0.5 text-sm uppercase">{throughAccount}</span>
+                <span className="border-b border-black flex-1 pl-2 pb-0.5 text-[15px] uppercase">{throughAccount}</span>
               </div>
 
               {/* Transaction Table */}
@@ -175,8 +175,8 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="border-b border-black">
-                      <th className="py-3 px-6 text-left border-r border-black font-bold uppercase text-[11px] tracking-widest w-[75%]">PARTICULARS</th>
-                      <th className="py-3 px-6 text-center font-bold uppercase text-[11px] tracking-widest w-[25%]">AMOUNT</th>
+                      <th className="py-3 px-6 text-left border-r border-black font-bold uppercase text-[13px] tracking-widest w-[75%]">PARTICULARS</th>
+                      <th className="py-3 px-6 text-center font-bold uppercase text-[13px] tracking-widest w-[25%]">AMOUNT</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -231,7 +231,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
               {/* Signatures */}
               <div className="mt-16 mb-8 pt-8">
                 {/* First row of signatures */}
-                <div className="flex justify-between px-8 text-[10px] font-bold uppercase tracking-widest">
+                <div className="flex justify-between px-8 text-[12px] font-bold uppercase tracking-widest">
                   <div className="w-56 text-center border-t border-black pt-2">
                     RECEIVER'S SIGNATURE
                   </div>
@@ -241,7 +241,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 </div>
 
                 {/* Second row of signatures */}
-                <div className="flex justify-between mt-24 px-8 text-[10px] font-bold uppercase tracking-widest">
+                <div className="flex justify-between mt-24 px-8 text-[12px] font-bold uppercase tracking-widest">
                   <div className="w-40 text-center border-t border-black pt-2">
                     PREPARED BY
                   </div>

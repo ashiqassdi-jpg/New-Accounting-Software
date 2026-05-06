@@ -78,21 +78,21 @@ export default function Sidebar() {
       <div className="px-3 py-4 flex flex-col gap-1 overflow-y-auto flex-1 custom-scrollbar">
         {!collapsed && companies.length > 0 && (
           <div className="mb-4 px-2">
-            <label className="text-[9px] font-black text-slate-300 uppercase tracking-[0.2em] mb-2 block pl-1">
-              Active Org
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-2 block pl-1">
+              Active Organization
             </label>
             <div className="relative group">
               <div 
-                className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all group"
+                className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3 flex items-center justify-between cursor-pointer hover:border-indigo-200 transition-all group"
                 onClick={() => navigate('/companies')}
               >
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[11px] font-bold text-slate-900 uppercase tracking-tight truncate">
-                    {selectedCompany?.name || 'Select Org'}
+                  <span className="text-[13px] font-bold text-slate-900 uppercase tracking-tight truncate">
+                    {selectedCompany?.name || 'Select Organization'}
                   </span>
                 </div>
-                <div className="bg-white p-1 rounded-lg border border-slate-100 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors shrink-0 ml-2">
-                  <Building2 size={12} className="text-slate-400 group-hover:text-indigo-600" />
+                <div className="bg-white p-1.5 rounded-lg border border-slate-100 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-colors shrink-0 ml-2">
+                  <Building2 size={16} className="text-slate-400 group-hover:text-indigo-600" />
                 </div>
               </div>
             </div>
@@ -104,9 +104,9 @@ export default function Sidebar() {
             key={item.path}
             to={item.path}
             className={({ isActive }) => cn(
-              "flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all relative overflow-hidden group",
+              "flex items-center gap-4 px-5 py-3.5 rounded-xl transition-all relative overflow-hidden group",
               isActive 
-                ? "bg-slate-900 text-white font-bold" 
+                ? "bg-slate-900 text-white font-bold shadow-lg shadow-slate-900/10" 
                 : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"
             )}
           >
@@ -115,7 +115,7 @@ export default function Sidebar() {
                 <item.icon className={cn(
                   "h-5 w-5 shrink-0 transition-transform duration-300 group-hover:scale-105"
                 )} />
-                {!collapsed && <span className="text-[13px] font-medium tracking-tight">{item.name}</span>}
+                {!collapsed && <span className="text-[15px] font-semibold tracking-tight">{item.name}</span>}
                 {/* Active Indicator */}
                 {isActive && (
                   <motion.div 

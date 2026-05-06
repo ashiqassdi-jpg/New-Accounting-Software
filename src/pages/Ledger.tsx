@@ -162,7 +162,7 @@ export default function Ledger() {
     doc.setFontSize(12);
     doc.text(`General Ledger: ${selectedAccount.name} (${selectedAccount.code})`, 14, 35);
     
-    const columns = ['Date', 'Ref #', 'Narration', 'Debit', 'Credit'];
+    const columns = ['Date', 'Reference Number', 'Narration', 'Debit', 'Credit'];
     const body = transactions.map(t => [
       format(new Date(t.date), 'dd/MM/yyyy'),
       t.voucher?.voucher_no || '-',
@@ -204,7 +204,7 @@ export default function Ledger() {
       {selectedAccount && (
         <div className="bg-white text-slate-900 py-4 px-8 text-center space-y-0.5 border-b border-slate-50 mb-4">
           <div className="space-y-0">
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight leading-tight uppercase">
+            <h1 className="text-2xl font-normal text-slate-900 tracking-tight leading-tight uppercase">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute"}
             </h1>
             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-2xl mx-auto">
@@ -251,15 +251,15 @@ export default function Ledger() {
 
         <div className="flex flex-col md:flex-row items-center gap-3 flex-1 max-w-2xl justify-end">
           {/* Pro Account Searcher */}
-          <div className="relative flex-1 max-w-xs" ref={searchRef}>
+          <div className="relative flex-1 max-w-sm" ref={searchRef}>
             <div 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2 text-[11px] font-bold text-slate-700 cursor-pointer flex items-center justify-between hover:border-indigo-500 transition-all shadow-sm"
+              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 cursor-pointer flex items-center justify-between hover:border-indigo-500 transition-all shadow-sm"
             >
               <span className={cn("truncate", selectedAccount ? "text-slate-900" : "text-slate-400")}>
                 {selectedAccount ? `${selectedAccount.name}` : "Select Account..."}
               </span>
-              <ChevronDown size={14} className={cn("text-slate-400 transition-transform", isSearchOpen && "rotate-180")} />
+              <ChevronDown size={16} className={cn("text-slate-400 transition-transform", isSearchOpen && "rotate-180")} />
             </div>
 
             <AnimatePresence>
@@ -410,13 +410,13 @@ export default function Ledger() {
           <button 
             onClick={() => setShowDeepFilter(!showDeepFilter)}
             className={cn(
-              "px-4 py-2 rounded-xl transition-all shadow-md text-[10px] font-black uppercase tracking-widest flex items-center gap-2 active:scale-95",
+              "px-5 py-2.5 rounded-xl transition-all shadow-md text-xs font-black uppercase tracking-widest flex items-center gap-2 active:scale-95",
               showDeepFilter 
                 ? "bg-indigo-600 text-white" 
                 : "bg-slate-900 text-white hover:bg-indigo-600 shadow-slate-900/10"
             )}
           >
-            <Filter size={13} />
+            <Filter size={16} />
             Analyze
           </button>
         </div>

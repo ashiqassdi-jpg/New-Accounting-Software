@@ -198,7 +198,7 @@ export default function Vouchers() {
     doc.setFontSize(12);
     doc.text('Voucher Register', 14, 35);
     
-    const columns = ['Type', 'Date', 'Voucher #', 'Narration', 'Amount'];
+    const columns = ['Type', 'Date', 'Voucher Number', 'Narration', 'Amount'];
     const body = filteredVouchers.map(v => [
       v.type,
       format(new Date(v.date), 'dd/MM/yyyy'),
@@ -342,15 +342,15 @@ export default function Vouchers() {
         <div className="space-y-12">
           {/* Quick Actions Grid */}
           {canAdd && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               {VOUCHER_TYPES.map((vt) => (
                 <button
                   key={vt.value}
                   onClick={() => setActiveFormType(vt.value as VoucherType)}
-                  className="flex flex-col items-center justify-center p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-100 hover:-translate-y-0.5 transition-all group"
+                  className="flex flex-col items-center justify-center p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-100 hover:-translate-y-0.5 transition-all group"
                 >
                   <div className={cn(
-                    "w-10 h-10 rounded-xl mb-3 flex items-center justify-center transition-all duration-300",
+                    "w-12 h-12 rounded-xl mb-3 flex items-center justify-center transition-all duration-300",
                     vt.value === 'PAYMENT' && "bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white",
                     vt.value === 'RECEIPT' && "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white",
                     vt.value === 'JOURNAL' && "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white",
@@ -358,23 +358,23 @@ export default function Vouchers() {
                     vt.value === 'SALES' && "bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white",
                     vt.value === 'PURCHASE' && "bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white",
                   )}>
-                    <Receipt size={20} />
+                    <Receipt size={24} />
                   </div>
-                  <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{vt.label}</span>
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-widest">{vt.label}</span>
                 </button>
               ))}
             </div>
           )}
 
           <div className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Activity' : 'Full Ledger'}</h2>
-                  <div className="flex bg-slate-100 p-0.5 rounded-lg">
+                  <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Activity' : 'Full Ledger'}</h2>
+                  <div className="flex bg-slate-100 p-1 rounded-lg">
                     <button 
                       onClick={() => setFilterMode('RECENT')}
                       className={cn(
-                        "px-2 py-0.5 text-[9px] font-bold rounded-md transition-all",
+                        "px-3 py-1 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
                         filterMode === 'RECENT' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -383,7 +383,7 @@ export default function Vouchers() {
                     <button 
                       onClick={() => setFilterMode('ALL')}
                       className={cn(
-                        "px-2 py-0.5 text-[9px] font-bold rounded-md transition-all",
+                        "px-3 py-1 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
                         filterMode === 'ALL' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
                       )}
                     >
@@ -392,11 +392,11 @@ export default function Vouchers() {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap md:flex-nowrap items-center gap-1.5 overflow-x-auto no-scrollbar">
-                    <div className="relative w-36 shrink-0">
-                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
+                <div className="flex flex-wrap md:flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar">
+                    <div className="relative w-48 shrink-0">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
                       <input 
-                        className="w-full bg-white border border-slate-100 rounded-lg pl-8 pr-2.5 py-1 text-[11px] font-medium text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
+                        className="w-full bg-white border border-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
                         placeholder="Scan ID/Narration..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -414,10 +414,10 @@ export default function Vouchers() {
                       setConfirmedDateRange(dateRange);
                       fetchVouchers();
                     }}
-                    className="px-3 py-1 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-wider hover:bg-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-1.5 shrink-0"
+                    className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-2 shrink-0"
                   >
-                    <Search size={11} />
-                    Run
+                    <Search size={14} />
+                    Run Search
                   </button>
                 </div>
               </div>
