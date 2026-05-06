@@ -138,7 +138,7 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
               {/* Header */}
               <div className="text-center space-y-2">
                 <h1 className="text-4xl company-name text-black leading-tight whitespace-nowrap">
-                  {company?.name || 'As-Sunnah Skill Development Institute'}
+                  {company?.name || "Ashiq's Creation"}
                 </h1>
                 <p className="text-[10px] font-bold text-black uppercase tracking-[0.2em] leading-tight max-w-full mx-auto whitespace-nowrap overflow-hidden text-ellipsis">
                   {company?.address || 'Your Company Address'}

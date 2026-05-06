@@ -114,7 +114,7 @@ export default function Login() {
             </motion.div>
           </div>
           <h2 className="mt-8 text-center text-4xl font-serif font-bold text-slate-900 tracking-tight">
-            Ashik's Creation
+            Ashiq's Creation
           </h2>
           <p className="mt-3 text-center text-sm text-slate-500 font-medium tracking-wide">
             {mode === 'signin' ? 'Welcome back to your dashboard' : 'Join our professional accounting network'}
