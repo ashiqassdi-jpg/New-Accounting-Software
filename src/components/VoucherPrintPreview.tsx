@@ -230,6 +230,26 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                 </div>
               </div>
 
+              {/* Audit Info (On-screen only) */}
+              <div className="no-print pt-4 border-t border-slate-100 flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                {voucher.creator && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-300">Added by:</span>
+                    <span className="text-slate-600">{voucher.creator.name}</span>
+                    <span className="text-slate-300">@</span>
+                    <span className="text-slate-500 font-mono">{format(new Date(voucher.created_at), 'dd-MMM-yyyy HH:mm')}</span>
+                  </div>
+                )}
+                {voucher.updated_by && voucher.editor && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-300">Modified by:</span>
+                    <span className="text-slate-600">{voucher.editor.name}</span>
+                    <span className="text-slate-300">@</span>
+                    <span className="text-slate-500 font-mono">{voucher.updated_at ? format(new Date(voucher.updated_at), 'dd-MMM-yyyy HH:mm') : 'N/A'}</span>
+                  </div>
+                )}
+              </div>
+
               {/* Signatures Row 1 */}
               <div className="grid grid-cols-2 pt-12 text-xs font-black uppercase tracking-widest px-8">
                 <div className="border-t-2 border-black pt-4 inline-block w-fit min-w-[220px] text-black">

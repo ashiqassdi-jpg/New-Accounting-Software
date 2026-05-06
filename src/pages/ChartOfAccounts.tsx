@@ -297,9 +297,41 @@ export default function ChartOfAccounts() {
   };
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden mb-8">
+        {/* Integrated Professional Header */}
+        <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
+              {selectedCompany?.name || "Ashiq's Creation"}
+            </h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+              {selectedCompany?.address || 'LEDGER INFRASTRUCTURE • CHART OF ACCOUNTS ARCHIVE'}
+            </p>
+            <div className="pt-4">
+              <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
+                Chart of Accounts
+              </h2>
+            </div>
+          </div>
+          <div className="text-left md:text-right space-y-2">
+             <div className="space-y-0.5">
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">System Status</p>
+               <p className="text-[11px] font-black text-emerald-600 uppercase tracking-tight">
+                 Verified Protocol Online
+               </p>
+             </div>
+             <div className="flex md:justify-end gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+               <span>Nodes: {accounts.length}</span>
+               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 self-center" />
+               <span>{format(new Date(), 'dd-MM-yyyy HH:mm')}</span>
+             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Header Controls */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
             Chart of Accounts

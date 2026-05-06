@@ -132,14 +132,27 @@ export default function Reports() {
 
   const handleExportPDF = (data: any[], title: string, columns: string[], filename: string) => {
     const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Ashiq's Creation", 14, 15);
+    
+    // Professional Header for PDF
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(24);
+    doc.text(selectedCompany?.name || "Ashiq's Creation", 105, 20, { align: 'center' });
+    
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text(selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION', 105, 28, { align: 'center' });
+    
+    doc.setLineWidth(0.5);
+    doc.line(20, 32, 190, 32);
+    
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.text(selectedCompany?.name || '', 14, 25);
-    doc.setFontSize(12);
-    doc.text(title, 14, 35);
-    doc.setFontSize(10);
-    doc.text(`Period: ${dateRange.from} to ${dateRange.to}`, 14, 42);
+    doc.text(title.toUpperCase(), 105, 42, { align: 'center' });
+    
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.text(`Period: ${dateRange.from || 'Start'} to ${dateRange.to || 'Current'}`, 105, 48, { align: 'center' });
+    doc.text(`Report Generated: ${format(new Date(), 'dd-MM-yyyy HH:mm')}`, 190, 52, { align: 'right' });
     
     // Format numbers for PDF export
     const formattedData = data.map(row => 
@@ -154,13 +167,15 @@ export default function Reports() {
     autoTable(doc, {
       head: [columns],
       body: formattedData,
-      startY: 50,
+      startY: 60,
       theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241] },
-      styles: { fontSize: 8 }
+      headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+      styles: { fontSize: 8, textColor: [51, 65, 85] },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      margin: { top: 60 }
     });
     
-    doc.save(`${filename}.pdf`);
+    doc.save(`${filename}_${format(new Date(), 'yyyyMMdd')}.pdf`);
   };
 
   const handleExportExcel = (data: any[], filename: string) => {
@@ -543,6 +558,7 @@ function TabButton({ active, onClick, label }: any) {
 
 // Sub-components for Reports
 function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExcel }: any) {
+  const { selectedCompany } = useCompany();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -602,6 +618,35 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      {/* Integrated Professional Header */}
+      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+            {selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION'}
+          </p>
+          <div className="pt-4">
+            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
+              Trial Balance
+            </h2>
+          </div>
+        </div>
+        <div className="text-left md:text-right space-y-2">
+           <div className="space-y-0.5">
+             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reporting Period</p>
+             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+               {dateRange.from || 'Opening'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+             </p>
+           </div>
+           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> BDT Basis</span>
+             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> Audited</span>
+           </div>
+        </div>
+      </div>
+
       <div className="px-10 py-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div className="flex items-center gap-6 flex-1">
           <div>
@@ -729,7 +774,19 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
     if (error) {
       console.error(error);
     } else {
-      setVouchers(data || []);
+      // Manual mapping of profiles to avoid complex join relationship errors
+      const { data: profilesData } = await supabase.from('profiles').select('id, name, email');
+      if (profilesData && data) {
+        const profileMap = new Map(profilesData.map(p => [p.id, p]));
+        const mappedData = data.map(v => ({
+          ...v,
+          creator: v.created_by ? profileMap.get(v.created_by) : undefined,
+          editor: v.updated_by ? profileMap.get(v.updated_by) : undefined
+        }));
+        setVouchers(mappedData);
+      } else {
+        setVouchers(data || []);
+      }
     }
     setLoading(false);
   };
@@ -787,6 +844,34 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      {/* Integrated Professional Header */}
+      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+            {selectedCompany?.address || 'EXECUTIVE DAYBOOK REGISTER • ENTERPRISE AUDIT'}
+          </p>
+          <div className="pt-4">
+            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
+              Daybook Register
+            </h2>
+          </div>
+        </div>
+        <div className="text-left md:text-right space-y-2">
+           <div className="space-y-0.5">
+             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Period</p>
+             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+               {dateRange.from || 'Start'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || 'Today'}
+             </p>
+           </div>
+           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+             <span className="flex items-center gap-1.5">Entries Tracked: {vouchers.length}</span>
+           </div>
+        </div>
+      </div>
+
       <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between no-print">
         <div>
           <h3 className="font-semibold text-slate-900 uppercase text-xs tracking-widest">Daybook Register</h3>
@@ -901,7 +986,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                 {expandedVoucherId === v.id && (
                   <tr className="bg-slate-50/50">
                     <td colSpan={5} className="p-0">
-                        <div className="px-20 py-8 border-y border-slate-100 space-y-4">
+                        <div className="px-20 py-8 border-y border-slate-100 space-y-6">
                           <div className="flex items-center justify-between">
                             <h4 className="text-[10px] font-semibold text-slate-400 uppercase tracking-[0.3em]">Technical Ledger Distribution</h4>
                             <div className="flex gap-4 text-[9px] font-medium text-slate-400">
@@ -909,6 +994,40 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                               <span>Method: {v.payment_channel || 'N/A'}</span>
                             </div>
                           </div>
+                          
+                          {/* Audit Info Section */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-2 border-b border-slate-50">
+                            <div className="flex items-center gap-2.5 p-3 bg-slate-50/50 rounded-xl border border-slate-100">
+                               <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                                 <Plus size={14} />
+                               </div>
+                               <div>
+                                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Entry Initiated By</p>
+                                 <p className="text-[11px] font-semibold text-slate-700 mt-1 flex items-center gap-1.5 capitalize">
+                                   {v.creator?.name || 'System Generated'} 
+                                   <span className="text-[9px] font-normal text-slate-400 lowercase italic">({v.creator?.email || 'N/A'})</span>
+                                 </p>
+                                 <p className="text-[10px] text-slate-400 mt-0.5">{format(new Date(v.created_at), 'dd MMM yyyy p')}</p>
+                               </div>
+                            </div>
+                            
+                            {v.updated_by && v.editor && (
+                              <div className="flex items-center gap-2.5 p-3 bg-amber-50/30 rounded-xl border border-amber-100/50">
+                                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                                  <Pencil size={14} />
+                                </div>
+                                <div>
+                                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Last Modified By</p>
+                                  <p className="text-[11px] font-semibold text-slate-700 mt-1 flex items-center gap-1.5 capitalize">
+                                    {v.editor?.name} 
+                                    <span className="text-[9px] font-normal text-slate-400 lowercase italic">({v.editor?.email})</span>
+                                  </p>
+                                  <p className="text-[10px] text-slate-400 mt-0.5">{v.updated_at ? format(new Date(v.updated_at), 'dd MMM yyyy p') : format(new Date(v.created_at), 'dd MMM yyyy p')}</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
                           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                             <table className="w-full text-left">
                               <thead>
@@ -982,11 +1101,12 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
             onClose={() => setViewingVoucher(null)}
           />
         )}
-    </div>
+      </div>
   );
 }
 
 function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+  const { selectedCompany } = useCompany();
   const [data, setData] = useState<any>({ income: [], expenses: [], netProfit: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -1019,6 +1139,34 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      {/* Integrated Professional Header */}
+      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+            {selectedCompany?.address || 'INCOME STATEMENT • FISCAL PERFORMANCE REPORT'}
+          </p>
+          <div className="pt-4">
+            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
+              Profit & Loss Statement
+            </h2>
+          </div>
+        </div>
+        <div className="text-left md:text-right space-y-2">
+           <div className="space-y-0.5">
+             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reporting Period</p>
+             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+               {dateRange.from || 'Inception'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || 'Current'}
+             </p>
+           </div>
+           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+             <span className="flex items-center gap-1.5">System: Accrual Basis</span>
+           </div>
+        </div>
+      </div>
+
       <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statement of Profit or Loss</h3>
         <div className="flex gap-2">
@@ -1072,6 +1220,7 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
 }
 
 function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any) {
+  const { selectedCompany } = useCompany();
   const [data, setData] = useState<any>({ assets: [], liabilities: [], equity: [], netProfit: 0 });
   const [loading, setLoading] = useState(true);
 
@@ -1112,6 +1261,34 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      {/* Integrated Professional Header */}
+      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
+        <div className="space-y-1.5">
+          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+            {selectedCompany?.address || 'CONSOLIDATED STATEMENT OF FINANCIAL POSITION'}
+          </p>
+          <div className="pt-4">
+            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
+              Balance Sheet
+            </h2>
+          </div>
+        </div>
+        <div className="text-left md:text-right space-y-2">
+           <div className="space-y-0.5">
+             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Appraisal Date</p>
+             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+               {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+             </p>
+           </div>
+           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Audited Records</span>
+           </div>
+        </div>
+      </div>
+
       <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statement of Financial Position</h3>
         <div className="flex gap-2">
@@ -1339,6 +1516,26 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
     if (error) console.error(error);
     
     let filteredData = data || [];
+
+    // Manual mapping of profiles to avoid complex join relationship errors
+    const { data: profilesData } = await supabase.from('profiles').select('id, name, email');
+    if (profilesData && filteredData.length > 0) {
+      const profileMap = new Map(profilesData.map(p => [p.id, p]));
+      filteredData = filteredData.map(t => {
+        if (t.voucher) {
+          return {
+            ...t,
+            voucher: {
+              ...t.voucher,
+              creator: t.voucher.created_by ? profileMap.get(t.voucher.created_by) : undefined,
+              editor: t.voucher.updated_by ? profileMap.get(t.voucher.updated_by) : undefined
+            }
+          };
+        }
+        return t;
+      });
+    }
+
     if (filters.voucherType) {
       filteredData = filteredData.filter(t => t.voucher?.type === filters.voucherType);
     }
@@ -1367,9 +1564,46 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
   const displayRows = [...filteredRows].reverse();
 
   return (
-    <div className="space-y-6">
+    <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+      {/* Integrated Professional Header */}
       {selectedAccountId && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print">
+        <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
+          <div className="space-y-1.5">
+            <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
+              {selectedCompany?.name || "Ashiq's Creation"}
+            </h1>
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
+              {selectedCompany?.address || 'GENERAL LEDGER ACCOUNT STATEMENT'}
+            </p>
+            <div className="pt-4">
+              <div className="flex items-center gap-4">
+                <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
+                  Account Ledger
+                </h2>
+                <div className="px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg">
+                  <span className="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{targetAcc?.name}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="text-left md:text-right space-y-2">
+             <div className="space-y-0.5">
+               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Traceability Period</p>
+               <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
+                 {dateRange.from || 'Opening'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || 'Current'}
+               </p>
+             </div>
+             <div className="flex md:justify-end gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+               <span>Code: {targetAcc?.code}</span>
+               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 self-center" />
+               <span>Type: {targetAcc?.type}</span>
+             </div>
+          </div>
+        </div>
+      )}
+
+      {selectedAccountId && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print p-10 bg-slate-50/10 border-b border-slate-50">
           <ReportStat label="Account Type" value={targetAcc?.type} isType icon={<ArchiveX size={16} />} />
           <ReportStat label="Total Debit" value={totalDebit} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
           <ReportStat label="Total Credit" value={totalCredit} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
@@ -1381,7 +1615,6 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         </div>
       )}
 
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
       <div className="p-10 border-b border-slate-50 space-y-10 no-print">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-end">
           <div className="lg:col-span-2 space-y-3 relative" ref={searchContainerRef}>
@@ -1680,6 +1913,5 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
           />
         )}
       </div>
-    </div>
   );
 }
