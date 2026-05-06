@@ -133,26 +133,34 @@ export default function Reports() {
   const handleExportPDF = (data: any[], title: string, columns: string[], filename: string) => {
     const doc = new jsPDF();
     
-    // Professional Header for PDF
+    // Professional Centered Header for PDF
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(24);
-    doc.text(selectedCompany?.name || "Ashiq's Creation", 105, 20, { align: 'center' });
+    doc.setFontSize(22);
+    doc.setTextColor(15, 23, 42);
+    doc.text(selectedCompany?.name || "Ashiq's Creation", 105, 25, { align: 'center' });
+    
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(100, 116, 139);
+    doc.text((selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION').toUpperCase(), 105, 32, { align: 'center' });
+    
+    // Dynamic Report Badge (Black Box)
+    const titleWidth = doc.getTextWidth(title.toUpperCase()) + 20;
+    doc.setFillColor(15, 23, 42);
+    doc.rect(105 - (titleWidth / 2), 40, titleWidth, 10, 'F');
+    doc.setFontSize(10);
+    doc.setTextColor(255, 255, 255);
+    doc.text(title.toUpperCase(), 105, 46.5, { align: 'center' });
     
     doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(51, 65, 85);
+    doc.text(`AUDIT PERIOD: ${dateRange.from || 'START'} — ${dateRange.to || 'TODAY'}`, 105, 58, { align: 'center' });
+    
+    doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
-    doc.text(selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION', 105, 28, { align: 'center' });
-    
-    doc.setLineWidth(0.5);
-    doc.line(20, 32, 190, 32);
-    
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(title.toUpperCase(), 105, 42, { align: 'center' });
-    
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "italic");
-    doc.text(`Period: ${dateRange.from || 'Start'} to ${dateRange.to || 'Current'}`, 105, 48, { align: 'center' });
-    doc.text(`Report Generated: ${format(new Date(), 'dd-MM-yyyy HH:mm')}`, 190, 52, { align: 'right' });
+    doc.setTextColor(148, 163, 184);
+    doc.text(`PROTOCOL: ${filename.toUpperCase()} • GENERATED: ${format(new Date(), 'dd-MM-yyyy HH:mm')}`, 105, 64, { align: 'center' });
     
     // Format numbers for PDF export
     const formattedData = data.map(row => 
@@ -167,12 +175,23 @@ export default function Reports() {
     autoTable(doc, {
       head: [columns],
       body: formattedData,
-      startY: 60,
+      startY: 75,
       theme: 'grid',
-      headStyles: { fillColor: [15, 23, 42], textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
-      styles: { fontSize: 8, textColor: [51, 65, 85] },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
-      margin: { top: 60 }
+      headStyles: { 
+        fillColor: [248, 250, 252], 
+        textColor: [15, 23, 42], 
+        fontSize: 8, 
+        fontStyle: 'bold',
+        lineWidth: 0.1,
+        lineColor: [226, 232, 240]
+      },
+      styles: { fontSize: 8, textColor: [51, 65, 85], cellPadding: 4 },
+      alternateRowStyles: { fillColor: [252, 253, 255] },
+      columnStyles: {
+        // Find indices for Debit, Credit, Amount, and Vch Type to make them stand out if needed
+        // but keeping it professional for global use
+      },
+      margin: { top: 75 }
     });
     
     doc.save(`${filename}_${format(new Date(), 'yyyyMMdd')}.pdf`);
@@ -674,11 +693,11 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-900 text-white">
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Code</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5 whitespace-nowrap">Account Ledger</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5 text-right whitespace-nowrap">Debit (৳)</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
+            <tr className="bg-white border-b border-slate-100 text-slate-500">
+              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Code</th>
+              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50 whitespace-nowrap">Account Ledger</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right whitespace-nowrap">Debit (৳)</th>
+              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right whitespace-nowrap">Credit (৳)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -882,12 +901,12 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-slate-900 text-white">
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Voucher / Ref</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Main Ledger</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5">Category</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest border-r border-white/5 text-right">Debit / Credit</th>
-              <th className="px-10 py-5 text-[10px] font-semibold uppercase tracking-widest pr-10 text-right">Actions</th>
+            <tr className="bg-white border-b border-slate-100 text-slate-500">
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Voucher / Ref</th>
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Main Ledger</th>
+              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 whitespace-nowrap">Category</th>
+              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 text-right whitespace-nowrap">Debit / Credit (৳)</th>
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest pr-10 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -1158,33 +1177,63 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100">
-        <div className="p-10 space-y-8">
-          <div>
-            <h4 className="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.2em] mb-6">Revenue / Income Records ({data.income.length})</h4>
-            <div className="space-y-4">
-              {data.income.map((i: any) => (
-                <BalanceRow key={i.name} label={i.name} value={i.value} />
-              ))}
-              {data.income.length === 0 && <p className="text-xs text-slate-300 italic">No revenue streams discovered</p>}
-            </div>
-          </div>
-          <div className="pt-6 border-t border-slate-50">
-            <BalanceRow label="Total Revenue" value={data.totalIncome} bold />
-          </div>
+        <div className="p-0 space-y-0">
+          <table className="w-full text-left border-b border-slate-100">
+             <thead>
+               <tr className="bg-white border-b border-slate-100">
+                 <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Revenue / Income Records ({data.income.length})</th>
+                 <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+               </tr>
+             </thead>
+             <tbody className="divide-y divide-slate-50">
+               {data.income.map((i: any) => (
+                 <tr key={i.name} className="hover:bg-slate-50/50">
+                   <td className="px-10 py-5 text-sm font-medium text-slate-500">{i.name}</td>
+                   <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(i.value)}</td>
+                 </tr>
+               ))}
+               {data.income.length === 0 && (
+                 <tr>
+                   <td colSpan={2} className="px-10 py-10 text-xs text-slate-300 italic">No revenue streams discovered</td>
+                 </tr>
+               )}
+             </tbody>
+             <tfoot className="bg-slate-50/30">
+               <tr>
+                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Revenue</td>
+                 <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalIncome)}</td>
+               </tr>
+             </tfoot>
+          </table>
         </div>
-        <div className="p-10 space-y-8">
-          <div>
-            <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] mb-6">Operational Expenditures ({data.expenses.length})</h4>
-            <div className="space-y-4">
-              {data.expenses.map((e: any) => (
-                <BalanceRow key={e.name} label={e.name} value={e.value} />
-              ))}
-              {data.expenses.length === 0 && <p className="text-xs text-slate-300 italic">No operational leakage detected</p>}
-            </div>
-          </div>
-          <div className="pt-6 border-t border-slate-50">
-            <BalanceRow label="Total Expenses" value={data.totalExpenses} bold />
-          </div>
+        <div className="p-0 space-y-0">
+          <table className="w-full text-left border-b border-slate-100">
+             <thead>
+               <tr className="bg-white border-b border-slate-100">
+                 <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Operational Expenditures ({data.expenses.length})</th>
+                 <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+               </tr>
+             </thead>
+             <tbody className="divide-y divide-slate-50">
+               {data.expenses.map((e: any) => (
+                 <tr key={e.name} className="hover:bg-slate-50/50">
+                   <td className="px-10 py-5 text-sm font-medium text-slate-500">{e.name}</td>
+                   <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(e.value)}</td>
+                 </tr>
+               ))}
+               {data.expenses.length === 0 && (
+                 <tr>
+                   <td colSpan={2} className="px-10 py-10 text-xs text-slate-300 italic">No operational leakage detected</td>
+                 </tr>
+               )}
+             </tbody>
+             <tfoot className="bg-slate-50/30">
+               <tr>
+                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Expenses</td>
+                 <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalExpenses)}</td>
+               </tr>
+             </tfoot>
+          </table>
         </div>
       </div>
       <div className="bg-slate-900 p-10 flex border-t-8 border-slate-50">
@@ -1274,44 +1323,69 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100">
-        <div className="p-10 space-y-8">
-          <div>
-            <h4 className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em] mb-6">Total Resources / Assets</h4>
-            <div className="space-y-4">
-              {data.assets.map((a: any) => (
-                <BalanceRow key={a.name} label={a.name} value={a.value} />
-              ))}
-            </div>
-          </div>
-          <div className="pt-6 border-t border-slate-50">
-            <BalanceRow label="Total Assets" value={data.totalAssets} bold />
-          </div>
+        <div className="p-0 space-y-0">
+          <table className="w-full text-left border-b border-slate-100">
+             <thead>
+               <tr className="bg-white border-b border-slate-100">
+                 <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Total Resources / Assets</th>
+                 <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+               </tr>
+             </thead>
+             <tbody className="divide-y divide-slate-50 font-medium">
+               {data.assets.map((a: any) => (
+                 <tr key={a.name} className="hover:bg-slate-50/50">
+                   <td className="px-10 py-5 text-sm text-slate-500">{a.name}</td>
+                   <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(a.value)}</td>
+                 </tr>
+               ))}
+             </tbody>
+             <tfoot className="bg-slate-50/30">
+               <tr>
+                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Assets</td>
+                 <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalAssets)}</td>
+               </tr>
+             </tfoot>
+          </table>
         </div>
-        <div className="p-10 space-y-8">
-          <div className="space-y-8">
-            <div>
-              <h4 className="text-[10px] font-bold text-rose-600 uppercase tracking-[0.2em] mb-6">External Obligations / Liabilities</h4>
-              <div className="space-y-4">
-                {data.liabilities.map((l: any) => (
-                  <BalanceRow key={l.name} label={l.name} value={l.value} />
-                ))}
-              </div>
-            </div>
-            <div>
-              <h4 className="text-[10px] font-bold text-amber-600 uppercase tracking-[0.2em] mb-6">Owner's Equity & Retained Earnings</h4>
-              <div className="space-y-4">
-                {data.equity.map((e: any) => (
-                  <BalanceRow key={e.name} label={e.name} value={e.value} />
-                ))}
-                <BalanceRow label="Retained Earnings (Net Profit)" value={data.netProfit} />
-              </div>
-            </div>
-          </div>
-          <div className="pt-6 border-t border-slate-100 space-y-3">
-             <BalanceRow label="Total Liabilities + Equity" value={data.totalLiabilities + data.totalEquity} bold />
-             {Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) > 0.01 && (
-               <div className="bg-rose-50 p-3 rounded-xl border border-rose-100">
-                 <p className="text-[9px] font-bold text-rose-600 uppercase tracking-widest text-center">Unbalanced Protocol: Diff ৳{formatBDT(data.totalAssets - (data.totalLiabilities + data.totalEquity))}</p>
+        <div className="p-0 space-y-0">
+          <div className="space-y-0">
+            <table className="w-full text-left border-b border-slate-100">
+               <thead>
+                 <tr className="bg-white border-b border-slate-100">
+                   <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Liabilities & Equity</th>
+                   <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+                 </tr>
+               </thead>
+               <tbody className="divide-y divide-slate-50 font-medium">
+                 <tr className="bg-slate-50/20"><td colSpan={2} className="px-10 py-2 text-[8px] font-black text-slate-400 uppercase tracking-widest">External Obligations</td></tr>
+                 {data.liabilities.map((l: any) => (
+                   <tr key={l.name} className="hover:bg-slate-50/50">
+                     <td className="px-10 py-5 text-sm text-slate-500">{l.name}</td>
+                     <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(l.value)}</td>
+                   </tr>
+                 ))}
+                 <tr className="bg-slate-50/20"><td colSpan={2} className="px-10 py-2 text-[8px] font-black text-slate-400 uppercase tracking-widest">Equity & Retained Earnings</td></tr>
+                 {data.equity.map((e: any) => (
+                   <tr key={e.name} className="hover:bg-slate-50/50">
+                     <td className="px-10 py-5 text-sm text-slate-500">{e.name}</td>
+                     <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(e.value)}</td>
+                   </tr>
+                 ))}
+                 <tr className="hover:bg-slate-50/50">
+                   <td className="px-10 py-5 text-sm text-slate-500">Retained Earnings (Net Profit)</td>
+                   <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(data.netProfit)}</td>
+                 </tr>
+               </tbody>
+               <tfoot className="bg-slate-50/30">
+                 <tr>
+                   <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Liabilities + Equity</td>
+                   <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalLiabilities + data.totalEquity)}</td>
+                 </tr>
+               </tfoot>
+            </table>
+            {Math.abs(data.totalAssets - (data.totalLiabilities + data.totalEquity)) > 0.01 && (
+               <div className="bg-rose-50 p-6 border-t border-rose-100">
+                 <p className="text-[10px] font-black text-rose-600 uppercase tracking-[0.3em] text-center">Unbalanced Protocol: Deviation Detected (৳{formatBDT(data.totalAssets - (data.totalLiabilities + data.totalEquity))})</p>
                </div>
              )}
           </div>
@@ -1744,31 +1818,52 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       </div>
 
       {selectedAccountId && (
-        <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black uppercase tracking-tight">
+        <div className="bg-white text-slate-900 py-16 px-10 text-center space-y-6 border-b border-slate-100">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-black uppercase tracking-tight">
               {selectedCompany?.name || "Ashiq's Creation"}
             </h1>
-            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] max-w-2xl mx-auto leading-relaxed">
               {selectedCompany?.address || 'GENERAL LEDGER ACCOUNT STATEMENT'}
             </p>
           </div>
-          <div className="pt-4 flex flex-col items-center gap-3">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+          
+          <div className="flex flex-col items-center gap-6">
+            <div className="flex items-center gap-4">
+              <h2 className="text-sm font-black bg-slate-900 text-white px-8 py-3 uppercase tracking-[0.4em] skew-x-[-1deg] shadow-lg">
                 Account Ledger
               </h2>
-              <span className="text-[11px] font-bold text-indigo-600 border border-indigo-100 bg-indigo-50 px-4 py-1.5 uppercase tracking-widest shadow-sm">
-                {targetAcc?.name}
-              </span>
+              <div className="px-6 py-2.5 bg-white border-2 border-slate-900 rounded-lg shadow-[4px_4px_0px_0px_rgba(15,23,42,0.1)]">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{targetAcc?.name}</span>
+              </div>
             </div>
-            <div className="space-y-1">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Traceability Period</p>
-              <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
-                {dateRange.from || 'Opening'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || 'Current'}
-              </p>
+            
+            <div className="space-y-1.5 pt-2">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">Traceability Protocol</p>
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
+                  {dateRange.from || 'OPENING'}
+                </span>
+                <div className="w-12 h-[1px] bg-slate-200" />
+                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
+                  {dateRange.to || 'CURRENT'}
+                </span>
+              </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {selectedAccountId && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print p-10 bg-slate-50/10 border-b border-slate-50">
+          <ReportStat label="Account Type" value={targetAcc?.type} isType icon={<ArchiveX size={16} />} />
+          <ReportStat label="Total Debit" value={totalDebit} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
+          <ReportStat label="Total Credit" value={totalCredit} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
+          <ReportStat 
+            label="Current Balance" 
+            value={closingBalance} 
+            icon={<BookOpen size={16} className="text-indigo-500" />}
+          />
         </div>
       )}
 
@@ -1776,13 +1871,13 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-slate-900 text-white">
-                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5">Date</th>
-                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5">Particulars</th>
-                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5">Vch Type</th>
-                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5 text-right">Debit</th>
-                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest border-r border-white/5 text-right">Credit</th>
-                <th className="px-10 py-5 text-[10px] font-medium uppercase tracking-widest text-right pr-10">Running Balance</th>
+              <tr className="bg-white border-b border-slate-100 text-slate-500">
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Date</th>
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Particulars</th>
+                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 whitespace-nowrap">Vch Type</th>
+                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 text-right whitespace-nowrap">Debit (৳)</th>
+                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 text-right whitespace-nowrap">Credit (৳)</th>
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right pr-10 whitespace-nowrap">Running Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
