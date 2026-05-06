@@ -615,38 +615,9 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
   const totalCredit = filteredData.reduce((sum, acc) => sum + acc.credit, 0);
 
   if (loading) return <div className="p-20 text-center text-slate-400 font-semibold animate-pulse uppercase tracking-widest text-[10px]">Calculating Ledger Equilibrium...</div>;
-
+  
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      {/* Integrated Professional Header */}
-      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-        <div className="space-y-1.5">
-          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
-          </h1>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-            {selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION'}
-          </p>
-          <div className="pt-4">
-            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-              Trial Balance
-            </h2>
-          </div>
-        </div>
-        <div className="text-left md:text-right space-y-2">
-           <div className="space-y-0.5">
-             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reporting Period</p>
-             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
-               {dateRange.from || 'Opening'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
-             </p>
-           </div>
-           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> BDT Basis</span>
-             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> Audited</span>
-           </div>
-        </div>
-      </div>
-
       <div className="px-10 py-8 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div className="flex items-center gap-6 flex-1">
           <div>
@@ -676,6 +647,28 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
           >
             <Printer size={20} />
           </button>
+        </div>
+      </div>
+
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
+            {selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION'}
+          </p>
+        </div>
+        <div className="pt-4 flex flex-col items-center gap-3">
+          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+            Trial Balance
+          </h2>
+          <div className="space-y-1">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Period</p>
+            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
+              {dateRange.from || 'Opening'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+            </p>
+          </div>
         </div>
       </div>
       <div className="overflow-x-auto">
@@ -841,37 +834,9 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
   }));
 
   if (loading) return <div className="p-20 text-center text-slate-400 font-semibold animate-pulse uppercase tracking-[0.2em] text-[10px]">Synchronizing Audit Trail...</div>;
-
+  
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      {/* Integrated Professional Header */}
-      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-        <div className="space-y-1.5">
-          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
-          </h1>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-            {selectedCompany?.address || 'EXECUTIVE DAYBOOK REGISTER • ENTERPRISE AUDIT'}
-          </p>
-          <div className="pt-4">
-            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-              Daybook Register
-            </h2>
-          </div>
-        </div>
-        <div className="text-left md:text-right space-y-2">
-           <div className="space-y-0.5">
-             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Period</p>
-             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
-               {dateRange.from || 'Start'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || 'Today'}
-             </p>
-           </div>
-           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-             <span className="flex items-center gap-1.5">Entries Tracked: {vouchers.length}</span>
-           </div>
-        </div>
-      </div>
-
       <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between no-print">
         <div>
           <h3 className="font-semibold text-slate-900 uppercase text-xs tracking-widest">Daybook Register</h3>
@@ -893,6 +858,27 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         </div>
       </div>
 
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
+            {selectedCompany?.address || 'EXECUTIVE DAYBOOK REGISTER • ENTERPRISE AUDIT'}
+          </p>
+        </div>
+        <div className="pt-4 flex flex-col items-center gap-3">
+          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+            Daybook Register
+          </h2>
+          <div className="space-y-1">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Period</p>
+            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
+              {dateRange.from || 'Start'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || 'Today'}
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
@@ -1136,38 +1122,10 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
   };
 
   if (loading) return <div className="p-20 text-center animate-pulse text-slate-300 uppercase tracking-widest font-semibold">Generating Profit Analytics...</div>;
-
+  
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      {/* Integrated Professional Header */}
-      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-        <div className="space-y-1.5">
-          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
-          </h1>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-            {selectedCompany?.address || 'INCOME STATEMENT • FISCAL PERFORMANCE REPORT'}
-          </p>
-          <div className="pt-4">
-            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-              Profit & Loss Statement
-            </h2>
-          </div>
-        </div>
-        <div className="text-left md:text-right space-y-2">
-           <div className="space-y-0.5">
-             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reporting Period</p>
-             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
-               {dateRange.from || 'Inception'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || 'Current'}
-             </p>
-           </div>
-           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-             <span className="flex items-center gap-1.5">System: Accrual Basis</span>
-           </div>
-        </div>
-      </div>
-
-      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 no-print">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statement of Profit or Loss</h3>
         <div className="flex gap-2">
            <button onClick={() => onExportExcel([
@@ -1175,6 +1133,28 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
              ['Expenses'], ...data.expenses.map((e:any) => [e.name, e.value]), ['Total Expenses', data.totalExpenses],
              ['Net Profit', data.netProfit]
            ])} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"><FileDown size={18} /></button>
+        </div>
+      </div>
+
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
+            {selectedCompany?.address || 'POLARIS EXECUTIVE AUDIT • FISCAL PERFORMANCE'}
+          </p>
+        </div>
+        <div className="pt-4 flex flex-col items-center gap-3">
+          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+            Profit & Loss Statement
+          </h2>
+          <div className="space-y-1">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reporting Period</p>
+            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
+              {dateRange.from || 'Inception'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || 'Current'}
+            </p>
+          </div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100">
@@ -1258,38 +1238,10 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
   };
 
   if (loading) return <div className="p-20 text-center animate-pulse text-slate-300 uppercase tracking-widest font-semibold">Reconstructing Financial Position...</div>;
-
+  
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      {/* Integrated Professional Header */}
-      <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-        <div className="space-y-1.5">
-          <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
-          </h1>
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-            {selectedCompany?.address || 'CONSOLIDATED STATEMENT OF FINANCIAL POSITION'}
-          </p>
-          <div className="pt-4">
-            <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-              Balance Sheet
-            </h2>
-          </div>
-        </div>
-        <div className="text-left md:text-right space-y-2">
-           <div className="space-y-0.5">
-             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Appraisal Date</p>
-             <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
-               {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
-             </p>
-           </div>
-           <div className="flex md:justify-end gap-4 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-             <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Audited Records</span>
-           </div>
-        </div>
-      </div>
-
-      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
+      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30 no-print">
         <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Statement of Financial Position</h3>
         <div className="flex gap-2">
            <button onClick={() => onExportExcel([
@@ -1297,6 +1249,28 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
              ['Liabilities'], ...data.liabilities.map((l:any) => [l.name, l.value]), ['Total Liabilities', data.totalLiabilities],
              ['Equity'], ...data.equity.map((e:any) => [e.name, e.value]), ['Net Profit (Retained)', data.netProfit], ['Total Equity', data.totalEquity]
            ])} className="p-2 text-slate-400 hover:text-emerald-600 transition-colors"><FileDown size={18} /></button>
+        </div>
+      </div>
+
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black uppercase tracking-tight">
+            {selectedCompany?.name || "Ashiq's Creation"}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
+            {selectedCompany?.address || 'CONSOLIDATED STATEMENT OF FINANCIAL POSITION'}
+          </p>
+        </div>
+        <div className="pt-4 flex flex-col items-center gap-3">
+          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+            Balance Sheet
+          </h2>
+          <div className="space-y-1">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Appraisal Date</p>
+            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
+              As on {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+            </p>
+          </div>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100">
@@ -1565,56 +1539,6 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   return (
     <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
-      {/* Integrated Professional Header */}
-      {selectedAccountId && (
-        <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-              {selectedCompany?.name || "Ashiq's Creation"}
-            </h1>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-              {selectedCompany?.address || 'GENERAL LEDGER ACCOUNT STATEMENT'}
-            </p>
-            <div className="pt-4">
-              <div className="flex items-center gap-4">
-                <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-                  Account Ledger
-                </h2>
-                <div className="px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg">
-                  <span className="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{targetAcc?.name}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="text-left md:text-right space-y-2">
-             <div className="space-y-0.5">
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Traceability Period</p>
-               <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
-                 {dateRange.from || 'Opening'} <span className="text-slate-300 mx-1">—</span> {dateRange.to || 'Current'}
-               </p>
-             </div>
-             <div className="flex md:justify-end gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-               <span>Code: {targetAcc?.code}</span>
-               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 self-center" />
-               <span>Type: {targetAcc?.type}</span>
-             </div>
-          </div>
-        </div>
-      )}
-
-      {selectedAccountId && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 no-print p-10 bg-slate-50/10 border-b border-slate-50">
-          <ReportStat label="Account Type" value={targetAcc?.type} isType icon={<ArchiveX size={16} />} />
-          <ReportStat label="Total Debit" value={totalDebit} icon={<ArrowUpRight size={16} className="text-rose-500" />} />
-          <ReportStat label="Total Credit" value={totalCredit} icon={<ArrowDownLeft size={16} className="text-emerald-500" />} />
-          <ReportStat 
-            label="Current Balance" 
-            value={closingBalance} 
-            icon={<BookOpen size={16} className="text-indigo-500" />}
-          />
-        </div>
-      )}
-
       <div className="p-10 border-b border-slate-50 space-y-10 no-print">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-end">
           <div className="lg:col-span-2 space-y-3 relative" ref={searchContainerRef}>
@@ -1818,6 +1742,35 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
           </div>
         </div>
       </div>
+
+      {selectedAccountId && (
+        <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black uppercase tracking-tight">
+              {selectedCompany?.name || "Ashiq's Creation"}
+            </h1>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
+              {selectedCompany?.address || 'GENERAL LEDGER ACCOUNT STATEMENT'}
+            </p>
+          </div>
+          <div className="pt-4 flex flex-col items-center gap-3">
+            <div className="flex items-center gap-3">
+              <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+                Account Ledger
+              </h2>
+              <span className="text-[11px] font-bold text-indigo-600 border border-indigo-100 bg-indigo-50 px-4 py-1.5 uppercase tracking-widest shadow-sm">
+                {targetAcc?.name}
+              </span>
+            </div>
+            <div className="space-y-1">
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Traceability Period</p>
+              <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
+                {dateRange.from || 'Opening'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || 'Current'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {selectedAccountId ? (
         <div className="overflow-x-auto">
