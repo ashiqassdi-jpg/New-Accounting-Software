@@ -127,26 +127,28 @@ export default function VoucherPrintPreview({ voucher, company, profile, onClose
                   font-family: 'Inter', sans-serif;
                   color: black;
                 }
-                .company-name {
-                  font-family: "Times New Roman", Times, serif !important;
-                }
                 .no-print { display: none !important; }
               `}
             </style>
             
             <div className="max-w-[700px] mx-auto space-y-8 font-sans">
               {/* Header */}
-              <div className="text-center space-y-2">
-                <h1 className="text-4xl company-name text-black leading-tight whitespace-nowrap">
-                  {company?.name || "Ashiq's Creation"}
-                </h1>
-                <p className="text-[10px] font-bold text-black uppercase tracking-[0.2em] leading-tight max-w-full mx-auto whitespace-nowrap overflow-hidden text-ellipsis">
-                  {company?.address || 'Your Company Address'}
-                </p>
-                <div className="pt-3">
-                  <h2 className="text-sm font-black border-y-2 border-black py-2 inline-block px-12 uppercase tracking-[0.4em] text-black">
+              <div className="text-center space-y-3">
+                <div className="space-y-2">
+                  <h1 className="text-4xl font-black text-black tracking-tight leading-tight">
+                    {company?.name || "As-Sunnah Skill Development Institute (New Shade)"}
+                  </h1>
+                  <p className="text-[10px] font-bold text-black uppercase tracking-[0.2em] leading-tight max-w-full mx-auto">
+                    {company?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
+                  </p>
+                </div>
+                
+                <div className="pt-4 flex flex-col items-center">
+                  <div className="w-full max-w-md border-t-2 border-black" />
+                  <h2 className="py-3 text-lg font-black text-black uppercase tracking-[0.4em]">
                     {voucher.type} VOUCHER
                   </h2>
+                  <div className="w-full max-w-md border-t-2 border-black" />
                 </div>
               </div>
 

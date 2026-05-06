@@ -298,34 +298,27 @@ export default function ChartOfAccounts() {
 
   return (
     <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden mb-8">
-        {/* Integrated Professional Header */}
-        <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-          <div className="space-y-1.5">
-            <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-              {selectedCompany?.name || "Ashiq's Creation"}
-            </h1>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-              {selectedCompany?.address || 'LEDGER INFRASTRUCTURE • CHART OF ACCOUNTS ARCHIVE'}
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
+          </h1>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
+          </p>
+        </div>
+        
+        <div className="pt-4 flex flex-col items-center">
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+            Chart of Accounts
+          </h2>
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          
+          <div className="mt-4 space-y-1">
+            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+              Verified Protocol Online • {format(new Date(), 'dd-MM-yyyy HH:mm')}
             </p>
-            <div className="pt-4">
-              <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-                Chart of Accounts
-              </h2>
-            </div>
-          </div>
-          <div className="text-left md:text-right space-y-2">
-             <div className="space-y-0.5">
-               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">System Status</p>
-               <p className="text-[11px] font-black text-emerald-600 uppercase tracking-tight">
-                 Verified Protocol Online
-               </p>
-             </div>
-             <div className="flex md:justify-end gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-               <span>Nodes: {accounts.length}</span>
-               <span className="w-1.5 h-1.5 rounded-full bg-slate-200 self-center" />
-               <span>{format(new Date(), 'dd-MM-yyyy HH:mm')}</span>
-             </div>
           </div>
         </div>
       </div>

@@ -202,38 +202,30 @@ export default function Ledger() {
     <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
       {/* Integrated Professional Header */}
       {selectedAccount && (
-        <div className="bg-white rounded-[2rem] border border-slate-50 shadow-2xl shadow-indigo-100/10 overflow-hidden mb-8">
-          <div className="px-10 pt-10 pb-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-start gap-6 bg-slate-50/30">
-            <div className="space-y-1.5">
-              <h1 className="text-2xl font-serif font-black text-slate-900 uppercase tracking-tight">
-                {selectedCompany?.name || "Ashiq's Creation"}
-              </h1>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] max-w-xl leading-relaxed">
-                {selectedCompany?.address || 'CONSOLIDATED GENERAL LEDGER ARCHIVE'}
-              </p>
-              <div className="pt-4">
-                <div className="flex items-center gap-4">
-                  <h2 className="text-[11px] font-black text-white bg-slate-900 px-4 py-2 inline-block uppercase tracking-[0.25em] shadow-[4px_4px_0px_0px_rgba(99,102,241,0.2)] skew-x-[-1deg]">
-                    General Ledger
-                  </h2>
-                  <div className="px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-lg">
-                    <span className="text-[11px] font-black text-indigo-600 uppercase tracking-widest">{selectedAccount?.name}</span>
-                  </div>
-                </div>
+        <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50 mb-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+              {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
+            </h1>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+              {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
+            </p>
+          </div>
+          
+          <div className="pt-4 flex flex-col items-center">
+            <div className="w-full max-w-md border-t-2 border-slate-900" />
+            <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+              General Ledger
+            </h2>
+            <div className="w-full max-w-md border-t-2 border-slate-900" />
+            
+            <div className="mt-4 space-y-3 font-bold uppercase tracking-widest text-slate-900">
+              <div className="px-6 py-2 bg-white border border-slate-200 rounded-lg inline-block text-xs">
+                {selectedAccount?.name} ({selectedAccount?.code})
               </div>
-            </div>
-            <div className="text-left md:text-right space-y-2">
-               <div className="space-y-0.5">
-                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Range</p>
-                 <p className="text-[11px] font-black text-slate-900 uppercase tracking-tight">
-                   {confirmedDateRange.from || 'Commencement'} <span className="text-slate-300 mx-1">—</span> {confirmedDateRange.to || 'Present'}
-                 </p>
-               </div>
-               <div className="flex md:justify-end gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                 <span>Code: {selectedAccount?.code}</span>
-                 <span className="w-1.5 h-1.5 rounded-full bg-slate-200 self-center" />
-                 <span>Volume: {transactions.length} Records</span>
-               </div>
+              <p className="text-[11px]">
+                Audit Range: {confirmedDateRange.from || 'Commencement'} — {confirmedDateRange.to || 'Present'}
+              </p>
             </div>
           </div>
         </div>

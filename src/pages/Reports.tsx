@@ -135,32 +135,35 @@ export default function Reports() {
     
     // Professional Centered Header for PDF
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(22);
+    doc.setFontSize(24);
     doc.setTextColor(15, 23, 42);
-    doc.text(selectedCompany?.name || "Ashiq's Creation", 105, 25, { align: 'center' });
+    doc.text(selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)", 105, 25, { align: 'center' });
     
     doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(100, 116, 139);
-    doc.text((selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION').toUpperCase(), 105, 32, { align: 'center' });
+    doc.text((selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212').toUpperCase(), 105, 32, { align: 'center' });
     
-    // Dynamic Report Badge (Black Box)
-    const titleWidth = doc.getTextWidth(title.toUpperCase()) + 20;
-    doc.setFillColor(15, 23, 42);
-    doc.rect(105 - (titleWidth / 2), 40, titleWidth, 10, 'F');
-    doc.setFontSize(10);
-    doc.setTextColor(255, 255, 255);
-    doc.text(title.toUpperCase(), 105, 46.5, { align: 'center' });
+    // Centered Title with lines
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(15, 23, 42);
+    doc.line(65, 40, 145, 40);
+    
+    doc.setFontSize(14);
+    doc.setTextColor(15, 23, 42);
+    doc.text(title.toUpperCase(), 105, 48, { align: 'center' });
+    
+    doc.line(65, 52, 145, 52);
     
     doc.setFontSize(9);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(51, 65, 85);
-    doc.text(`AUDIT PERIOD: ${dateRange.from || 'START'} — ${dateRange.to || 'TODAY'}`, 105, 58, { align: 'center' });
+    doc.text(`AUDIT PERIOD: ${dateRange.from || 'START'} — ${dateRange.to || 'TODAY'}`, 105, 62, { align: 'center' });
     
     doc.setFontSize(7);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(148, 163, 184);
-    doc.text(`PROTOCOL: ${filename.toUpperCase()} • GENERATED: ${format(new Date(), 'dd-MM-yyyy HH:mm')}`, 105, 64, { align: 'center' });
+    doc.text(`PROTOCOL: ${filename.toUpperCase()} • GENERATED: ${format(new Date(), 'dd-MM-yyyy HH:mm')}`, 105, 68, { align: 'center' });
     
     // Format numbers for PDF export
     const formattedData = data.map(row => 
@@ -669,23 +672,26 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
-            {selectedCompany?.address || 'GLOBAL AUDIT PROTOCOL • ENTERPRISE EDITION'}
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
-        <div className="pt-4 flex flex-col items-center gap-3">
-          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+        
+        <div className="pt-4 flex flex-col items-center">
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Trial Balance
           </h2>
-          <div className="space-y-1">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Period</p>
-            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
-              {dateRange.from || 'Opening'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          
+          <div className="mt-4 space-y-1">
+            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+              Audit Period: {dateRange.from || 'Opening'} — {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
             </p>
           </div>
         </div>
@@ -693,11 +699,11 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-white border-b border-slate-100 text-slate-500">
-              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Code</th>
-              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50 whitespace-nowrap">Account Ledger</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right whitespace-nowrap">Debit (৳)</th>
-              <th className="px-10 py-5 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right whitespace-nowrap">Credit (৳)</th>
+            <tr className="bg-slate-900 text-white">
+              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Code</th>
+              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Account Ledger</th>
+              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit (৳)</th>
+              <th className="px-10 py-5 text-[10px] font-bold uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -707,7 +713,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
                 <td className="px-10 py-5 text-[11px] font-semibold text-slate-700 uppercase tracking-tight group-hover:text-indigo-600 transition-colors">
                    {acc.name}
                 </td>
-                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">
+                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums border-r border-slate-50">
                   {acc.debit > 0 ? formatBDT(acc.debit).replace(/[^0-9.,]/g, '') : '-'}
                 </td>
                 <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">
@@ -724,7 +730,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
           <tfoot className="bg-slate-50/80 border-t-2 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
             <tr>
               <td colSpan={2} className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">Consolidated Total</td>
-              <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+              <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums border-r border-slate-50">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
               <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
             </tr>
           </tfoot>
@@ -877,23 +883,26 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
-            {selectedCompany?.address || 'EXECUTIVE DAYBOOK REGISTER • ENTERPRISE AUDIT'}
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
-        <div className="pt-4 flex flex-col items-center gap-3">
-          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+        
+        <div className="pt-4 flex flex-col items-center">
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Daybook Register
           </h2>
-          <div className="space-y-1">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Audit Period</p>
-            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
-              {dateRange.from || 'Start'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || 'Today'}
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          
+          <div className="mt-4 space-y-1">
+            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+              Audit Period: {dateRange.from || 'Start'} — {dateRange.to || 'Today'}
             </p>
           </div>
         </div>
@@ -901,11 +910,11 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="bg-white border-b border-slate-100 text-slate-500">
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Voucher / Ref</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Main Ledger</th>
-              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 whitespace-nowrap">Category</th>
-              <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 text-right whitespace-nowrap">Debit / Credit (৳)</th>
+            <tr className="bg-slate-900 text-white">
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Voucher / Ref</th>
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Main Ledger</th>
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Category</th>
+              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit / Credit (৳)</th>
               <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest pr-10 text-right">Actions</th>
             </tr>
           </thead>
@@ -935,7 +944,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                     <p className="text-[11px] font-semibold text-slate-700 uppercase tracking-tight">{getOppositeAccount(v)}</p>
                     <p className="text-[10px] text-slate-400 font-medium truncate max-w-[200px] mt-1">{v.narration}</p>
                   </td>
-                  <td className="px-10 py-6">
+                  <td className="px-10 py-6 border-r border-slate-50">
                     <span className={cn(
                       "px-3 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest",
                       v.type === 'PAYMENT' && "bg-rose-50 text-rose-600 border border-rose-100",
@@ -948,7 +957,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                       {v.type}
                     </span>
                   </td>
-                  <td className="px-10 py-6 text-right">
+                  <td className="px-10 py-6 text-right border-r border-slate-50">
                     <p className="text-sm font-semibold text-slate-900 font-mono tabular-nums">{formatBDT(v.amount).replace(/[^0-9.,]/g, '')}</p>
                   </td>
                   <td className="px-10 py-6 text-right pr-10">
@@ -1088,7 +1097,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                 <td className="px-10 py-6 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">
                   Consolidated Volume
                 </td>
-                <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums">
+                <td className="px-10 py-6 text-sm font-mono font-semibold text-indigo-600 text-right tabular-nums border-r border-slate-50">
                   {formatBDT(vouchers.reduce((sum, v) => sum + (Number(v.amount) || 0), 0)).replace(/[^0-9.,]/g, '')}
                 </td>
                 <td className="px-10 py-6"></td>
@@ -1155,23 +1164,26 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
-            {selectedCompany?.address || 'POLARIS EXECUTIVE AUDIT • FISCAL PERFORMANCE'}
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
-        <div className="pt-4 flex flex-col items-center gap-3">
-          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+        
+        <div className="pt-4 flex flex-col items-center">
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Profit & Loss Statement
           </h2>
-          <div className="space-y-1">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Reporting Period</p>
-            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
-              {dateRange.from || 'Inception'} <span className="mx-2 text-slate-200">—</span> {dateRange.to || 'Current'}
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          
+          <div className="mt-4 space-y-1">
+            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+              Reporting Period: {dateRange.from || 'Inception'} — {dateRange.to || 'Current'}
             </p>
           </div>
         </div>
@@ -1180,9 +1192,9 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
         <div className="p-0 space-y-0">
           <table className="w-full text-left border-b border-slate-100">
              <thead>
-               <tr className="bg-white border-b border-slate-100">
-                 <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Revenue / Income Records ({data.income.length})</th>
-                 <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+               <tr className="bg-slate-900 text-white">
+                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Revenue / Income Records ({data.income.length})</th>
+                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right w-40">Amount (৳)</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-slate-50">
@@ -1200,7 +1212,7 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
              </tbody>
              <tfoot className="bg-slate-50/30">
                <tr>
-                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Revenue</td>
+                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest border-r border-slate-50">Total Revenue</td>
                  <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalIncome)}</td>
                </tr>
              </tfoot>
@@ -1209,27 +1221,27 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
         <div className="p-0 space-y-0">
           <table className="w-full text-left border-b border-slate-100">
              <thead>
-               <tr className="bg-white border-b border-slate-100">
-                 <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Operational Expenditures ({data.expenses.length})</th>
-                 <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+               <tr className="bg-slate-900 text-white">
+                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Operational Expenditures ({data.expenses.length})</th>
+                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right w-40">Amount (৳)</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-slate-50">
                {data.expenses.map((e: any) => (
                  <tr key={e.name} className="hover:bg-slate-50/50">
-                   <td className="px-10 py-5 text-sm font-medium text-slate-500">{e.name}</td>
+                   <td className="px-10 py-5 text-sm font-medium text-slate-500 border-r border-slate-50">{e.name}</td>
                    <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(e.value)}</td>
                  </tr>
                ))}
                {data.expenses.length === 0 && (
                  <tr>
-                   <td colSpan={2} className="px-10 py-10 text-xs text-slate-300 italic">No operational leakage detected</td>
+                   <td colSpan={2} className="px-10 py-10 text-xs text-slate-300 italic focus:border-r border-slate-50">No operational leakage detected</td>
                  </tr>
                )}
              </tbody>
              <tfoot className="bg-slate-50/30">
                <tr>
-                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Expenses</td>
+                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest border-r border-slate-50">Total Expenses</td>
                  <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalExpenses)}</td>
                </tr>
              </tfoot>
@@ -1301,23 +1313,26 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
         </div>
       </div>
 
-      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-4 border-b border-slate-50">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-black uppercase tracking-tight">
-            {selectedCompany?.name || "Ashiq's Creation"}
+      <div className="bg-white text-slate-900 py-12 px-10 text-center space-y-3 border-b border-slate-50">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+            {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] max-w-2xl mx-auto leading-relaxed">
-            {selectedCompany?.address || 'CONSOLIDATED STATEMENT OF FINANCIAL POSITION'}
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
-        <div className="pt-4 flex flex-col items-center gap-3">
-          <h2 className="text-xs font-black bg-slate-900 text-white px-6 py-2 uppercase tracking-[0.3em] skew-x-[-1deg]">
+        
+        <div className="pt-4 flex flex-col items-center">
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
             Balance Sheet
           </h2>
-          <div className="space-y-1">
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Appraisal Date</p>
-            <p className="text-[11px] font-black uppercase tracking-tight text-slate-900">
-              As on {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          
+          <div className="mt-4 space-y-1">
+            <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+              Appraisal Date: As on {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
             </p>
           </div>
         </div>
@@ -1326,22 +1341,22 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
         <div className="p-0 space-y-0">
           <table className="w-full text-left border-b border-slate-100">
              <thead>
-               <tr className="bg-white border-b border-slate-100">
-                 <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Total Resources / Assets</th>
-                 <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+               <tr className="bg-slate-900 text-white">
+                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Total Resources / Assets</th>
+                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right w-40">Amount (৳)</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-slate-50 font-medium">
                {data.assets.map((a: any) => (
                  <tr key={a.name} className="hover:bg-slate-50/50">
-                   <td className="px-10 py-5 text-sm text-slate-500">{a.name}</td>
+                   <td className="px-10 py-5 text-sm text-slate-500 border-r border-slate-50">{a.name}</td>
                    <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(a.value)}</td>
                  </tr>
                ))}
              </tbody>
              <tfoot className="bg-slate-50/30">
                <tr>
-                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Assets</td>
+                 <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest border-r border-slate-50">Total Assets</td>
                  <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalAssets)}</td>
                </tr>
              </tfoot>
@@ -1351,34 +1366,34 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           <div className="space-y-0">
             <table className="w-full text-left border-b border-slate-100">
                <thead>
-                 <tr className="bg-white border-b border-slate-100">
-                   <th className="px-10 py-6 text-[10px] font-bold text-slate-500 uppercase tracking-widest border-r border-slate-50">Liabilities & Equity</th>
-                   <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white text-right w-40">Amount (৳)</th>
+                 <tr className="bg-slate-900 text-white">
+                   <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Liabilities & Equity</th>
+                   <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right w-40">Amount (৳)</th>
                  </tr>
                </thead>
                <tbody className="divide-y divide-slate-50 font-medium">
                  <tr className="bg-slate-50/20"><td colSpan={2} className="px-10 py-2 text-[8px] font-black text-slate-400 uppercase tracking-widest">External Obligations</td></tr>
                  {data.liabilities.map((l: any) => (
                    <tr key={l.name} className="hover:bg-slate-50/50">
-                     <td className="px-10 py-5 text-sm text-slate-500">{l.name}</td>
+                     <td className="px-10 py-5 text-sm text-slate-500 border-r border-slate-50">{l.name}</td>
                      <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(l.value)}</td>
                    </tr>
                  ))}
                  <tr className="bg-slate-50/20"><td colSpan={2} className="px-10 py-2 text-[8px] font-black text-slate-400 uppercase tracking-widest">Equity & Retained Earnings</td></tr>
                  {data.equity.map((e: any) => (
                    <tr key={e.name} className="hover:bg-slate-50/50">
-                     <td className="px-10 py-5 text-sm text-slate-500">{e.name}</td>
+                     <td className="px-10 py-5 text-sm text-slate-500 border-r border-slate-50">{e.name}</td>
                      <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(e.value)}</td>
                    </tr>
                  ))}
                  <tr className="hover:bg-slate-50/50">
-                   <td className="px-10 py-5 text-sm text-slate-500">Retained Earnings (Net Profit)</td>
+                   <td className="px-10 py-5 text-sm text-slate-500 border-r border-slate-50">Retained Earnings (Net Profit)</td>
                    <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 text-right tabular-nums">{formatBDT(data.netProfit)}</td>
                  </tr>
                </tbody>
                <tfoot className="bg-slate-50/30">
                  <tr>
-                   <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest">Total Liabilities + Equity</td>
+                   <td className="px-10 py-6 text-[10px] font-bold text-slate-900 uppercase tracking-widest border-r border-slate-50">Total Liabilities + Equity</td>
                    <td className="px-10 py-6 text-sm font-mono font-bold text-slate-900 text-right tabular-nums">{formatBDT(data.totalLiabilities + data.totalEquity)}</td>
                  </tr>
                </tfoot>
@@ -1818,37 +1833,30 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       </div>
 
       {selectedAccountId && (
-        <div className="bg-white text-slate-900 py-16 px-10 text-center space-y-6 border-b border-slate-100">
+        <div className="bg-white text-slate-900 py-16 px-10 text-center space-y-3 border-b border-slate-100">
           <div className="space-y-2">
-            <h1 className="text-3xl font-black uppercase tracking-tight">
-              {selectedCompany?.name || "Ashiq's Creation"}
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">
+              {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
             </h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] max-w-2xl mx-auto leading-relaxed">
-              {selectedCompany?.address || 'GENERAL LEDGER ACCOUNT STATEMENT'}
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+              {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
             </p>
           </div>
           
-          <div className="flex flex-col items-center gap-6">
-            <div className="flex items-center gap-4">
-              <h2 className="text-sm font-black bg-slate-900 text-white px-8 py-3 uppercase tracking-[0.4em] skew-x-[-1deg] shadow-lg">
-                Account Ledger
-              </h2>
-              <div className="px-6 py-2.5 bg-white border-2 border-slate-900 rounded-lg shadow-[4px_4px_0px_0px_rgba(15,23,42,0.1)]">
-                <span className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{targetAcc?.name}</span>
-              </div>
-            </div>
+          <div className="pt-4 flex flex-col items-center">
+            <div className="w-full max-w-md border-t-2 border-slate-900" />
+            <h2 className="py-3 text-lg font-black text-slate-900 uppercase tracking-[0.4em]">
+              Account Ledger
+            </h2>
+            <div className="w-full max-w-md border-t-2 border-slate-900" />
             
-            <div className="space-y-1.5 pt-2">
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.3em]">Traceability Protocol</p>
-              <div className="flex items-center justify-center gap-3">
-                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
-                  {dateRange.from || 'OPENING'}
-                </span>
-                <div className="w-12 h-[1px] bg-slate-200" />
-                <span className="text-[11px] font-black uppercase tracking-widest text-slate-900">
-                  {dateRange.to || 'CURRENT'}
-                </span>
+            <div className="mt-4 space-y-3">
+              <div className="px-6 py-2 bg-white border border-slate-200 rounded-lg shadow-sm">
+                <span className="text-xs font-black text-slate-900 uppercase tracking-widest">{targetAcc?.name}</span>
               </div>
+              <p className="text-[11px] font-bold text-slate-900 uppercase tracking-widest">
+                Protocol period: {dateRange.from || 'OPENING'} — {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
+              </p>
             </div>
           </div>
         </div>
@@ -1871,12 +1879,12 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-white border-b border-slate-100 text-slate-500">
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Date</th>
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-50">Particulars</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 whitespace-nowrap">Vch Type</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 text-right whitespace-nowrap">Debit (৳)</th>
-                <th className="px-10 py-6 text-[10px] font-black uppercase tracking-widest bg-slate-900 text-white border-r border-white/5 text-right whitespace-nowrap">Credit (৳)</th>
+              <tr className="bg-slate-900 text-white">
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Date</th>
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Particulars</th>
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Vch Type</th>
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit (৳)</th>
+                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Credit (৳)</th>
                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right pr-10 whitespace-nowrap">Running Balance</th>
               </tr>
             </thead>
@@ -1894,11 +1902,11 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
                     </p>
                     <p className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest mt-1">Ref: {r.voucher?.voucher_no}</p>
                   </td>
-                  <td className="px-10 py-5">
-                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">{r.voucher?.type}</span>
+                  <td className="px-10 py-5 border-r border-slate-50">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">{r.voucher?.type}</span>
                   </td>
-                  <td className="px-10 py-5 text-sm font-mono font-semibold text-rose-500 text-right tabular-nums">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
-                  <td className="px-10 py-5 text-sm font-mono font-semibold text-emerald-500 text-right tabular-nums">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-10 py-5 text-sm font-mono font-semibold text-rose-600 text-right tabular-nums border-r border-slate-50">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-10 py-5 text-sm font-mono font-semibold text-emerald-600 text-right tabular-nums border-r border-slate-50">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
                   <td className="px-10 py-5 text-right pr-10">
                     <div className="flex items-center justify-end gap-3">
                       <span className={cn(
@@ -1931,9 +1939,9 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             </tbody>
             <tfoot className="bg-slate-50/80 border-t-4 border-slate-100 font-semibold backdrop-blur-sm sticky bottom-0">
               <tr>
-                <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold">Analytical Totals</td>
-                <td className="px-10 py-8 text-sm font-mono text-rose-600 text-right tabular-nums">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
-                <td className="px-10 py-8 text-sm font-mono text-emerald-600 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
+                <td colSpan={3} className="px-10 py-8 text-[10px] text-slate-900 text-right uppercase tracking-[0.3em] font-semibold border-r border-slate-50">Analytical Totals</td>
+                <td className="px-10 py-8 text-sm font-mono font-semibold text-rose-600 text-right tabular-nums border-r border-slate-50">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+                <td className="px-10 py-8 text-sm font-mono font-semibold text-emerald-600 text-right tabular-nums border-r border-slate-50">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
                 <td className={cn(
                   "px-10 py-8 text-sm font-mono text-right pr-10 tabular-nums",
                   closingBalance < 0 ? "text-rose-600" : "text-indigo-700"
