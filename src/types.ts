@@ -35,6 +35,7 @@ export interface Company {
   created_at: string;
   created_by: string;
   deleted_at?: string;
+  deleted_by?: string;
 }
 
 export type VoucherType = 'PAYMENT' | 'RECEIPT' | 'JOURNAL' | 'CONTRA' | 'SALES' | 'PURCHASE';
@@ -49,6 +50,7 @@ export interface Account {
   parent_id?: string;
   current_balance: number;
   deleted_at?: string;
+  deleted_by?: string;
 }
 
 export interface Voucher {
@@ -67,6 +69,7 @@ export interface Voucher {
   creator?: { name: string; email: string };
   editor?: { name: string; email: string };
   deleted_at?: string;
+  deleted_by?: string;
 }
 
 export interface Transaction {
@@ -79,6 +82,7 @@ export interface Transaction {
   date: string;
   narration?: string | null;
   deleted_at?: string;
+  deleted_by?: string;
 }
 
 export interface DashboardStats {

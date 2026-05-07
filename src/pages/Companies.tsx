@@ -129,7 +129,10 @@ export default function Companies() {
       
       const { error } = await supabase
         .from('companies')
-        .update({ deleted_at: new Date().toISOString() })
+        .update({ 
+          deleted_at: new Date().toISOString(),
+          deleted_by: user?.id
+        })
         .eq('id', id);
         
       if (error) throw error;

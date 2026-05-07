@@ -513,20 +513,30 @@ function RecycleBin() {
   const [deletedCompanies, setDeletedCompanies] = useState<any[]>([]);
   const [deletedAccounts, setDeletedAccounts] = useState<any[]>([]);
   const [deletedVouchers, setDeletedVouchers] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'COMPANIES' | 'ACCOUNTS' | 'VOUCHERS'>('ALL');
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [companiesRes, accountsRes, vouchersRes] = await Promise.all([
+      const [companiesRes, accountsRes, vouchersRes, profilesRes] = await Promise.all([
         supabase.from('companies').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
         supabase.from('accounts').select('*, companies(name)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
-        supabase.from('vouchers').select('*, companies(name), items:transactions(*)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
+        supabase.from('vouchers').select('*, companies(name), items:transactions(*)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
+        supabase.from('profiles').select('id, name, email')
       ]);
 
-      setDeletedCompanies(companiesRes.data || []);
-      setDeletedAccounts(accountsRes.data || []);
-      setDeletedVouchers(vouchersRes.data || []);
+      const profileMap = new Map(profilesRes.data?.map(p => [p.id, p]) || []);
+      
+      const mapDeleter = (items: any[]) => items.map(item => ({
+        ...item,
+        deleter: item.deleted_by ? profileMap.get(item.deleted_by) : null
+      }));
+
+      setDeletedCompanies(mapDeleter(companiesRes.data || []));
+      setDeletedAccounts(mapDeleter(accountsRes.data || []));
+      setDeletedVouchers(mapDeleter(vouchersRes.data || []));
+      setProfiles(profilesRes.data || []);
     } catch (error) {
       console.error('Error fetching recycle bin:', error);
       toast.error('Fetch Failed', { description: 'Could not retrieve deleted items.' });
@@ -658,6 +668,20 @@ function RecycleBin() {
                     <div className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase leading-relaxed italic border-l border-slate-200 dark:border-slate-700 pl-4 py-1">
                       System Metadata: Deleted on {format(new Date(previewItem.data.deleted_at), 'dd MMM yyyy p')} from entity "{previewItem.data.companies?.name}"
                     </div>
+                    {previewItem.data.deleter && (
+                      <div className="bg-rose-50/50 dark:bg-rose-900/10 p-6 rounded-2xl border border-rose-100 dark:border-rose-900/30">
+                        <span className="text-[9px] font-bold text-rose-400 dark:text-rose-500 uppercase tracking-widest block mb-2">Audit: Deletion Protocol Executed By</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 font-bold text-xs">
+                            {previewItem.data.deleter.name?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{previewItem.data.deleter.name}</p>
+                            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 lowercase">{previewItem.data.deleter.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -677,6 +701,23 @@ function RecycleBin() {
                           <p className="text-sm font-bold text-slate-700 dark:text-slate-200 tracking-widest">{previewItem.data.current_balance.toLocaleString()}</p>
                        </div>
                     </div>
+                    <div className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase leading-relaxed italic border-l border-slate-200 dark:border-slate-700 pl-4 py-1">
+                      System Metadata: Deleted on {format(new Date(previewItem.data.deleted_at), 'dd MMM yyyy p')} from entity "{previewItem.data.companies?.name}"
+                    </div>
+                    {previewItem.data.deleter && (
+                      <div className="bg-rose-50/50 dark:bg-rose-900/10 p-6 rounded-2xl border border-rose-100 dark:border-rose-900/30">
+                        <span className="text-[9px] font-bold text-rose-400 dark:text-rose-500 uppercase tracking-widest block mb-2">Audit: Deletion Protocol Executed By</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 font-bold text-xs">
+                            {previewItem.data.deleter.name?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{previewItem.data.deleter.name}</p>
+                            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 lowercase">{previewItem.data.deleter.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -696,6 +737,23 @@ function RecycleBin() {
                           <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 uppercase">{previewItem.data.currency_symbol}</span>
                        </div>
                     </div>
+                    <div className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase leading-relaxed italic border-l border-slate-200 dark:border-slate-700 pl-4 py-1">
+                      System Metadata: Deleted on {format(new Date(previewItem.data.deleted_at), 'dd MMM yyyy p')}
+                    </div>
+                    {previewItem.data.deleter && (
+                      <div className="bg-rose-50/50 dark:bg-rose-900/10 p-6 rounded-2xl border border-rose-100 dark:border-rose-900/30">
+                        <span className="text-[9px] font-bold text-rose-400 dark:text-rose-500 uppercase tracking-widest block mb-2">Audit: Deletion Protocol Executed By</span>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400 font-bold text-xs">
+                            {previewItem.data.deleter.name?.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-slate-800 dark:text-slate-100">{previewItem.data.deleter.name}</p>
+                            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 lowercase">{previewItem.data.deleter.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>

@@ -777,16 +777,23 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
 
     setLoading(true);
     try {
+      const now = new Date().toISOString();
       const { error: vError } = await supabase
         .from('vouchers')
-        .update({ deleted_at: new Date().toISOString() })
+        .update({ 
+          deleted_at: now,
+          deleted_by: profile?.id
+        })
         .eq('id', id);
         
       if (vError) throw vError;
 
       const { error: tError } = await supabase
         .from('transactions')
-        .update({ deleted_at: new Date().toISOString() })
+        .update({ 
+          deleted_at: now,
+          deleted_by: profile?.id
+        })
         .eq('voucher_id', id);
 
       if (tError) throw tError;

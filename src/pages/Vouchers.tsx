@@ -252,7 +252,10 @@ export default function Vouchers() {
       // Soft delete transactions first
       const { error: transError } = await supabase
         .from('transactions')
-        .update({ deleted_at: now })
+        .update({ 
+          deleted_at: now,
+          deleted_by: user?.id
+        })
         .eq('voucher_id', id);
       
       if (transError) throw transError;
@@ -260,7 +263,10 @@ export default function Vouchers() {
       // Soft delete the voucher
       const { error: voucherError } = await supabase
         .from('vouchers')
-        .update({ deleted_at: now })
+        .update({ 
+          deleted_at: now,
+          deleted_by: user?.id
+        })
         .eq('id', id);
 
       if (voucherError) {
