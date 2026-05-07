@@ -19,8 +19,11 @@ import {
   Coins,
   History,
   AlertCircle,
-  Shield
+  Shield,
+  Eye,
+  X
 } from 'lucide-react';
+import { format } from 'date-fns';
 import { useAuth } from '../hooks/useAuth';
 import { useCompany } from '../hooks/useCompany';
 import { supabase } from '../lib/supabase';
@@ -518,7 +521,7 @@ function RecycleBin() {
       const [companiesRes, accountsRes, vouchersRes] = await Promise.all([
         supabase.from('companies').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
         supabase.from('accounts').select('*, companies(name)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
-        supabase.from('vouchers').select('*, companies(name)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
+        supabase.from('vouchers').select('*, companies(name), items:transactions(*)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
       ]);
 
       setDeletedCompanies(companiesRes.data || []);
@@ -531,6 +534,8 @@ function RecycleBin() {
       setLoading(false);
     }
   };
+
+  const [previewItem, setPreviewItem] = useState<{type: string, data: any} | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -591,6 +596,139 @@ function RecycleBin() {
 
   return (
     <div className="space-y-8">
+      <AnimatePresence>
+        {previewItem && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10">
+                <div className="flex items-center gap-4">
+                  <div className="bg-slate-50 dark:bg-slate-800 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+                    <Eye className="text-slate-400 dark:text-slate-500" size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 uppercase tracking-widest">Full Record Preview</h3>
+                    <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">{previewItem.type} Audit</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setPreviewItem(null)}
+                  className="p-3 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-colors text-slate-400"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-10 overflow-y-auto custom-scrollbar">
+                {previewItem.type === 'VOUCHER' && (
+                  <div className="space-y-8">
+                    <div className="grid grid-cols-2 gap-8">
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Reference ID</span>
+                        <p className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">{previewItem.data.voucher_no}</p>
+                      </div>
+                      <div>
+                        <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Temporal Marker</span>
+                        <p className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">{format(new Date(previewItem.data.date), 'dd MMM yyyy')}</p>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-50/50 dark:bg-slate-800/30 rounded-2xl p-6 border border-slate-100 dark:border-slate-800">
+                      <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-4">Ledger Dispersal</span>
+                      <div className="space-y-4">
+                        {previewItem.data.items?.map((item: any, idx: number) => (
+                           <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-100/50 dark:border-slate-800/50 last:border-0">
+                              <div>
+                                 <p className="text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase">{item.account_name || 'Processing Account...'}</p>
+                                 <p className="text-[9px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 truncate max-w-[200px]">{item.narration || 'No annotation'}</p>
+                              </div>
+                              <div className="text-right">
+                                 {item.debit > 0 && <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{item.debit.toLocaleString()}</p>}
+                                 {item.credit > 0 && <p className="text-xs font-bold text-indigo-500 dark:text-indigo-400">{item.credit.toLocaleString()}</p>}
+                              </div>
+                           </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="text-[9px] font-medium text-slate-400 dark:text-slate-500 uppercase leading-relaxed italic border-l border-slate-200 dark:border-slate-700 pl-4 py-1">
+                      System Metadata: Deleted on {format(new Date(previewItem.data.deleted_at), 'dd MMM yyyy p')} from entity "{previewItem.data.companies?.name}"
+                    </div>
+                  </div>
+                )}
+
+                {previewItem.type === 'ACCOUNT' && (
+                  <div className="space-y-8">
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Ledger Identity</span>
+                      <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{previewItem.data.name}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-8">
+                       <div className="bg-slate-50/50 dark:bg-slate-800/30 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Classification</span>
+                          <p className="text-sm font-bold text-indigo-500 dark:text-indigo-400 uppercase tracking-widest">{previewItem.data.type}</p>
+                       </div>
+                       <div className="bg-slate-50/50 dark:bg-slate-800/30 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                          <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Exit Balance</span>
+                          <p className="text-sm font-bold text-slate-700 dark:text-slate-200 tracking-widest">{previewItem.data.current_balance.toLocaleString()}</p>
+                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {previewItem.type === 'ENTITY' && (
+                  <div className="space-y-8">
+                    <div>
+                      <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Entity Designation</span>
+                      <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">{previewItem.data.name}</p>
+                    </div>
+                    <div className="bg-slate-50/50 dark:bg-slate-800/30 p-8 rounded-3xl space-y-4 border border-slate-100 dark:border-slate-800">
+                       <div className="flex justify-between">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Operational Status</span>
+                          <span className="text-[9px] font-bold text-indigo-500 uppercase">{previewItem.data.financial_status}</span>
+                       </div>
+                       <div className="flex justify-between">
+                          <span className="text-[9px] font-bold text-slate-400 uppercase">Currency Base</span>
+                          <span className="text-[9px] font-bold text-slate-600 dark:text-slate-300 uppercase">{previewItem.data.currency_symbol}</span>
+                       </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-10 border-t border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/10 grid grid-cols-2 gap-4">
+                <button 
+                  onClick={() => {
+                    if (previewItem.type === 'VOUCHER') handleRestore('voucher', previewItem.data.id, previewItem.data.voucher_no);
+                    else if (previewItem.type === 'ACCOUNT') handleRestore('account', previewItem.data.id, previewItem.data.name);
+                    else handleRestore('company', previewItem.data.id, previewItem.data.name);
+                    setPreviewItem(null);
+                  }}
+                  className="flex items-center justify-center gap-3 bg-indigo-500 text-white py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-md shadow-indigo-100 dark:shadow-none"
+                >
+                  <History size={16} /> Restore Record
+                </button>
+                <button 
+                  onClick={() => {
+                    if (previewItem.type === 'VOUCHER') handlePurge('voucher', previewItem.data.id, previewItem.data.voucher_no);
+                    else if (previewItem.type === 'ACCOUNT') handlePurge('account', previewItem.data.id, previewItem.data.name);
+                    else handlePurge('company', previewItem.data.id, previewItem.data.name);
+                    setPreviewItem(null);
+                  }}
+                  className="flex items-center justify-center gap-3 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 py-4 rounded-2xl font-bold text-[10px] uppercase tracking-widest hover:bg-slate-300 dark:hover:bg-slate-700 transition-all"
+                >
+                  <Trash2 size={16} /> Purge Permanently
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="bg-rose-50 dark:bg-rose-500/10 p-3 rounded-2xl border border-rose-100 dark:border-rose-500/20">
@@ -636,6 +774,7 @@ function RecycleBin() {
                     origin="Platform" 
                     onRestore={() => handleRestore('company', c.id, c.name)}
                     onPurge={() => handlePurge('company', c.id, c.name)}
+                    onPreview={() => setPreviewItem({ type: 'ENTITY', data: c })}
                   />
                 ))}
                 {(activeFilter === 'ALL' || activeFilter === 'ACCOUNTS') && deletedAccounts.map(a => (
@@ -647,6 +786,7 @@ function RecycleBin() {
                     origin={a.companies?.name || 'Unknown'} 
                     onRestore={() => handleRestore('account', a.id, a.name)}
                     onPurge={() => handlePurge('account', a.id, a.name)}
+                    onPreview={() => setPreviewItem({ type: 'ACCOUNT', data: a })}
                   />
                 ))}
                 {(activeFilter === 'ALL' || activeFilter === 'VOUCHERS') && deletedVouchers.map(v => (
@@ -658,6 +798,7 @@ function RecycleBin() {
                     origin={v.companies?.name || 'Unknown'} 
                     onRestore={() => handleRestore('voucher', v.id, v.voucher_no)}
                     onPurge={() => handlePurge('voucher', v.id, v.voucher_no)}
+                    onPreview={() => setPreviewItem({ type: 'VOUCHER', data: v })}
                   />
                 ))}
                 {deletedCompanies.length === 0 && deletedAccounts.length === 0 && deletedVouchers.length === 0 && (
@@ -679,7 +820,7 @@ function RecycleBin() {
   );
 }
 
-function RecycleItem({ type, name, origin, item, onRestore, onPurge }: any) {
+function RecycleItem({ type, name, origin, item, onRestore, onPurge, onPreview }: any) {
   return (
     <tr className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all">
       <td className="px-10 py-5">
@@ -706,6 +847,13 @@ function RecycleItem({ type, name, origin, item, onRestore, onPurge }: any) {
       </td>
       <td className="px-10 py-5">
          <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+           <button 
+             onClick={onPreview}
+             className="p-2.5 text-slate-600 bg-slate-50 hover:bg-slate-100 dark:text-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl transition-all shadow-sm"
+             title="Preview Item"
+           >
+             <Eye size={16} />
+           </button>
            <button 
              onClick={onRestore}
              className="p-2.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 rounded-xl transition-all shadow-sm"
