@@ -338,14 +338,33 @@ export default function UserManagement() {
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-[0.2em] mb-1">Designation</p>
                 <p className="text-[11px] text-slate-700 dark:text-slate-300 font-semibold italic">{p.designation || 'Specialist'}</p>
                 
-                {p.email && <p className="text-[9px] text-indigo-400 dark:text-indigo-500 font-mono mt-2 truncate font-semibold lowercase">{p.email}</p>}
-                
-                {isSuperAdmin && p.role !== 'SUPER_ADMIN' && p.password && (
-                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
-                    <p className="text-[8px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em] mb-1">Gate Key (Password)</p>
-                    <div className="flex items-center gap-2 bg-slate-100/50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
-                      <Lock size={10} className="text-slate-400 shrink-0" />
-                      <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 truncate">{p.password}</span>
+                {isSuperAdmin && (
+                  <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50 space-y-3">
+                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Access Credentials</p>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 bg-white dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                        <Mail size={10} className="text-indigo-400 shrink-0" />
+                        <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 truncate lowercase">{p.email}</span>
+                      </div>
+
+                      {p.role !== 'SUPER_ADMIN' && p.password && (
+                        <div className="flex items-center gap-2 bg-white dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                          <Lock size={10} className="text-rose-400 shrink-0" />
+                          <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 truncate flex-1">
+                            {visiblePasswords[p.id] ? p.password : '••••••••'}
+                          </span>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              togglePasswordVisibility(p.id);
+                            }}
+                            className="p-1 hover:bg-slate-50 dark:hover:bg-slate-800 rounded transition-colors"
+                          >
+                            {visiblePasswords[p.id] ? <EyeOff size={10} /> : <Eye size={10} />}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -511,6 +530,35 @@ export default function UserManagement() {
                         onChange={(e) => setEditingUser({ ...editingUser, phone: e.target.value })}
                       />
                     </div>
+
+                    {isSuperAdmin && (
+                      <>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Email Access</label>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
+                            <input 
+                              readOnly
+                              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-[10px] font-mono text-slate-500 outline-none cursor-not-allowed"
+                              value={editingUser.email || ''}
+                            />
+                          </div>
+                        </div>
+                        {editingUser.role !== 'SUPER_ADMIN' && editingUser.password && (
+                          <div className="space-y-1">
+                            <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">System Gate Key</label>
+                            <div className="relative">
+                              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
+                              <input 
+                                readOnly
+                                className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-[10px] font-mono text-slate-500 outline-none cursor-not-allowed"
+                                value={editingUser.password}
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
 
                   <label className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pt-2">System Role</label>
