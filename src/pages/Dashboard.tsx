@@ -411,8 +411,8 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="inline-flex items-center gap-2 bg-white p-1 rounded-xl border border-slate-200 shadow-sm no-print">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 rounded-lg text-slate-400">
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm no-print">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-slate-400 dark:text-slate-300">
               <Calendar size={12} />
               <span className="text-[9px] font-semibold uppercase tracking-wider">Period</span>
             </div>
@@ -421,7 +421,7 @@ export default function Dashboard() {
             </div>
             <button 
               onClick={() => setConfirmedDateRange(dateRange)}
-              className="bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-md shadow-slate-100"
+              className="bg-slate-900 dark:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-md shadow-slate-100 dark:shadow-none"
             >
               Sync
             </button>
