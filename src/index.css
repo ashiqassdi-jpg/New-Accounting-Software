@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -6,54 +6,50 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, serif;
 }
 
 @layer base {
   html {
-    font-size: 15px; /* Slightly smaller base for compactness */
+    font-size: 15px;
   }
 
   body {
-    @apply bg-[#FBFBFC] dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100;
+    @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
 
-  /* Compact form controls */
   input, select, textarea {
-    @apply text-[13px] font-medium leading-tight transition-all duration-200 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-1.5 outline-none focus:ring-4 focus:ring-indigo-500/10 dark:focus:ring-indigo-500/5 focus:border-indigo-500;
+    @apply text-[13px] font-medium leading-tight transition-all duration-200 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-600/10 focus:border-indigo-600;
   }
 
   button {
-    @apply active:scale-[0.98] transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed;
   }
 }
 
 @layer components {
-  /* Elegant Button Styles */
+  /* Simplified Professional Button Styles */
   .btn-primary {
-    @apply bg-slate-900 text-white px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-800 shadow-sm transition-all;
+    @apply bg-indigo-600 text-white px-4 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider hover:bg-indigo-700 transition-all border border-indigo-700;
   }
 
   .btn-secondary {
-    @apply bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-slate-50 hover:border-slate-300 transition-all;
+    @apply bg-white border border-slate-200 text-slate-600 px-4 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider hover:bg-slate-50 hover:border-slate-300 transition-all;
   }
 
-  /* Compact section header */
   .section-header {
     @apply flex items-center justify-between mb-6;
   }
 
   .section-title {
-    @apply text-xl font-bold text-slate-900 tracking-tight leading-none;
+    @apply text-xl font-bold text-slate-900 dark:text-white tracking-tight;
   }
 
-  /* Italic serif column headers—humanizes the data */
   .col-header {
-    @apply font-sans font-black text-[10px] text-slate-400 uppercase tracking-[0.2em];
+    @apply font-sans font-bold text-[10px] text-slate-400 uppercase tracking-widest;
   }
 
-  /* Custom Scrollbar - Cleaner, more professional */
+  /* Professional Scrollbar */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -62,72 +58,11 @@
     @apply bg-transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors cursor-pointer;
+    @apply bg-slate-200 dark:bg-slate-800 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors;
   }
 
-  /* Modal body lock */
-  body.modal-open {
-    overflow: hidden !important;
-  }
-
-  /* Custom scrollbar utility */
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: theme('colors.slate.200') transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: theme('colors.slate.200');
-    border-radius: 20px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: theme('colors.slate.300');
-  }
-
-  /* Monospace for data values—signals precision */
-  .data-value {
-    @apply font-mono text-[13px] tracking-tight tabular-nums font-medium;
-  }
-
-  /* Professional Currency Styling */
-  .currency-symbol {
-    @apply text-slate-300 font-sans mr-0.5 font-normal;
-  }
-
-  /* Compact card styling */
-  .card-compact {
-    @apply bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-5 shadow-[0_1px_2px_0_rgba(0,0,0,0.02)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.04)] transition-shadow duration-300;
+  .card-professional {
+    @apply bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl p-5 transition-all duration-200;
   }
 }
 
-html {
-  transition: background-color 0.3s ease;
-  --tooltip-bg: #ffffff;
-  --tooltip-text: #1e293b;
-}
-
-.dark html {
-  color-scheme: dark;
-  --tooltip-bg: #1e293b;
-  --tooltip-text: #f8fafc;
-}
-
-@media print {
-  .no-print {
-    display: none !important;
-  }
-  body {
-    @apply bg-white text-black text-[10pt];
-  }
-  main {
-    @apply p-0 m-0 !overflow-visible !max-h-none !h-auto;
-  }
-  .card-compact {
-    @apply border-none shadow-none p-0;
-  }
-}

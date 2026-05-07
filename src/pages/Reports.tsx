@@ -178,12 +178,12 @@ export default function Reports() {
       ) : (
         <div className="space-y-4">
           {/* Action Header */}
-          <div className="bg-white dark:bg-slate-900 rounded-[2rem] p-8 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
             <div className="space-y-1">
               <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                <FileText className="text-indigo-600 dark:text-indigo-400" size={24} /> Financial Reports
+                <FileText className="text-indigo-600" size={24} /> Financial Reports
               </h1>
-              <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 Governance & Audit Protocols
               </p>
             </div>
@@ -196,9 +196,9 @@ export default function Reports() {
                   setConfirmedDateRange(dateRange);
                   setConfirmedFilters(filters);
                 }}
-                className="px-6 py-3 bg-slate-900 dark:bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-all shadow-lg active:scale-95 flex items-center gap-2"
+                className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2"
               >
-                <Search size={16} />
+                <Search size={18} />
                 Search
               </button>
               
@@ -210,11 +210,11 @@ export default function Reports() {
                 className={cn(
                   "px-4 py-3 rounded-xl transition-all border flex items-center gap-2 text-xs font-bold uppercase tracking-widest",
                   showAdvancedFilters 
-                    ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm dark:bg-indigo-500/10 dark:border-indigo-500/50 dark:text-indigo-400" 
-                    : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700"
+                    ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
+                    : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm"
                 )}
               >
-                <Filter size={16} />
+                <Filter size={18} />
                 Analyze
               </button>
             </div>
@@ -525,10 +525,10 @@ function TabButton({ active, onClick, label }: any) {
     <button 
       onClick={onClick}
       className={cn(
-        "px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all",
+        "px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all",
         active 
-          ? "bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm" 
-          : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800/50"
+          ? "bg-slate-900 text-white shadow-sm" 
+          : "text-slate-500 hover:text-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800"
       )}
     >
       {label}
@@ -596,33 +596,33 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
   const totalCredit = filteredData.reduce((sum, acc) => sum + acc.credit, 0);  if (loading) return <div className="p-20 text-center text-slate-400 dark:text-slate-500 font-semibold animate-pulse uppercase tracking-widest text-[10px]">Calculating Ledger Equilibrium...</div>;
   
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+    <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden">
+      <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-4 flex-1">
           <div>
-            <h3 className="font-semibold text-slate-900 dark:text-slate-200 uppercase text-xs tracking-widest">Trial Balance</h3>
-            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">Equilibrium Audit</p>
+            <h3 className="font-bold text-slate-900 dark:text-slate-200 uppercase text-[10px] tracking-widest">Trial Balance</h3>
+            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Equilibrium Audit</p>
           </div>
           <div className="relative flex-1 max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
             <input 
               placeholder="Filter trial balance..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs font-semibold outline-none focus:ring-4 focus:ring-emerald-500/5 transition-all dark:text-white"
+              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs font-bold outline-none focus:border-indigo-500 transition-all dark:text-white"
             />
           </div>
         </div>
         <div className="flex gap-2">
           <button 
             onClick={() => onExportExcel(filteredData.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
-            className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-100 dark:border-slate-700"
+            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-200 dark:border-slate-700"
           >
-            <FileDown size={20} />
+            <Download size={20} />
           </button>
           <button 
             onClick={() => onExportPDF(filteredData.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
-            className="p-2.5 bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-100 dark:border-slate-700"
+            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-200 dark:border-slate-700"
           >
             <Printer size={20} />
           </button>

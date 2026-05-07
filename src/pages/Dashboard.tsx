@@ -46,20 +46,20 @@ const COLORS = ['#6366f1', '#94a3b8', '#fbbf24', '#f43f5e', '#8b5cf6'];
 
 function ActionShortcut({ title, icon: Icon, to, color }: any) {
   const colors = {
-    indigo: "text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20",
-    emerald: "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20",
-    rose: "text-rose-600 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:hover:bg-rose-500/20",
-  }[color as keyof typeof colors] || "text-slate-600 bg-slate-50 hover:bg-slate-100 dark:text-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700";
+    indigo: "text-indigo-600 bg-indigo-50 hover:bg-white border-indigo-100",
+    emerald: "text-emerald-600 bg-emerald-50 hover:bg-white border-emerald-100",
+    rose: "text-rose-600 bg-rose-50 hover:bg-white border-rose-100",
+  }[color as keyof typeof colors] || "text-slate-600 bg-slate-50 hover:bg-white border-slate-100";
 
   return (
     <Link 
       to={to}
       className={cn(
-        "flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700",
+        "flex items-center gap-3 px-5 py-2.5 rounded-lg transition-all border shadow-[0_1px_2px_0_rgba(0,0,0,0.02)]",
         colors
       )}
     >
-      <Icon size={16} />
+      <Icon size={20} />
       <span className="text-[10px] font-bold uppercase tracking-widest">{title}</span>
     </Link>
   );
@@ -422,17 +422,17 @@ export default function Dashboard() {
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm no-print">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-700/50 rounded-lg text-slate-400 dark:text-slate-300">
-              <Calendar size={12} />
-              <span className="text-[9px] font-semibold uppercase tracking-wider">Period</span>
+          <div className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm no-print">
+            <div className="flex items-center gap-3 px-4 py-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400">
+              <Calendar size={20} />
+              <span className="text-[10px] font-bold uppercase tracking-widest">Operation Period</span>
             </div>
             <div className="flex items-center gap-1.5 pr-1">
               <DateRangeFilter value={dateRange} onChange={setDateRange} compact />
             </div>
             <button 
               onClick={() => setConfirmedDateRange(dateRange)}
-              className="bg-slate-900 dark:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-md shadow-slate-100 dark:shadow-none"
+              className="bg-indigo-600 text-white px-4 py-1.5 rounded-md text-[9px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-sm"
             >
               Sync
             </button>
@@ -441,7 +441,7 @@ export default function Dashboard() {
 
           <button 
             onClick={() => window.print()}
-            className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors shadow-sm no-print"
+            className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shadow-sm no-print"
             title="Print Dashboard"
           >
             <Printer size={20} />
@@ -560,33 +560,23 @@ export default function Dashboard() {
         <ChartBox title="Liabilities vs Equity" icon={Scale}>
           <ResponsiveContainer width="100%" height={320}>
             <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="colorLiab" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                </linearGradient>
-                <linearGradient id="colorEq" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.1}/>
-                  <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:stroke-slate-800" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
               <Tooltip 
                 contentStyle={{ 
-                  borderRadius: '16px', 
-                  border: 'none', 
-                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
+                  borderRadius: '12px', 
+                  border: '1px solid #f1f5f9', 
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)', 
                   padding: '12px', 
-                  backgroundColor: 'var(--tooltip-bg)',
-                  color: 'var(--tooltip-text)'
+                  backgroundColor: '#ffffff',
+                  color: '#1e293b'
                 }}
                 formatter={(val: number) => formatBDT(val)}
               />
-              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
-              <Area type="monotone" dataKey="liabilities" name="Liabilities" stroke="#f43f5e" strokeWidth={2} fillOpacity={1} fill="url(#colorLiab)" />
-              <Area type="monotone" dataKey="equity" name="Equity" stroke="#fbbf24" strokeWidth={2} fillOpacity={1} fill="url(#colorEq)" />
+              <Legend verticalAlign="top" height={36} iconType="square" wrapperStyle={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+              <Area type="monotone" dataKey="liabilities" name="Liabilities" stroke="#f43f5e" strokeWidth={2} fillOpacity={0.1} fill="#f43f5e" />
+              <Area type="monotone" dataKey="equity" name="Equity" stroke="#fbbf24" strokeWidth={2} fillOpacity={0.1} fill="#fbbf24" />
             </AreaChart>
           </ResponsiveContainer>
         </ChartBox>
@@ -594,14 +584,14 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden mb-8">
-        <div className="p-6 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
-          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest flex items-center gap-2">
-            <ClipboardList size={14} className="text-indigo-500" />
-            Recent Financial Narrative
+      <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden mb-8">
+        <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest flex items-center gap-3">
+            <ClipboardList size={20} className="text-indigo-600" />
+            Financial Audit History
           </h3>
           <Link to="/reports?tab=DAYBOOK" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
-            View Register <ArrowRight size={10} className="inline ml-1" />
+            Access Full Register <ArrowRight size={12} className="inline ml-1" />
           </Link>
         </div>
         <div className="overflow-x-auto">

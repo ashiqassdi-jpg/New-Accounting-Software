@@ -354,20 +354,20 @@ export default function Vouchers() {
                 <button
                   key={vt.value}
                   onClick={() => setActiveFormType(vt.value as VoucherType)}
-                  className="flex flex-col items-center justify-center p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 dark:hover:shadow-none hover:border-indigo-100 dark:hover:border-indigo-900/50 hover:-translate-y-0.5 transition-all group"
+                  className="flex flex-col items-center justify-center p-5 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-xl transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
                 >
                   <div className={cn(
-                    "w-12 h-12 rounded-xl mb-3 flex items-center justify-center transition-all duration-300",
-                    vt.value === 'PAYMENT' && "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 group-hover:bg-rose-600 dark:group-hover:bg-rose-500 group-hover:text-white",
-                    vt.value === 'RECEIPT' && "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:text-white",
-                    vt.value === 'JOURNAL' && "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 dark:group-hover:bg-amber-500 group-hover:text-white",
-                    vt.value === 'CONTRA' && "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 dark:group-hover:bg-indigo-500 group-hover:text-white",
-                    vt.value === 'SALES' && "bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 group-hover:bg-sky-600 dark:group-hover:bg-sky-500 group-hover:text-white",
-                    vt.value === 'PURCHASE' && "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-slate-900 dark:group-hover:bg-slate-700 group-hover:text-white",
+                    "w-12 h-12 rounded-lg mb-3 flex items-center justify-center transition-all",
+                    vt.value === 'PAYMENT' && "bg-rose-50 text-rose-600",
+                    vt.value === 'RECEIPT' && "bg-emerald-50 text-emerald-600",
+                    vt.value === 'JOURNAL' && "bg-amber-50 text-amber-600",
+                    vt.value === 'CONTRA' && "bg-indigo-50 text-indigo-600",
+                    vt.value === 'SALES' && "bg-sky-50 text-sky-600",
+                    vt.value === 'PURCHASE' && "bg-slate-50 text-slate-600",
                   )}>
                     <Receipt size={24} />
                   </div>
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">{vt.label}</span>
+                  <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">{vt.label}</span>
                 </button>
               ))}
             </div>
@@ -674,72 +674,72 @@ export default function Vouchers() {
             )}
 
             {/* List */}
-            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-slate-50/50 dark:bg-slate-800/50">
-                      <th className="px-6 py-3 col-header pl-8 text-slate-400 dark:text-slate-500">Type</th>
-                      <th className="px-6 py-3 col-header text-slate-400 dark:text-slate-500">Date</th>
-                      <th className="px-6 py-3 col-header text-slate-400 dark:text-slate-500">Description</th>
-                      <th className="px-6 py-3 col-header text-right text-slate-400 dark:text-slate-500">Amount</th>
-                      <th className="px-6 py-3 col-header text-right pr-8 text-slate-400 dark:text-slate-500">Actions</th>
+                    <tr className="bg-slate-50 dark:bg-slate-800/50">
+                      <th className="px-6 py-4 col-header pl-8 text-slate-500">Type</th>
+                      <th className="px-6 py-4 col-header text-slate-500">Date</th>
+                      <th className="px-6 py-4 col-header text-slate-500">Description</th>
+                      <th className="px-6 py-4 col-header text-right text-slate-500">Amount</th>
+                      <th className="px-6 py-4 col-header text-right pr-8 text-slate-500">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {filteredVouchers.map((v) => (
-                      <tr key={v.id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20 transition-colors group">
-                        <td className="px-6 py-3 pl-8">
+                      <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                        <td className="px-6 py-4 pl-8">
                           <span className={cn(
-                            "text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-widest",
-                            v.type === 'PAYMENT' && "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400",
-                            v.type === 'RECEIPT' && "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
-                            v.type === 'JOURNAL' && "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400",
-                            v.type === 'CONTRA' && "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400",
-                            v.type === 'SALES' && "bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400",
-                            v.type === 'PURCHASE' && "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400",
+                            "text-[9px] font-bold px-2 py-0.5 rounded text-white uppercase tracking-widest",
+                            v.type === 'PAYMENT' && "bg-rose-500",
+                            v.type === 'RECEIPT' && "bg-emerald-500",
+                            v.type === 'JOURNAL' && "bg-amber-500",
+                            v.type === 'CONTRA' && "bg-indigo-600",
+                            v.type === 'SALES' && "bg-sky-500",
+                            v.type === 'PURCHASE' && "bg-slate-500",
                           )}>
                             {v.type}
                           </span>
                         </td>
-                        <td className="px-6 py-3 text-xs font-bold text-slate-400 dark:text-slate-500">
+                        <td className="px-6 py-4 text-xs font-bold text-slate-400">
                           {format(new Date(v.date), 'dd MMM yyyy')}
                         </td>
-                        <td className="px-6 py-3">
+                        <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span className="text-[13px] font-bold text-slate-900 dark:text-slate-100 tracking-tight">{v.voucher_no}</span>
-                            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-[200px]">{v.narration}</span>
+                            <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{v.voucher_no}</span>
+                            <span className="text-[11px] text-slate-500 font-medium truncate max-w-[200px]">{v.narration}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-3 data-value text-right text-slate-900 dark:text-slate-100 font-mono font-bold">
+                        <td className="px-6 py-4 text-right tabular-nums text-slate-900 dark:text-slate-100 font-mono font-bold">
                           {formatBDT(v.amount)}
                         </td>
-                        <td className="px-6 py-3 text-right pr-8">
+                        <td className="px-6 py-4 text-right pr-8">
                           <div className="flex items-center justify-end gap-1">
                             <button 
-                              className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-30"
+                              className="p-2 text-slate-400 hover:text-indigo-600 transition-colors disabled:opacity-30"
                               onClick={() => setViewingVoucher(v)}
                               disabled={loading}
                             >
-                              <Eye size={14} />
+                              <Eye size={20} />
                             </button>
                             
                             {canEdit && (
                               <button 
-                                className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all disabled:opacity-30"
+                                className="p-2 text-slate-400 hover:text-amber-600 transition-colors disabled:opacity-30"
                                 onClick={() => setEditingVoucher(v)}
                                 disabled={loading}
                               >
-                                <Pencil size={14} />
+                                <Pencil size={20} />
                               </button>
                             )}
                             {canDelete && (
                               <button 
-                                className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all disabled:opacity-30"
+                                className="p-2 text-slate-400 hover:text-rose-600 transition-colors disabled:opacity-30"
                                 onClick={() => handleDeleteVoucher(v.id, v.voucher_no)}
                                 disabled={loading}
                               >
-                                <Trash2 size={14} />
+                                <Trash2 size={20} />
                               </button>
                             )}
                           </div>
