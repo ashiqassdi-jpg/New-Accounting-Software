@@ -273,10 +273,10 @@ export default function Vouchers() {
     <div className="space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-lg font-bold text-slate-900 tracking-tight leading-none text-center md:text-left">
+          <h1 className="text-lg font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none text-center md:text-left">
             Voucher Management
           </h1>
-          <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-widest leading-none text-center md:text-left truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl">
+          <p className="text-[9px] text-slate-400 dark:text-slate-500 mt-1 font-bold uppercase tracking-widest leading-none text-center md:text-left truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl">
             Vanguard Entries Hub • {selectedCompany?.name || 'Vanguard'}
           </p>
         </div>
@@ -287,32 +287,32 @@ export default function Vouchers() {
             className={cn(
               "px-3 py-1.5 rounded-lg transition-all border flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider",
               showDeepFilter 
-                ? "bg-indigo-50 border-indigo-200 text-indigo-600" 
-                : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                ? "bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400" 
+                : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             )}
           >
             <Filter size={14} />
             <span>Filter</span>
           </button>
-          <div className="w-px h-6 bg-slate-100 mx-0.5 hidden md:block" />
+          <div className="w-px h-6 bg-slate-100 dark:bg-slate-800 mx-0.5 hidden md:block" />
           <div className="flex items-center gap-1">
             <button 
               onClick={() => window.print()}
-              className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-slate-600 transition-colors shadow-sm"
+              className="p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shadow-sm"
               title="Print List"
             >
               <Printer size={14} />
             </button>
             <button 
               onClick={handleExportExcel}
-              className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-emerald-600 transition-colors shadow-sm"
+              className="p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors shadow-sm"
               title="Export Excel"
             >
               <Download size={14} />
             </button>
             <button 
               onClick={handleExportPDF}
-              className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
+              className="p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors shadow-sm"
               title="Export PDF"
             >
               <FileText size={14} />
@@ -344,35 +344,35 @@ export default function Vouchers() {
                 <button
                   key={vt.value}
                   onClick={() => setActiveFormType(vt.value as VoucherType)}
-                  className="flex flex-col items-center justify-center p-5 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 hover:border-indigo-100 hover:-translate-y-0.5 transition-all group"
+                  className="flex flex-col items-center justify-center p-5 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-lg hover:shadow-indigo-500/5 dark:hover:shadow-none hover:border-indigo-100 dark:hover:border-indigo-900/50 hover:-translate-y-0.5 transition-all group"
                 >
                   <div className={cn(
                     "w-12 h-12 rounded-xl mb-3 flex items-center justify-center transition-all duration-300",
-                    vt.value === 'PAYMENT' && "bg-rose-50 text-rose-600 group-hover:bg-rose-600 group-hover:text-white",
-                    vt.value === 'RECEIPT' && "bg-emerald-50 text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white",
-                    vt.value === 'JOURNAL' && "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white",
-                    vt.value === 'CONTRA' && "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white",
-                    vt.value === 'SALES' && "bg-sky-50 text-sky-600 group-hover:bg-sky-600 group-hover:text-white",
-                    vt.value === 'PURCHASE' && "bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white",
+                    vt.value === 'PAYMENT' && "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 group-hover:bg-rose-600 dark:group-hover:bg-rose-500 group-hover:text-white",
+                    vt.value === 'RECEIPT' && "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 dark:group-hover:bg-emerald-500 group-hover:text-white",
+                    vt.value === 'JOURNAL' && "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 dark:group-hover:bg-amber-500 group-hover:text-white",
+                    vt.value === 'CONTRA' && "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 dark:group-hover:bg-indigo-500 group-hover:text-white",
+                    vt.value === 'SALES' && "bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400 group-hover:bg-sky-600 dark:group-hover:bg-sky-500 group-hover:text-white",
+                    vt.value === 'PURCHASE' && "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-slate-900 dark:group-hover:bg-slate-700 group-hover:text-white",
                   )}>
                     <Receipt size={24} />
                   </div>
-                  <span className="text-xs font-bold text-slate-900 uppercase tracking-widest">{vt.label}</span>
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">{vt.label}</span>
                 </button>
               ))}
             </div>
           )}
 
           <div className="space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-5">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-xs font-black text-slate-900 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Activity' : 'Full Ledger'}</h2>
-                  <div className="flex bg-slate-100 p-1 rounded-lg">
+                  <h2 className="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.2em]">{filterMode === 'RECENT' ? 'Recent Activity' : 'Full Ledger'}</h2>
+                  <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
                     <button 
                       onClick={() => setFilterMode('RECENT')}
                       className={cn(
                         "px-3 py-1 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
-                        filterMode === 'RECENT' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        filterMode === 'RECENT' ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                       )}
                     >
                       RECENT
@@ -381,7 +381,7 @@ export default function Vouchers() {
                       onClick={() => setFilterMode('ALL')}
                       className={cn(
                         "px-3 py-1 text-[10px] font-bold rounded-md transition-all uppercase tracking-widest",
-                        filterMode === 'ALL' ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                        filterMode === 'ALL' ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
                       )}
                     >
                       ALL
@@ -391,9 +391,9 @@ export default function Vouchers() {
 
                 <div className="flex flex-wrap md:flex-nowrap items-center gap-2 overflow-x-auto no-scrollbar">
                     <div className="relative w-48 shrink-0">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={14} />
                       <input 
-                        className="w-full bg-white border border-slate-100 rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-slate-800 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 shadow-sm"
+                        className="w-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-sm"
                         placeholder="Scan ID/Narration..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -411,7 +411,7 @@ export default function Vouchers() {
                       setConfirmedDateRange(dateRange);
                       fetchVouchers();
                     }}
-                    className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-indigo-600 transition-all shadow-sm active:scale-95 flex items-center gap-2 shrink-0"
+                    className="px-4 py-2 bg-slate-900 dark:bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-all shadow-sm active:scale-95 flex items-center gap-2 shrink-0"
                   >
                     <Search size={14} />
                     Run Search
@@ -424,22 +424,22 @@ export default function Vouchers() {
               <>
                 <div
                   onClick={() => setShowDeepFilter(false)}
-                  className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
+                  className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-[100] no-print"
                 />
                 <div
-                  className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-2xl bg-white rounded-2xl shadow-xl z-[101] border border-slate-200 no-print overflow-hidden"
+                  className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl z-[101] border border-slate-200 dark:border-slate-800 no-print overflow-hidden"
                 >
                   <div className="p-6 md:p-8 space-y-6">
-                    <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
                       <div>
-                        <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                          <Filter className="text-indigo-600" size={18} />
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                          <Filter className="text-indigo-600 dark:text-indigo-400" size={18} />
                           Deep Search Protocols
                         </h2>
                       </div>
                       <button 
                         onClick={() => setShowDeepFilter(false)}
-                        className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                        className="p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
                       >
                         <X size={20} />
                       </button>
@@ -447,40 +447,40 @@ export default function Vouchers() {
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                       <div className="md:col-span-2 space-y-2">
-                        <label className="block text-sm font-medium text-slate-700">Analytical Account Lead</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Analytical Account Lead</label>
                         <div className="relative" ref={accountSearchRef}>
                           <div 
                             onClick={() => setIsAccountSearchOpen(!isAccountSearchOpen)}
                             className={cn(
-                              "flex items-center gap-2 px-3 py-2.5 bg-white border border-slate-300 rounded-lg shadow-sm cursor-pointer hover:border-slate-400 transition-colors group",
+                              "flex items-center gap-2 px-3 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg shadow-sm cursor-pointer hover:border-slate-400 dark:hover:border-slate-600 transition-colors group",
                               isAccountSearchOpen && "border-indigo-500 ring-2 ring-indigo-500/20"
                             )}
                           >
                             <Search size={16} className={cn(
                               "transition-colors",
-                              filterAccountId ? "text-indigo-600" : "text-slate-400"
+                              filterAccountId ? "text-indigo-600 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500"
                             )} />
                             <span className={cn(
                               "text-sm truncate flex-1",
-                              filterAccountId ? "text-slate-900 font-medium" : "text-slate-500"
+                              filterAccountId ? "text-slate-900 dark:text-slate-100 font-medium" : "text-slate-500 dark:text-slate-400"
                             )}>
                               {filterAccountId 
                                 ? accounts.find(a => a.id === filterAccountId)?.name 
                                 : "Select Ledger Account..."}
                             </span>
-                            <ChevronDown size={16} className={cn("text-slate-400 transition-transform duration-200", isAccountSearchOpen && "rotate-180")} />
+                            <ChevronDown size={16} className={cn("text-slate-400 dark:text-slate-500 transition-transform duration-200", isAccountSearchOpen && "rotate-180")} />
                           </div>
 
                           {isAccountSearchOpen && (
                             <div 
-                              className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 shadow-lg rounded-lg z-[150] overflow-hidden"
+                              className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg rounded-lg z-[150] overflow-hidden"
                             >
-                              <div className="p-2 border-b border-slate-100 bg-slate-50">
+                              <div className="p-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50">
                                 <div className="relative">
-                                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                                   <input 
                                     ref={accountSearchInputRef}
-                                    className="w-full bg-white border border-slate-300 rounded-md pl-8 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
+                                    className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-md pl-8 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500 text-slate-900 dark:text-slate-100"
                                     placeholder="Search accounts..."
                                     value={accountSearchQuery}
                                     onChange={(e) => {
@@ -540,7 +540,7 @@ export default function Vouchers() {
                                   }}
                                   className={cn(
                                     "w-full text-left px-3 py-2 text-sm rounded-md transition-colors",
-                                    !filterAccountId ? "bg-indigo-50 text-indigo-700 font-medium" : "hover:bg-slate-50 text-slate-600"
+                                    !filterAccountId ? "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400 font-medium" : "hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400"
                                   )}
                                 >
                                   Reset Account Selection
@@ -560,13 +560,13 @@ export default function Vouchers() {
                                         "w-full text-left px-3 py-2 rounded-md flex items-center justify-between transition-all",
                                         isSelected 
                                           ? "bg-indigo-600 text-white shadow-md scale-[1.02] ring-2 ring-indigo-300 ring-offset-1" 
-                                          : (filterAccountId === a.id ? "bg-indigo-50 border border-indigo-100" : "hover:bg-slate-50 border border-transparent")
+                                          : (filterAccountId === a.id ? "bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-900/30" : "hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent")
                                       )}
                                     >
                                       <div className="flex flex-col truncate pr-2">
-                                        <span className={cn("text-sm truncate", isSelected ? "text-white font-medium" : (filterAccountId === a.id ? "text-indigo-900 font-medium" : "text-slate-700"))}>{a.name}</span>
+                                        <span className={cn("text-sm truncate", isSelected ? "text-white font-medium" : (filterAccountId === a.id ? "text-indigo-900 dark:text-indigo-100 font-medium" : "text-slate-700 dark:text-slate-300"))}>{a.name}</span>
                                       </div>
-                                      <span className={cn("text-xs font-mono shrink-0", isSelected ? "text-indigo-100" : (filterAccountId === a.id ? "text-indigo-500" : "text-slate-400"))}>{a.code}</span>
+                                      <span className={cn("text-xs font-mono shrink-0", isSelected ? "text-indigo-100" : (filterAccountId === a.id ? "text-indigo-500 dark:text-indigo-400" : "text-slate-400 dark:text-slate-500"))}>{a.code}</span>
                                     </button>
                                   );
                                 })}
@@ -577,48 +577,48 @@ export default function Vouchers() {
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-slate-700">Voucher Category</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Voucher Category</label>
                         <div className="relative group">
                           <select
                             value={filterType}
                             onChange={(e) => setFilterType(e.target.value as any)}
-                            className="appearance-none w-full bg-white border border-slate-300 rounded-lg px-3 py-2.5 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm cursor-pointer"
+                            className="appearance-none w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg px-3 py-2.5 text-sm text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors shadow-sm cursor-pointer"
                           >
                             <option value="ALL">All Types</option>
                             {VOUCHER_TYPES.map(t => (
                                <option key={t.value} value={t.value}>{t.label}</option>
                             ))}
                           </select>
-                          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none group-hover:text-slate-600 transition-colors" />
+                          <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" />
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <label className="block text-sm font-medium text-slate-700">Date Boundary</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Date Boundary</label>
                         <div className="pt-1">
                           <DateRangeFilter value={dateRange} onChange={setDateRange} />
                         </div>
                       </div>
 
                       <div className="md:col-span-2 space-y-2">
-                        <label className="block text-sm font-medium text-slate-700">Value Thresholds (৳)</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Value Thresholds (৳)</label>
                         <div className="flex gap-4">
                           <div className="flex-1 space-y-1.5">
-                            <label className="block text-xs text-slate-500">Minimum</label>
+                            <label className="block text-xs text-slate-500 dark:text-slate-400">Minimum</label>
                             <input 
                               type="number"
                               placeholder="0.00"
-                              className="w-full bg-white border border-slate-300 shadow-sm rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 shadow-sm rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors text-slate-900 dark:text-slate-100"
                               value={amountRange.min}
                               onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
                             />
                           </div>
                           <div className="flex-1 space-y-1.5">
-                            <label className="block text-xs text-slate-500">Maximum</label>
+                            <label className="block text-xs text-slate-500 dark:text-slate-400">Maximum</label>
                             <input 
                               type="number"
                               placeholder="∞"
-                              className="w-full bg-white border border-slate-300 shadow-sm rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors"
+                              className="w-full bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 shadow-sm rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-colors text-slate-900 dark:text-slate-100"
                               value={amountRange.max}
                               onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
                             />
@@ -627,7 +627,7 @@ export default function Vouchers() {
                       </div>
                     </div>
 
-                    <div className="pt-6 border-t border-slate-100 flex gap-3 justify-end items-center">
+                    <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex gap-3 justify-end items-center">
                       <button 
                         onClick={() => {
                           setFilterType('ALL');
@@ -641,7 +641,7 @@ export default function Vouchers() {
                           setConfirmedAmountRange({ min: '', max: '' });
                           setConfirmedFilterAccountId(null);
                         }}
-                        className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                       >
                         Reset Logic
                       </button>
@@ -664,50 +664,50 @@ export default function Vouchers() {
             )}
 
             {/* List */}
-            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-slate-50/50">
-                      <th className="px-6 py-3 col-header pl-8">Type</th>
-                      <th className="px-6 py-3 col-header">Date</th>
-                      <th className="px-6 py-3 col-header">Description</th>
-                      <th className="px-6 py-3 col-header text-right">Amount</th>
-                      <th className="px-6 py-3 col-header text-right pr-8">Actions</th>
+                    <tr className="bg-slate-50/50 dark:bg-slate-800/50">
+                      <th className="px-6 py-3 col-header pl-8 text-slate-400 dark:text-slate-500">Type</th>
+                      <th className="px-6 py-3 col-header text-slate-400 dark:text-slate-500">Date</th>
+                      <th className="px-6 py-3 col-header text-slate-400 dark:text-slate-500">Description</th>
+                      <th className="px-6 py-3 col-header text-right text-slate-400 dark:text-slate-500">Amount</th>
+                      <th className="px-6 py-3 col-header text-right pr-8 text-slate-400 dark:text-slate-500">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                     {filteredVouchers.map((v) => (
-                      <tr key={v.id} className="hover:bg-slate-50/20 transition-colors group">
+                      <tr key={v.id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20 transition-colors group">
                         <td className="px-6 py-3 pl-8">
                           <span className={cn(
                             "text-[9px] font-bold px-2 py-0.5 rounded-md uppercase tracking-widest",
-                            v.type === 'PAYMENT' && "bg-rose-50 text-rose-600",
-                            v.type === 'RECEIPT' && "bg-emerald-50 text-emerald-600",
-                            v.type === 'JOURNAL' && "bg-amber-50 text-amber-600",
-                            v.type === 'CONTRA' && "bg-indigo-50 text-indigo-600",
-                            v.type === 'SALES' && "bg-sky-50 text-sky-600",
-                            v.type === 'PURCHASE' && "bg-slate-100 text-slate-600",
+                            v.type === 'PAYMENT' && "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400",
+                            v.type === 'RECEIPT' && "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400",
+                            v.type === 'JOURNAL' && "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400",
+                            v.type === 'CONTRA' && "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400",
+                            v.type === 'SALES' && "bg-sky-50 dark:bg-sky-900/20 text-sky-600 dark:text-sky-400",
+                            v.type === 'PURCHASE' && "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400",
                           )}>
                             {v.type}
                           </span>
                         </td>
-                        <td className="px-6 py-3 text-xs font-bold text-slate-400">
+                        <td className="px-6 py-3 text-xs font-bold text-slate-400 dark:text-slate-500">
                           {format(new Date(v.date), 'dd MMM yyyy')}
                         </td>
                         <td className="px-6 py-3">
                           <div className="flex flex-col">
-                            <span className="text-[13px] font-bold text-slate-900 tracking-tight">{v.voucher_no}</span>
-                            <span className="text-[11px] text-slate-400 font-medium truncate max-w-[200px]">{v.narration}</span>
+                            <span className="text-[13px] font-bold text-slate-900 dark:text-slate-100 tracking-tight">{v.voucher_no}</span>
+                            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-[200px]">{v.narration}</span>
                           </div>
                         </td>
-                        <td className="px-6 py-3 data-value text-right text-slate-900">
+                        <td className="px-6 py-3 data-value text-right text-slate-900 dark:text-slate-100 font-mono font-bold">
                           {formatBDT(v.amount)}
                         </td>
                         <td className="px-6 py-3 text-right pr-8">
                           <div className="flex items-center justify-end gap-1">
                             <button 
-                              className="p-1.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 transition-all disabled:opacity-30"
+                              className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all disabled:opacity-30"
                               onClick={() => setViewingVoucher(v)}
                               disabled={loading}
                             >
@@ -716,7 +716,7 @@ export default function Vouchers() {
                             
                             {canEdit && (
                               <button 
-                                className="p-1.5 text-slate-300 hover:text-amber-600 hover:bg-amber-50 transition-all disabled:opacity-30"
+                                className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all disabled:opacity-30"
                                 onClick={() => setEditingVoucher(v)}
                                 disabled={loading}
                               >
@@ -725,7 +725,7 @@ export default function Vouchers() {
                             )}
                             {canDelete && (
                               <button 
-                                className="p-1.5 text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-30"
+                                className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all disabled:opacity-30"
                                 onClick={() => handleDeleteVoucher(v.id, v.voucher_no)}
                                 disabled={loading}
                               >
@@ -742,8 +742,8 @@ export default function Vouchers() {
 
               {filteredVouchers.length === 0 && !loading && (
                 <div className="py-20 text-center">
-                  <Receipt className="mx-auto text-gray-300 h-10 w-10 mb-4" />
-                  <p className="text-slate-400 text-sm font-medium">No transactions found match your criteria.</p>
+                  <Receipt className="mx-auto text-gray-300 dark:text-slate-700 h-10 w-10 mb-4" />
+                  <p className="text-slate-400 dark:text-slate-500 text-sm font-medium">No transactions found match your criteria.</p>
                 </div>
               )}
             </div>

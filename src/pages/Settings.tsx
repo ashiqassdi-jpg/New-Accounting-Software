@@ -193,21 +193,21 @@ export default function Settings() {
     <div className="max-w-6xl space-y-10 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 font-sans tracking-tight uppercase">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-sans tracking-tight uppercase">
             System Infrastructure
           </h1>
-          <p className="text-[10px] font-semibold text-slate-400 mt-1 uppercase tracking-[0.2em]">
+          <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-[0.2em]">
             Policy configuration & core administrative parameters
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-2xl border border-slate-100 shadow-inner w-fit no-print">
+      <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-inner w-fit no-print">
         <button 
           onClick={() => setActiveTab('PROFILE')}
           className={cn(
             "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
-            activeTab === 'PROFILE' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
+            activeTab === 'PROFILE' ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-md border border-slate-100 dark:border-slate-700" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
           )}
         >
           Identity
@@ -216,7 +216,7 @@ export default function Settings() {
           onClick={() => setActiveTab('COMPANY')}
           className={cn(
             "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
-            activeTab === 'COMPANY' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
+            activeTab === 'COMPANY' ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-md border border-slate-100 dark:border-slate-700" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
           )}
         >
           Entity Config
@@ -226,7 +226,7 @@ export default function Settings() {
             onClick={() => setActiveTab('USERS')}
             className={cn(
               "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
-              activeTab === 'USERS' ? "bg-white text-slate-900 shadow-md border border-slate-100" : "text-slate-400 hover:text-slate-600"
+              activeTab === 'USERS' ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-md border border-slate-100 dark:border-slate-700" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
             )}
           >
             Access Control
@@ -243,57 +243,57 @@ export default function Settings() {
             exit={{ opacity: 0, scale: 0.98 }}
           >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-              <section className="lg:col-span-7 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-fit">
-                <div className="px-10 py-8 border-b border-slate-50 bg-slate-50/30 flex items-center gap-4">
-                  <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                    <User className="text-indigo-600" size={20} />
+              <section className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden h-fit">
+                <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/50 flex items-center gap-4">
+                  <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                    <User className="text-indigo-600 dark:text-indigo-400" size={20} />
                   </div>
                   <div>
-                    <h2 className="font-semibold text-slate-900 text-xs uppercase tracking-widest">Authentication Profile</h2>
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-0.5">Personal Identity Verification</p>
+                    <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-xs uppercase tracking-widest">Authentication Profile</h2>
+                    <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Personal Identity Verification</p>
                   </div>
                 </div>
 
                 <form onSubmit={handleUpdateProfile} className="p-10 space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-1">
-                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Full Legal Name</label>
+                      <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Full Legal Name</label>
                       <input 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 underline-offset-4 decoration-indigo-500/30"
+                        className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 dark:text-slate-200 underline-offset-4 decoration-indigo-500/30"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Contact Protocol</label>
+                      <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Contact Protocol</label>
                       <input 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700"
+                        className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 dark:text-slate-200"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+880 1XXX-XXXXXX"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Organizational Title</label>
+                      <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Organizational Title</label>
                       <input 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 italic"
+                        className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 dark:text-slate-200 italic"
                         value={designation}
                         onChange={(e) => setDesignation(e.target.value)}
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Commission Entry</label>
+                      <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Commission Entry</label>
                       <input 
                         type="date"
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700"
+                        className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 dark:text-slate-200"
                         value={joiningDate}
                         onChange={(e) => setJoiningDate(e.target.value)}
                       />
                     </div>
                     <div className="md:col-span-2 space-y-1">
-                      <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Domicile Address</label>
+                      <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Domicile Address</label>
                       <textarea 
-                        className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 resize-none h-24"
+                        className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-700 dark:text-slate-200 resize-none h-24"
                         value={address}
                         onChange={(e) => setAddress(e.target.value)}
                         placeholder="Verified headquarters or residence..."
@@ -304,7 +304,7 @@ export default function Settings() {
                   <button 
                     type="submit"
                     disabled={loading}
-                    className="w-fit flex items-center justify-center gap-3 bg-slate-900 text-white px-10 py-4 rounded-2xl font-semibold text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all shadow-xl shadow-slate-100 active:scale-95 disabled:opacity-50"
+                    className="w-fit flex items-center justify-center gap-3 bg-slate-900 dark:bg-indigo-600 text-white px-10 py-4 rounded-2xl font-semibold text-[10px] uppercase tracking-widest hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-all shadow-xl shadow-slate-100 dark:shadow-none active:scale-95 disabled:opacity-50"
                   >
                     {success === 'profile' ? <CheckCircle2 size={16} /> : <Save size={16} />}
                     {success === 'profile' ? 'Profile Synchronized' : 'Sync Identity Data'}
@@ -353,53 +353,53 @@ export default function Settings() {
           >
             {selectedCompany ? (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                <section className="lg:col-span-12 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden h-fit">
-                  <div className="px-10 py-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                <section className="lg:col-span-12 bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden h-fit">
+                  <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-800/20 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100">
-                        <Building2 className="text-emerald-600" size={24} />
+                      <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <Building2 className="text-emerald-600 dark:text-emerald-400" size={24} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-slate-900 text-sm uppercase tracking-tight">{selectedCompany.name}</h2>
-                        <p className="text-[9px] font-semibold text-emerald-600 uppercase tracking-[0.2em] mt-0.5">Entity Meta-Configuration</p>
+                        <h2 className="font-semibold text-slate-900 dark:text-slate-100 text-sm uppercase tracking-tight">{selectedCompany.name}</h2>
+                        <p className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-[0.2em] mt-0.5">Entity Meta-Configuration</p>
                       </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-50">
-                    <form onSubmit={handleUpdateCompany} className="bg-white p-10 space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-50 dark:bg-slate-800">
+                    <form onSubmit={handleUpdateCompany} className="bg-white dark:bg-slate-900 p-10 space-y-10">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                         <div className="space-y-1">
-                          <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
+                          <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2 pl-1">
                             <Calendar size={12} /> Fiscal Baseline
                           </label>
                           <input 
                             type="date"
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-semibold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                            className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs font-semibold text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono"
                             value={fiscalYear}
                             onChange={(e) => setFiscalYear(e.target.value)}
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-2 pl-1">
+                          <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2 pl-1">
                             <Coins size={12} /> Unit ISO Symbol
                           </label>
                           <input 
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-3.5 text-xs font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono"
+                            className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-3.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-mono"
                             value={currency}
                             onChange={(e) => setCurrency(e.target.value)}
                           />
                         </div>
                         <div className="sm:col-span-2 space-y-1">
-                          <label className="text-[9px] font-semibold text-slate-400 uppercase tracking-widest pl-1">Operational State</label>
+                          <label className="text-[9px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Operational State</label>
                           <select 
-                            className="w-full bg-slate-50/50 border border-slate-100 rounded-xl px-4 py-4 text-[10px] font-semibold uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all"
+                            className="w-full bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-4 text-[10px] font-semibold uppercase tracking-widest outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all text-slate-900 dark:text-slate-200"
                             value={status}
                             onChange={(e) => setStatus(e.target.value)}
                           >
-                            <option value="ACTIVE">System Active</option>
-                            <option value="CLOSED">Period Terminated</option>
-                            <option value="AUDITED">Verification Locked</option>
+                            <option value="ACTIVE" className="bg-white dark:bg-slate-900">System Active</option>
+                            <option value="CLOSED" className="bg-white dark:bg-slate-900">Period Terminated</option>
+                            <option value="AUDITED" className="bg-white dark:bg-slate-900">Verification Locked</option>
                           </select>
                         </div>
                       </div>
@@ -407,24 +407,24 @@ export default function Settings() {
                       <button 
                         type="submit"
                         disabled={loading}
-                        className="w-full bg-indigo-600 text-white py-4 rounded-xl font-semibold text-[10px] uppercase tracking-[0.2em] transform active:scale-[0.98] transition-all hover:bg-slate-900 shadow-xl shadow-indigo-100 flex items-center justify-center gap-3"
+                        className="w-full bg-indigo-600 text-white py-4 rounded-xl font-semibold text-[10px] uppercase tracking-[0.2em] transform active:scale-[0.98] transition-all hover:bg-slate-900 dark:hover:bg-indigo-500 shadow-xl shadow-indigo-100 dark:shadow-none flex items-center justify-center gap-3"
                       >
                         <Save size={16} /> Apply Entity Changes
                       </button>
                     </form>
 
-                    <div className="bg-white p-10 flex flex-col gap-8 justify-center">
+                    <div className="bg-white dark:bg-slate-900 p-10 flex flex-col gap-8 justify-center">
                       <div className="space-y-8">
                         {canManageCompanies && (
-                          <div className="bg-amber-50/30 p-8 rounded-[2rem] border border-amber-100">
+                          <div className="bg-amber-50/30 dark:bg-amber-900/10 p-8 rounded-[2rem] border border-amber-100 dark:border-amber-900/30">
                              <div className="flex items-center gap-3 mb-6">
-                                <Trash2 size={16} className="text-amber-600" />
-                                <h3 className="text-[10px] font-semibold uppercase tracking-widest text-amber-900">Selective Purge</h3>
+                                <Trash2 size={16} className="text-amber-600 dark:text-amber-500" />
+                                <h3 className="text-[10px] font-semibold uppercase tracking-widest text-amber-900 dark:text-amber-400">Selective Purge</h3>
                              </div>
-                             <p className="text-[10px] text-slate-500 font-bold uppercase mb-4 tracking-tight leading-relaxed">Reset all financial footprint for <strong>{selectedCompany.name}</strong>. All vouchers and ledgers will be erased.</p>
+                             <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase mb-4 tracking-tight leading-relaxed">Reset all financial footprint for <strong>{selectedCompany.name}</strong>. All vouchers and ledgers will be erased.</p>
                              <div className="space-y-3">
                                 <input 
-                                  className="w-full bg-white border border-amber-200 rounded-xl px-4 py-2.5 text-[11px] font-bold outline-none focus:border-amber-500 placeholder:text-amber-200"
+                                  className="w-full bg-white dark:bg-slate-950 border border-amber-200 dark:border-amber-900/50 rounded-xl px-4 py-2.5 text-[11px] font-bold outline-none focus:border-amber-500 dark:focus:border-amber-400 placeholder:text-amber-200 dark:placeholder:text-amber-900/50 text-slate-900 dark:text-slate-100"
                                   placeholder={`Type "${selectedCompany.name}"`}
                                   value={confirmCompanyReset}
                                   onChange={(e) => setConfirmCompanyReset(e.target.value)}
@@ -432,7 +432,7 @@ export default function Settings() {
                                 <button 
                                   disabled={confirmCompanyReset !== selectedCompany.name || loading}
                                   onClick={handleWipeCompanyData}
-                                  className="w-full bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-[9px] uppercase tracking-widest hover:bg-amber-700 disabled:opacity-20 transition-all shadow-lg shadow-amber-100"
+                                  className="w-full bg-amber-600 text-white py-2.5 rounded-xl font-semibold text-[9px] uppercase tracking-widest hover:bg-amber-700 dark:hover:bg-amber-500 disabled:opacity-20 transition-all shadow-lg shadow-amber-100 dark:shadow-none"
                                 >
                                   Execute Purge Protocol
                                 </button>
@@ -441,14 +441,14 @@ export default function Settings() {
                         )}
 
                         {canWipeData && (
-                          <div className="bg-rose-50/30 p-8 rounded-[2rem] border border-rose-100">
+                          <div className="bg-rose-50/30 dark:bg-rose-900/10 p-8 rounded-[2rem] border border-rose-100 dark:border-rose-900/30">
                              <div className="flex items-center gap-3 mb-6">
-                                <ShieldAlert size={16} className="text-rose-600" />
-                                <h3 className="text-[10px] font-semibold uppercase tracking-widest text-rose-900">Platform Reset</h3>
+                                <ShieldAlert size={16} className="text-rose-600 dark:text-rose-500" />
+                                <h3 className="text-[10px] font-semibold uppercase tracking-widest text-rose-900 dark:text-rose-400">Platform Reset</h3>
                              </div>
                              <div className="space-y-3">
                                 <input 
-                                  className="w-full bg-white border border-rose-200 rounded-xl px-4 py-2.5 text-[11px] font-mono font-black outline-none focus:border-rose-500 uppercase placeholder:text-rose-200"
+                                  className="w-full bg-white dark:bg-slate-950 border border-rose-200 dark:border-rose-900/50 rounded-xl px-4 py-2.5 text-[11px] font-mono font-black outline-none focus:border-rose-500 dark:focus:border-rose-400 uppercase placeholder:text-rose-200 dark:placeholder:text-rose-900/50 text-slate-900 dark:text-slate-100"
                                   placeholder="WIPE ENTIRE SYSTEM"
                                   value={confirmGlobalReset}
                                   onChange={(e) => setConfirmGlobalReset(e.target.value.toUpperCase())}
@@ -456,7 +456,7 @@ export default function Settings() {
                                 <button 
                                   disabled={confirmGlobalReset !== 'WIPE ENTIRE SYSTEM' || loading}
                                   onClick={handleGlobalWipe}
-                                  className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-semibold text-[9px] uppercase tracking-widest hover:bg-rose-900 disabled:opacity-20 transition-all shadow-lg shadow-rose-100"
+                                  className="w-full bg-rose-600 text-white py-2.5 rounded-xl font-semibold text-[9px] uppercase tracking-widest hover:bg-rose-900 dark:hover:bg-rose-500 disabled:opacity-20 transition-all shadow-lg shadow-rose-100 dark:shadow-none"
                                 >
                                   Reset Infrastructure
                                 </button>
@@ -469,11 +469,11 @@ export default function Settings() {
                 </section>
               </div>
             ) : (
-              <div className="py-40 flex flex-col items-center justify-center space-y-6">
-                <div className="p-8 bg-slate-50 rounded-full text-slate-200">
+              <div className="py-40 flex flex-col items-center justify-center space-y-6 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem]">
+                <div className="p-8 bg-white dark:bg-slate-800 rounded-full text-slate-200 dark:text-slate-700 border border-slate-100 dark:border-slate-700 shadow-sm">
                    <Building2 size={64} />
                 </div>
-                <p className="font-black uppercase tracking-[0.3em] text-xs text-slate-300">Entity Buffer Empty</p>
+                <p className="font-black uppercase tracking-[0.3em] text-xs text-slate-300 dark:text-slate-600">Entity Buffer Empty</p>
               </div>
             )}
           </motion.div>

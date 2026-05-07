@@ -161,5 +161,26 @@ export const batchOperations = {
 
     const maxCode = Math.max(...numericCodes);
     return (maxCode + 1).toString();
+  },
+
+  generateVoucherNarration(type: string, amount: number, channel: string, date: string, ledgerNames: string[]) {
+    if (amount <= 0) return '';
+    
+    const formattedAmount = new Intl.NumberFormat('en-IN', { 
+      minimumFractionDigits: 2, 
+      maximumFractionDigits: 2 
+    }).format(amount);
+    
+    const formattedDate = new Date(date).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    }).replace(/ /g, '-');
+
+    const ledgersStr = ledgerNames.length > 2 
+      ? ledgerNames.slice(0, 2).join(', ') + ' etc.'
+      : ledgerNames.join(', ');
+
+    return `${type} of ${formattedAmount} BDT via ${channel} on ${formattedDate} for ${ledgersStr || '...'}.`;
   }
 };

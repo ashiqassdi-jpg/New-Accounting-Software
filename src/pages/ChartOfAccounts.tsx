@@ -302,25 +302,25 @@ export default function ChartOfAccounts() {
 
   return (
     <div className="space-y-8 pb-20 max-w-[1600px] mx-auto">
-      <div className="bg-white text-slate-900 py-6 px-10 text-center space-y-1 border-b border-slate-50">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 py-6 px-10 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
         <div className="space-y-0.5">
-          <h1 className="text-4xl font-normal text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl font-normal text-slate-900 dark:text-slate-100 tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-normal text-slate-500 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[10px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
         <div className="pt-2 flex flex-col items-center">
-          <div className="w-full max-w-md border-t-2 border-slate-900" />
-          <h2 className="py-1 text-lg font-normal text-slate-900 uppercase tracking-[0.4em]">
+          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-100" />
+          <h2 className="py-1 text-lg font-normal text-slate-900 dark:text-slate-100 uppercase tracking-[0.4em]">
             Chart of Accounts
           </h2>
-          <div className="w-full max-w-md border-t-2 border-slate-900" />
+          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-100" />
           
           <div className="mt-2 space-y-1">
-            <p className="text-[11px] font-normal text-slate-900 uppercase tracking-widest">
+            <p className="text-[11px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
               Verified Protocol Online • {format(new Date(), 'dd-MM-yyyy HH:mm')}
             </p>
           </div>
@@ -330,32 +330,32 @@ export default function ChartOfAccounts() {
       {/* Header Controls */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 font-sans tracking-tight leading-none text-center md:text-left">
+          <h1 className="text-2xl font-semibold text-slate-900 dark:text-slate-100 font-sans tracking-tight leading-none text-center md:text-left">
             Chart of Accounts
           </h1>
-          <p className="text-[11px] text-slate-400 mt-1.5 font-medium uppercase tracking-widest leading-none text-center md:text-left">
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5 font-medium uppercase tracking-widest leading-none text-center md:text-left">
             Vanguard Ledger Architecture
           </p>
         </div>
 
         <div className="flex items-center justify-center md:justify-end gap-2 no-print">
-          <button onClick={() => window.print()} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm">
+          <button onClick={() => window.print()} className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors shadow-sm">
             <Printer size={16} />
           </button>
-          <button onClick={handleExportExcel} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-emerald-600 transition-colors shadow-sm">
+          <button onClick={handleExportExcel} className="p-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-500 hover:text-emerald-600 transition-colors shadow-sm">
             <Download size={16} />
           </button>
           {!isModerator && (
             <div className="flex items-center gap-2">
               <button 
                 onClick={openBulkModal}
-                className="bg-white border border-slate-200 text-slate-700 px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+                className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-100 px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-700 transition-all shadow-sm flex items-center gap-2"
               >
                 <Plus size={16} /> Bulk Create
               </button>
               <button 
                 onClick={() => openModal()}
-                className="bg-slate-900 text-white px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2"
+                className="bg-slate-900 dark:bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-[11px] font-semibold uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-lg flex items-center gap-2"
               >
                 <Plus size={16} /> New Ledger
               </button>
@@ -367,7 +367,7 @@ export default function ChartOfAccounts() {
       {/* Navigation & Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         <aside className="space-y-4 no-print">
-          <div className="bg-white p-1 rounded-2xl border border-slate-200 shadow-sm flex flex-col">
+          <div className="bg-white dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col">
             {ACCOUNT_GROUPS.map((group) => (
               <button
                 key={group.value}
@@ -375,17 +375,17 @@ export default function ChartOfAccounts() {
                 className={cn(
                   "flex items-center justify-between px-4 py-3 rounded-xl transition-all",
                   activeTab === group.value 
-                    ? "bg-slate-900 text-white shadow-xl shadow-slate-200" 
-                    : "text-slate-500 hover:bg-slate-50"
+                    ? "bg-slate-900 dark:bg-indigo-600 text-white shadow-xl shadow-slate-200 dark:shadow-none" 
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <ListTree size={16} className={cn(activeTab === group.value ? "text-indigo-400" : "text-slate-300")} />
+                  <ListTree size={16} className={cn(activeTab === group.value ? "text-indigo-400" : "text-slate-300 dark:text-slate-600")} />
                   <span className="text-[11px] font-semibold uppercase tracking-wider">{group.label}</span>
                 </div>
                 <div className={cn(
                   "text-[10px] font-semibold px-2 py-0.5 rounded-full",
-                  activeTab === group.value ? "bg-white/20 text-white" : "bg-slate-100 text-slate-400"
+                  activeTab === group.value ? "bg-white/20 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
                 )}>
                   {accounts.filter(a => a.type === group.value).length}
                 </div>
@@ -395,13 +395,13 @@ export default function ChartOfAccounts() {
         </aside>
 
         <section className="lg:col-span-3 space-y-4">
-          <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden min-h-[500px]">
-            <div className="px-6 py-4 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden min-h-[500px]">
+            <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-4 flex-1">
                 <div className="relative flex-1 max-w-sm">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" size={14} />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600" size={14} />
                   <input 
-                    className="w-full bg-slate-50 border border-slate-100 rounded-lg pl-9 pr-4 py-1.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg pl-9 pr-4 py-1.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all font-medium text-slate-900 dark:text-slate-100"
                     placeholder={`Search ${activeGroup?.label.toLowerCase()}...`}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -409,32 +409,32 @@ export default function ChartOfAccounts() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium text-slate-300 uppercase tracking-widest">Displaying All Nodes</span>
+                <span className="text-[10px] font-medium text-slate-300 dark:text-slate-600 uppercase tracking-widest">Displaying All Nodes</span>
               </div>
             </div>
 
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-slate-50/50">
+                <thead className="bg-slate-50/50 dark:bg-slate-950/50">
                   <tr className="text-center md:text-left">
-                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest w-24">Code</th>
-                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Entity Descriptor</th>
-                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Balance Pool</th>
+                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-24">Code</th>
+                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-left">Entity Descriptor</th>
+                    <th className="px-5 py-3 text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">Balance Pool</th>
                     {!isModerator && <th className="px-5 py-3 w-20"></th>}
                   </tr>
                 </thead>
                 <tbody>
                   {filteredAccounts.map(acc => (
-                    <tr key={acc.id} className="group hover:bg-slate-50/50 transition-colors border-b border-slate-50 last:border-0 text-center md:text-left">
-                      <td className="px-5 py-3 text-xs font-mono text-slate-400">{acc.code}</td>
-                      <td className="px-5 py-3 text-xs font-semibold text-slate-800">{acc.name}</td>
+                    <tr key={acc.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800 last:border-0 text-center md:text-left">
+                      <td className="px-5 py-3 text-xs font-mono text-slate-400 dark:text-slate-500">{acc.code}</td>
+                      <td className="px-5 py-3 text-xs font-semibold text-slate-800 dark:text-slate-200">{acc.name}</td>
                       <td className="px-5 py-3 text-right">
                         {(() => {
                           const displayBalance = getDisplayBalance(acc.type, acc.current_balance);
                           return (
                             <span className={cn(
                               "text-xs font-mono font-semibold tabular-nums",
-                              displayBalance < 0 ? "text-rose-500" : "text-slate-700"
+                              displayBalance < 0 ? "text-rose-500" : "text-slate-700 dark:text-slate-300"
                             )}>
                               {formatBDT(displayBalance)}
                             </span>
@@ -444,10 +444,10 @@ export default function ChartOfAccounts() {
                       {!isModerator && (
                         <td className="px-5 py-3 text-right">
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => openModal(acc)} className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all">
+                            <button onClick={() => openModal(acc)} className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/20 rounded-lg transition-all">
                               <Edit3 size={14} />
                             </button>
-                            <button onClick={() => handleDelete(acc.id)} className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-all">
+                            <button onClick={() => handleDelete(acc.id)} className="p-1.5 text-slate-400 dark:text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg transition-all">
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -459,8 +459,8 @@ export default function ChartOfAccounts() {
                     <tr>
                       <td colSpan={4} className="py-32 text-center">
                         <div className="flex flex-col items-center">
-                          <ListTree className="text-slate-200 mb-4" size={48} />
-                          <p className="text-[11px] font-semibold text-slate-300 uppercase tracking-[0.2em]">Void Ledger Path</p>
+                          <ListTree className="text-slate-200 dark:text-slate-800 mb-4" size={48} />
+                          <p className="text-[11px] font-semibold text-slate-300 dark:text-slate-700 uppercase tracking-[0.2em]">Void Ledger Path</p>
                         </div>
                       </td>
                     </tr>
@@ -476,40 +476,40 @@ export default function ChartOfAccounts() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
           <div 
             className={cn(
-              "relative bg-white w-full rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-300",
+              "relative bg-white dark:bg-slate-900 w-full rounded-[2.5rem] shadow-2xl overflow-hidden transition-all duration-300 border border-slate-200 dark:border-slate-800",
               isBulkMode ? "max-w-4xl" : "max-w-md"
             )}
           >
-            <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between">
+            <div className="px-8 py-6 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
               <div className="flex flex-col">
-                <h2 className="text-lg font-semibold text-slate-900 leading-none">
+                <h2 className="text-lg font-semibold text-slate-900 dark:text-white leading-none">
                   {isBulkMode ? 'Bulk Ledger Creation' : (editingAccount ? 'Refine Ledger' : 'Incorporate Ledger')}
                 </h2>
-                <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase tracking-widest">Protocol Assignment Mode</p>
+                <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">Protocol Assignment Mode</p>
               </div>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-600 transition-colors">
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-300 hover:text-slate-600 dark:hover:text-white transition-colors">
                 <X size={24} />
               </button>
             </div>
             
             {isBulkMode ? (
               <div className="p-8 space-y-6">
-                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-100 max-h-[400px] overflow-y-auto">
+                <div className="bg-slate-50 dark:bg-slate-800 rounded-2xl p-4 border border-slate-100 dark:border-slate-700 max-h-[400px] overflow-y-auto">
                   <table className="w-full text-left">
                     <thead>
                       <tr>
-                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Type</th>
-                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest">Ledger Name</th>
-                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest w-32">Code</th>
+                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Type</th>
+                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Ledger Name</th>
+                        <th className="px-4 py-2 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest w-32">Code</th>
                         <th className="px-4 py-2 w-10"></th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                       {bulkRows.map((row, idx) => (
                         <tr key={idx} className="group">
                           <td className="px-4 py-3">
                             <select 
-                              className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10"
+                              className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-[10px] font-bold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/10"
                               value={row.type}
                               onChange={(e) => updateBulkRow(idx, 'type', e.target.value)}
                             >
@@ -518,7 +518,7 @@ export default function ChartOfAccounts() {
                           </td>
                           <td className="px-4 py-3">
                             <input 
-                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] font-medium text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10"
+                              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-[10px] font-medium text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/10"
                               placeholder="e.g. Sales Account"
                               value={row.name}
                               onChange={(e) => updateBulkRow(idx, 'name', e.target.value)}
@@ -529,7 +529,7 @@ export default function ChartOfAccounts() {
                           </td>
                           <td className="px-4 py-3">
                             <input 
-                              className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[10px] font-mono font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/10"
+                              className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-[10px] font-mono font-bold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/10"
                               placeholder="Code"
                               value={row.code}
                               onChange={(e) => updateBulkRow(idx, 'code', e.target.value)}
@@ -541,7 +541,7 @@ export default function ChartOfAccounts() {
                           <td className="px-4 py-3 text-right">
                             <button 
                               onClick={() => removeBulkRow(idx)}
-                              className="p-1.5 text-slate-300 hover:text-rose-500 transition-colors"
+                              className="p-1.5 text-slate-300 dark:text-slate-600 hover:text-rose-500 transition-colors"
                             >
                               <Trash2 size={12} />
                             </button>
@@ -552,20 +552,20 @@ export default function ChartOfAccounts() {
                   </table>
                   <button 
                     onClick={addBulkRow}
-                    className="mt-4 flex items-center gap-2 text-[10px] font-bold text-indigo-600 hover:text-indigo-700 transition-colors px-4 py-2 border-2 border-dashed border-indigo-100 rounded-xl w-full justify-center group hover:bg-indigo-50/50"
+                    className="mt-4 flex items-center gap-2 text-[10px] font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors px-4 py-2 border-2 border-dashed border-indigo-100 dark:border-indigo-900 rounded-xl w-full justify-center group hover:bg-indigo-50 dark:hover:bg-indigo-950"
                   >
                     <Plus size={14} /> Add Row [Enter]
                   </button>
                 </div>
                 
                 <div className="flex gap-3">
-                  <button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
+                  <button onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">
                     Dismiss
                   </button>
                   <button 
                     disabled={loading}
                     onClick={handleBulkSave}
-                    className="flex-1 px-4 py-3 bg-slate-900 text-white text-[10px] font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
+                    className="flex-1 px-4 py-3 bg-slate-900 dark:bg-indigo-600 text-white text-[10px] font-semibold rounded-xl hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-xl shadow-slate-100 dark:shadow-none disabled:opacity-50"
                   >
                     {loading ? 'Processing...' : 'Save All Ledger Entities'}
                   </button>
@@ -581,21 +581,21 @@ export default function ChartOfAccounts() {
                     onClick={() => setType(g.value as Account['type'])}
                     className={cn(
                       "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all group",
-                      type === g.value ? "border-indigo-600 bg-indigo-50/50 shadow-md" : "border-slate-50 hover:border-slate-100"
+                      type === g.value ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/20 shadow-md" : "border-slate-50 dark:border-slate-800 hover:border-slate-100 dark:hover:border-slate-700"
                     )}
                   >
-                    <ListTree size={16} className={cn(type === g.value ? "text-indigo-600 shadow-xl" : "text-slate-300 group-hover:text-slate-400")} />
-                    <span className={cn("text-[8px] font-semibold uppercase tracking-widest", type === g.value ? "text-indigo-700" : "text-slate-400")}>{g.label.charAt(0)}</span>
+                    <ListTree size={16} className={cn(type === g.value ? "text-indigo-600 shadow-xl" : "text-slate-300 dark:text-slate-700 group-hover:text-slate-400")} />
+                    <span className={cn("text-[8px] font-semibold uppercase tracking-widest", type === g.value ? "text-indigo-700 dark:text-indigo-400" : "text-slate-400")}>{g.label.charAt(0)}</span>
                   </button>
                 ))}
               </div>
 
               <div className="space-y-4">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Ledger Identifier (Name)</label>
+                  <label className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Ledger Identifier (Name)</label>
                   <input 
                     required
-                    className="w-full"
+                    className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Accounts Receivable"
@@ -604,10 +604,10 @@ export default function ChartOfAccounts() {
 
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-1">
-                    <label className="text-[10px] font-medium text-slate-400 uppercase tracking-widest pl-1">Atomic Code</label>
+                    <label className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Atomic Code</label>
                     <input 
                       required
-                      className="w-full font-mono font-semibold tracking-widest text-slate-700"
+                      className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 py-2 font-mono font-semibold tracking-widest text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all"
                       value={code}
                       onChange={(e) => setCode(e.target.value)}
                       placeholder="e.g. 1201"
@@ -617,13 +617,13 @@ export default function ChartOfAccounts() {
               </div>
 
               <div className="pt-4 flex gap-3">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-semibold text-slate-500 hover:bg-slate-50 rounded-xl transition-all">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 px-4 py-3 text-[10px] font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all">
                   Dismiss
                 </button>
                 <button 
                   disabled={loading}
                   type="submit"
-                  className="flex-1 px-4 py-3 bg-slate-900 text-white text-[10px] font-semibold rounded-xl hover:bg-slate-800 transition-all shadow-xl shadow-slate-100 disabled:opacity-50"
+                  className="flex-1 px-4 py-3 bg-slate-900 dark:bg-indigo-600 text-white text-[10px] font-semibold rounded-xl hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-xl shadow-slate-100 dark:shadow-none disabled:opacity-50"
                 >
                   {loading ? 'Processing...' : (editingAccount ? 'Apply Changes' : 'Register Ledger')}
                 </button>

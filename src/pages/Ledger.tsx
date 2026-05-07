@@ -202,28 +202,28 @@ export default function Ledger() {
     <div className="space-y-4 pb-10 max-w-[1600px] mx-auto">
       {/* Integrated Professional Header */}
       {selectedAccount && (
-        <div className="bg-white text-slate-900 py-4 px-8 text-center space-y-0.5 border-b border-slate-50 mb-4">
+        <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 py-4 px-8 text-center space-y-0.5 border-b border-slate-50 dark:border-slate-800 mb-4 transition-colors">
           <div className="space-y-0">
-            <h1 className="text-2xl font-normal text-slate-900 tracking-tight leading-tight uppercase">
+            <h1 className="text-2xl font-normal text-slate-900 dark:text-slate-100 tracking-tight leading-tight uppercase">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute"}
             </h1>
-            <p className="text-[9px] font-normal text-slate-400 uppercase tracking-[0.2em] max-w-2xl mx-auto">
+            <p className="text-[9px] font-normal text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] max-w-2xl mx-auto">
               {selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA'}
             </p>
           </div>
           
           <div className="pt-1 flex flex-col items-center">
-            <div className="w-full max-w-xs border-t border-slate-900" />
-            <h2 className="py-0.5 text-base font-normal text-slate-900 uppercase tracking-[0.4em]">
+            <div className="w-full max-w-xs border-t border-slate-900 dark:border-slate-100" />
+            <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-slate-100 uppercase tracking-[0.4em]">
               General Ledger
             </h2>
-            <div className="w-full max-w-xs border-t border-slate-900" />
+            <div className="w-full max-w-xs border-t border-slate-900 dark:border-slate-100" />
             
-            <div className="mt-1 space-y-1 font-normal uppercase tracking-widest text-slate-900">
-              <div className="px-4 py-1 bg-slate-900 text-white rounded text-[10px] inline-block font-normal">
+            <div className="mt-1 space-y-1 font-normal uppercase tracking-widest text-slate-900 dark:text-slate-100">
+              <div className="px-4 py-1 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 rounded text-[10px] inline-block font-normal">
                 {selectedAccount?.name} ({selectedAccount?.code})
               </div>
-              <p className="text-[10px] text-slate-500 font-normal">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-normal">
                 Range: {confirmedDateRange.from || 'Opening'} — {confirmedDateRange.to || 'Present'}
               </p>
             </div>
@@ -232,14 +232,14 @@ export default function Ledger() {
       )}
 
       {/* Action Header */}
-      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-100 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print transition-colors">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center shadow-lg shadow-slate-900/10">
-              <BookOpen className="text-white" size={16} />
+            <div className="w-8 h-8 bg-slate-900 dark:bg-slate-100 rounded-lg flex items-center justify-center shadow-lg shadow-slate-900/10 dark:shadow-none transition-colors">
+              <BookOpen className="text-white dark:text-slate-900" size={16} />
             </div>
             <div>
-              <h1 className="text-sm font-bold text-slate-900 tracking-tight leading-none uppercase">
+              <h1 className="text-sm font-bold text-slate-900 dark:text-slate-100 tracking-tight leading-none uppercase">
                 General Ledger
               </h1>
               <p className="text-[9px] font-bold text-slate-400 mt-0.5 uppercase tracking-widest truncate max-w-[200px]">
@@ -254,9 +254,9 @@ export default function Ledger() {
           <div className="relative flex-1 max-w-sm" ref={searchRef}>
             <div 
               onClick={() => setIsSearchOpen(!isSearchOpen)}
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 cursor-pointer flex items-center justify-between hover:border-indigo-500 transition-all shadow-sm"
+              className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer flex items-center justify-between hover:border-indigo-500 transition-all shadow-sm"
             >
-              <span className={cn("truncate", selectedAccount ? "text-slate-900" : "text-slate-400")}>
+              <span className={cn("truncate", selectedAccount ? "text-slate-900 dark:text-white" : "text-slate-400 dark:text-slate-600")}>
                 {selectedAccount ? `${selectedAccount.name}` : "Select Account..."}
               </span>
               <ChevronDown size={16} className={cn("text-slate-400 transition-transform", isSearchOpen && "rotate-180")} />
@@ -268,14 +268,14 @@ export default function Ledger() {
                   initial={{ opacity: 0, y: 10, scale: 0.98 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.98 }}
-                  className="absolute left-0 right-0 top-full mt-2 bg-white border border-slate-200 shadow-2xl rounded-2xl z-[100] overflow-hidden"
+                  className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl z-[100] overflow-hidden"
                 >
-                  <div className="p-3 border-b border-slate-50 bg-slate-50/30">
+                  <div className="p-3 border-b border-slate-50 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/30">
                     <div className="relative">
-                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-600" />
                       <input 
                         ref={searchInputRef}
-                        className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold"
+                        className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-semibold text-slate-900 dark:text-white"
                         placeholder="Search Account Ledger..."
                         value={accountSearchQuery}
                         onChange={(e) => setAccountSearchQuery(e.target.value)}
@@ -327,7 +327,7 @@ export default function Ledger() {
                     {(() => {
                       if (filteredAccounts.length === 0) {
                         return (
-                          <div className="py-8 text-center text-[10px] font-semibold text-slate-300 uppercase tracking-widest italic">
+                          <div className="py-8 text-center text-[10px] font-semibold text-slate-300 dark:text-slate-700 uppercase tracking-widest italic transition-colors">
                             No matching ledgers
                           </div>
                         );
@@ -355,14 +355,16 @@ export default function Ledger() {
                             }}
                             className={cn(
                               "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group mb-3 border border-transparent",
-                              selectedIndex === 0 ? "bg-rose-50 border-rose-100 shadow-sm" : "hover:bg-rose-50 hover:border-rose-100"
+                              selectedIndex === 0 
+                                ? "bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900/40 shadow-sm" 
+                                : "hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:border-rose-100 dark:hover:border-rose-900/20"
                             )}
                           >
-                            <span className={cn("text-[10px] font-semibold tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
+                            <span className={cn("text-[10px] font-semibold tracking-tight", selectedIndex === 0 ? "text-rose-600 dark:text-rose-400" : "text-rose-500 dark:text-rose-700")}>No Selection</span>
                           </button>
                           {groups.map(group => (
                             <div key={group.value} className="mb-3 last:mb-0">
-                              <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 uppercase tracking-[0.25em] mb-1">{group.label}</div>
+                              <div className="px-4 py-1 text-[8px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-[0.25em] mb-1">{group.label}</div>
                               <div className="grid grid-cols-1 gap-1">
                                 {group.accounts.map(a => {
                                   const globalIndex = filteredAccounts.indexOf(a) + 1;
@@ -378,20 +380,22 @@ export default function Ledger() {
                                       }}
                                       className={cn(
                                         "w-full text-left px-4 py-3 rounded-xl flex items-center justify-between transition-all group border border-transparent",
-                                        isSelected ? "bg-indigo-600 border-indigo-700 shadow-md" : (selectedAccountId === a.id ? "bg-indigo-50" : "hover:bg-slate-50")
+                                        isSelected 
+                                          ? "bg-indigo-600 border-indigo-700 shadow-md" 
+                                          : (selectedAccountId === a.id ? "bg-indigo-50 dark:bg-indigo-900/20" : "hover:bg-slate-50 dark:hover:bg-slate-800")
                                       )}
                                     >
                                       <div className="flex flex-col">
                                         <span className={cn(
                                           "text-[11px] font-semibold tracking-tight",
-                                          isSelected ? "text-white" : (selectedAccountId === a.id ? "text-indigo-700" : "text-slate-700")
+                                          isSelected ? "text-white" : (selectedAccountId === a.id ? "text-indigo-700 dark:text-indigo-400" : "text-slate-700 dark:text-slate-300")
                                         )}>{a.name}</span>
                                         <span className={cn(
                                           "text-[9px] font-mono font-medium transition-colors",
-                                          isSelected ? "text-indigo-100" : "text-slate-400 group-hover:text-indigo-400"
+                                          isSelected ? "text-indigo-100" : "text-slate-400 dark:text-slate-500 group-hover:text-indigo-400"
                                         )}>{a.code}</span>
                                       </div>
-                                      {(isSelected || selectedAccountId === a.id) && <Check size={14} className={isSelected ? "text-white" : "text-indigo-600"} />}
+                                      {(isSelected || selectedAccountId === a.id) && <Check size={14} className={isSelected ? "text-white" : "text-indigo-600 dark:text-indigo-400"} />}
                                     </button>
                                   );
                                 })}
@@ -413,7 +417,7 @@ export default function Ledger() {
               "px-5 py-2.5 rounded-xl transition-all shadow-md text-xs font-black uppercase tracking-widest flex items-center gap-2 active:scale-95",
               showDeepFilter 
                 ? "bg-indigo-600 text-white" 
-                : "bg-slate-900 text-white hover:bg-indigo-600 shadow-slate-900/10"
+                : "bg-slate-900 dark:bg-slate-800 text-white hover:bg-indigo-600 dark:hover:bg-indigo-500 shadow-slate-900/10"
             )}
           >
             <Filter size={16} />
@@ -430,26 +434,26 @@ export default function Ledger() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowDeepFilter(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-[100] no-print"
+              className="fixed inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-[2px] z-[100] no-print"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              className="fixed inset-x-4 top-[15%] md:left-1/2 md:-translate-x-1/2 md:max-w-lg bg-white rounded-3xl shadow-2xl z-[101] border border-slate-200 no-print overflow-hidden"
+              className="fixed inset-x-4 top-[15%] md:left-1/2 md:-translate-x-1/2 md:max-w-lg bg-white dark:bg-slate-900 rounded-3xl shadow-2xl z-[101] border border-slate-200 dark:border-slate-800 no-print overflow-hidden transition-colors"
             >
               <div className="p-6 space-y-6 text-left">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-sm font-black text-slate-900 tracking-tight uppercase flex items-center gap-2">
+                    <h2 className="text-sm font-black text-slate-900 dark:text-white tracking-tight uppercase flex items-center gap-2">
                       <Filter className="text-indigo-600" size={16} />
                       Ledger Filter
                     </h2>
-                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Parameters refinement</p>
+                    <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Parameters refinement</p>
                   </div>
                   <button 
                     onClick={() => setShowDeepFilter(false)}
-                    className="p-2 bg-slate-50 text-slate-400 hover:text-slate-600 rounded-xl transition-all"
+                    className="p-2 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 rounded-xl transition-all"
                   >
                     <X size={16} />
                   </button>
@@ -457,19 +461,19 @@ export default function Ledger() {
 
                 <div className="space-y-5">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Audit Boundary</label>
-                    <div className="bg-slate-50/50 p-2 rounded-xl border border-slate-100">
+                    <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Audit Boundary</label>
+                    <div className="bg-slate-50/50 dark:bg-slate-950/50 p-2 rounded-xl border border-slate-100 dark:border-slate-800">
                       <DateRangeFilter value={dateRange} onChange={setDateRange} />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Narration Key</label>
+                      <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Narration Key</label>
                       <div className="relative">
-                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" />
+                        <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600" />
                         <input 
-                          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900"
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900 dark:text-white"
                           placeholder="Text search..."
                           value={narrationSearch}
                           onChange={(e) => setNarrationSearch(e.target.value)}
@@ -478,17 +482,17 @@ export default function Ledger() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Value Bounds (৳)</label>
+                      <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest pl-1">Value Bounds (৳)</label>
                       <div className="flex gap-2">
                         <input 
                           placeholder="Min"
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold text-slate-900 dark:text-white"
                           value={amountRange.min}
                           onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))}
                         />
                         <input 
                           placeholder="Max"
-                          className="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold"
+                          className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all font-mono font-bold text-slate-900 dark:text-white"
                           value={amountRange.max}
                           onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))}
                         />
@@ -497,7 +501,7 @@ export default function Ledger() {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-slate-50 flex gap-3">
+                <div className="pt-4 border-t border-slate-50 dark:border-slate-800 flex gap-3">
                   <button 
                     onClick={() => {
                       setDateRange({ from: '', to: '' });
@@ -507,7 +511,7 @@ export default function Ledger() {
                       setConfirmedAmountRange({ min: '', max: '' });
                       setConfirmedNarrationSearch('');
                     }}
-                    className="flex-1 px-4 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest hover:bg-slate-50 rounded-xl transition-all"
+                    className="flex-1 px-4 py-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 rounded-xl transition-all"
                   >
                     Reset
                   </button>
@@ -518,7 +522,7 @@ export default function Ledger() {
                       setConfirmedNarrationSearch(narrationSearch);
                       setShowDeepFilter(false);
                     }}
-                    className="flex-1 px-4 py-2 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 transition-all shadow-md active:scale-95"
+                    className="flex-1 px-4 py-2 bg-slate-900 dark:bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-indigo-600 dark:hover:bg-indigo-500 transition-all shadow-md active:scale-95"
                   >
                     Apply Filter
                   </button>
@@ -541,45 +545,45 @@ export default function Ledger() {
           />
         </div>
       ) : (
-        <div className="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center space-y-3 no-print">
-          <div className="w-14 h-14 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center mx-auto">
-            <Search className="text-slate-200" size={24} />
+        <div className="bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center space-y-3 no-print transition-colors">
+          <div className="w-14 h-14 bg-white dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-center mx-auto">
+            <Search className="text-slate-200 dark:text-slate-800" size={24} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-800 tracking-tight uppercase">Analytical State Idle</h3>
-            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Select an account to initiate record analysis</p>
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 tracking-tight uppercase">Analytical State Idle</h3>
+            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">Select an account to initiate record analysis</p>
           </div>
         </div>
       )}
 
       {selectedAccount && (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between no-print">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden transition-colors">
+          <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between no-print">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white shadow-lg shadow-indigo-600/20">
                 <FileText size={16} />
               </div>
               <div>
-                <h3 className="font-bold text-slate-900 uppercase text-[10px] tracking-widest">Transaction Traceability</h3>
-                <p className="text-[9px] font-bold text-slate-400 mt-0.5 tracking-widest">Deep-dive financial records</p>
+                <h3 className="font-bold text-slate-900 dark:text-white uppercase text-[10px] tracking-widest">Transaction Traceability</h3>
+                <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 mt-0.5 tracking-widest">Deep-dive financial records</p>
               </div>
             </div>
             <div className="flex gap-2">
               <button 
                 onClick={() => window.print()}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
               >
                 <Printer size={13} /> Print
               </button>
               <button 
                 onClick={handleExportExcel}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-100 transition-all border border-emerald-200"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-100 dark:hover:bg-emerald-900/50 transition-all border border-emerald-200 dark:border-emerald-900/50"
               >
                 <FileDown size={13} /> Excel
               </button>
               <button 
                 onClick={handleExportPDF}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 dark:bg-indigo-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-sm"
               >
                 <FileText size={13} /> PDF Report
               </button>
@@ -589,7 +593,7 @@ export default function Ledger() {
           <div className="overflow-x-auto print:overflow-visible">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-slate-900 text-white border-b border-slate-800">
+                <tr className="bg-slate-900 dark:bg-black text-white border-b border-slate-800 transition-colors">
                   <th className="px-6 py-3 text-left text-[9px] font-black uppercase tracking-widest">Date</th>
                   <th className="px-6 py-3 text-left text-[9px] font-black uppercase tracking-widest">Ref ID</th>
                   <th className="px-6 py-3 text-left text-[9px] font-black uppercase tracking-widest">Narrative</th>
@@ -598,16 +602,16 @@ export default function Ledger() {
                   <th className="px-6 py-3 text-right text-[9px] font-black uppercase tracking-widest w-40 pr-10">Balance</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {transactions.map((t) => (
-                  <tr key={t.id} className="hover:bg-slate-50/20 transition-colors group">
-                    <td className="px-6 py-3 text-[11px] font-bold text-slate-400 whitespace-nowrap font-mono">
+                  <tr key={t.id} className="hover:bg-slate-50/20 dark:hover:bg-slate-800/20 transition-colors group">
+                    <td className="px-6 py-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap font-mono">
                       {format(new Date(t.date), 'dd/MM/yyyy')}
                     </td>
-                    <td className="px-6 py-3 text-[11px] font-bold text-slate-700 font-mono tracking-tighter">
+                    <td className="px-6 py-3 text-[11px] font-bold text-slate-700 dark:text-slate-300 font-mono tracking-tighter">
                       {t.voucher?.voucher_no}
                     </td>
-                    <td className="px-6 py-3 text-[12px] font-bold text-slate-500 max-w-sm leading-snug">
+                    <td className="px-6 py-3 text-[12px] font-bold text-slate-500 dark:text-slate-400 max-w-sm leading-snug">
                       {t.narration || t.voucher?.narration}
                     </td>
                     <td className="px-6 py-3 text-[11px] font-bold text-rose-600 text-right font-mono tabular-nums">
@@ -616,13 +620,13 @@ export default function Ledger() {
                     <td className="px-6 py-3 text-[11px] font-bold text-emerald-600 text-right font-mono tabular-nums">
                       {t.credit > 0 ? formatBDT(t.credit).replace(/[^0-9.,]/g, '') : '-'}
                     </td>
-                    <td className="px-6 py-3 text-[11px] font-bold text-slate-900 text-right pr-10 font-mono tabular-nums relative">
+                    <td className="px-6 py-3 text-[11px] font-bold text-slate-900 dark:text-slate-100 text-right pr-10 font-mono tabular-nums relative">
                       <div className="flex items-center justify-end gap-2">
-                        <span className={cn(t.balance < 0 ? "text-rose-600" : "text-slate-900")}>
+                        <span className={cn(t.balance < 0 ? "text-rose-600" : "text-slate-900 dark:text-slate-100")}>
                           {formatBDT(t.balance).replace(/[^0-9.,]/g, '')}
                         </span>
                         <button 
-                          className="p-1.5 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all opacity-0 group-hover:opacity-100 no-print"
+                          className="p-1.5 text-slate-300 dark:text-slate-700 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 rounded-lg transition-all opacity-0 group-hover:opacity-100 no-print"
                           onClick={() => setViewingVoucher(t.voucher)}
                         >
                           <Eye size={12} />
@@ -633,16 +637,16 @@ export default function Ledger() {
                 ))}
                 {transactions.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="py-20 text-center text-slate-300 font-black uppercase tracking-widest text-[10px] italic">
+                    <td colSpan={6} className="py-20 text-center text-slate-300 dark:text-slate-700 font-black uppercase tracking-widest text-[10px] italic">
                       No records found
                     </td>
                   </tr>
                 )}
               </tbody>
               {transactions.length > 0 && (
-                <tfoot className="bg-slate-50/50 border-t-2 border-slate-100 font-bold">
+                <tfoot className="bg-slate-50/50 dark:bg-slate-950/50 border-t-2 border-slate-100 dark:border-slate-800 font-bold transition-colors">
                   <tr>
-                    <td colSpan={3} className="px-6 py-4 text-[9px] text-slate-900 text-right uppercase tracking-widest">
+                    <td colSpan={3} className="px-6 py-4 text-[9px] text-slate-900 dark:text-slate-100 text-right uppercase tracking-widest">
                       Ledger Totals
                     </td>
                     <td className="px-6 py-4 text-[11px] font-mono text-rose-600 text-right tabular-nums">
@@ -653,7 +657,7 @@ export default function Ledger() {
                     </td>
                     <td className={cn(
                       "px-6 py-4 text-[11px] font-mono text-right tabular-nums pr-10",
-                      transactions[0].balance < 0 ? "text-rose-600" : "text-indigo-700"
+                      transactions[0].balance < 0 ? "text-rose-600" : "text-indigo-700 dark:text-indigo-400"
                     )}>
                       {formatBDT(transactions[0].balance).replace(/[^0-9.,]/g, '')}
                     </td>
@@ -694,19 +698,19 @@ export default function Ledger() {
 
 function LedgerStat({ label, value, isType, icon }: any) {
   return (
-    <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
+    <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group overflow-hidden relative">
       <div className="flex flex-col gap-0.5 relative z-10">
-        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5 leading-none mb-1">
+        <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 leading-none mb-1">
           {icon} {label}
         </span>
         <span className={cn(
           "text-base font-black tracking-tight",
-          isType ? "text-indigo-600 uppercase" : "text-slate-900 font-mono"
+          isType ? "text-indigo-600 dark:text-indigo-400 uppercase" : "text-slate-900 dark:text-slate-100 font-mono"
         )}>
           {isType ? value : formatBDT(value)}
         </span>
       </div>
-      <div className="absolute top-0 right-0 p-3 opacity-[0.03] translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform text-slate-900">
+      <div className="absolute top-0 right-0 p-3 opacity-[0.03] dark:opacity-[0.05] translate-x-2 -translate-y-2 group-hover:translate-x-0 group-hover:translate-y-0 transition-transform text-slate-900 dark:text-white">
         {icon && React.cloneElement(icon, { size: 48 })}
       </div>
     </div>

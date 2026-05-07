@@ -46,16 +46,16 @@ const COLORS = ['#6366f1', '#94a3b8', '#fbbf24', '#f43f5e', '#8b5cf6'];
 
 function ActionShortcut({ title, icon: Icon, to, color }: any) {
   const colors = {
-    indigo: "text-indigo-600 bg-indigo-50 hover:bg-indigo-100",
-    emerald: "text-emerald-600 bg-emerald-50 hover:bg-emerald-100",
-    rose: "text-rose-600 bg-rose-50 hover:bg-rose-100",
-  }[color as keyof typeof colors] || "text-slate-600 bg-slate-50 hover:bg-slate-100";
+    indigo: "text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:text-indigo-400 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20",
+    emerald: "text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20",
+    rose: "text-rose-600 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:hover:bg-rose-500/20",
+  }[color as keyof typeof colors] || "text-slate-600 bg-slate-50 hover:bg-slate-100 dark:text-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700";
 
   return (
     <Link 
       to={to}
       className={cn(
-        "flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent hover:border-slate-100",
+        "flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent hover:border-slate-100 dark:hover:border-slate-700",
         colors
       )}
     >
@@ -402,10 +402,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-xl font-bold text-slate-900 font-sans tracking-tight leading-none">
+          <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100 font-sans tracking-tight leading-none">
             Dashboard
           </h1>
-          <p className="text-[10px] text-slate-400 mt-1.5 font-semibold uppercase tracking-widest truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl" title={selectedCompany?.name || 'Vanguard Entity'}>
+          <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1.5 font-semibold uppercase tracking-widest truncate max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-2xl xl:max-w-4xl" title={selectedCompany?.name || 'Vanguard Entity'}>
             {selectedCompany?.name || 'Vanguard Entity'}
           </p>
         </div>
@@ -520,7 +520,15 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--tw-bg-opacity)' }}
+                    contentStyle={{ 
+                      borderRadius: '16px', 
+                      border: 'none', 
+                      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
+                      backgroundColor: 'var(--tooltip-bg)',
+                      color: 'var(--tooltip-text)',
+                      fontSize: '11px',
+                      fontWeight: '700'
+                    }}
                     formatter={(val: number) => formatBDT(val)}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
@@ -531,7 +539,7 @@ export default function Dashboard() {
               {expenseDistribution.map((item, index) => (
                 <div key={item.name} className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{item.name}</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate max-w-[120px]">{item.name}</span>
                 </div>
               ))}
             </div>
@@ -555,7 +563,14 @@ export default function Dashboard() {
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
               <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px', backgroundColor: 'var(--tw-bg-opacity)' }}
+                contentStyle={{ 
+                  borderRadius: '16px', 
+                  border: 'none', 
+                  boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', 
+                  padding: '12px', 
+                  backgroundColor: 'var(--tooltip-bg)',
+                  color: 'var(--tooltip-text)'
+                }}
                 formatter={(val: number) => formatBDT(val)}
               />
               <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
@@ -574,7 +589,7 @@ export default function Dashboard() {
             <ClipboardList size={14} className="text-indigo-500" />
             Recent Financial Narrative
           </h3>
-          <Link to="/reports?tab=DAYBOOK" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:text-indigo-700 transition-colors">
+          <Link to="/reports?tab=DAYBOOK" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
             View Register <ArrowRight size={10} className="inline ml-1" />
           </Link>
         </div>
@@ -598,10 +613,10 @@ export default function Dashboard() {
                     <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] italic">{t.narration || t.vouchers?.narration || 'N/A'}</p>
                     <p className="text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest mt-0.5">Voucher: {t.vouchers?.voucher_no}</p>
                   </td>
-                  <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-rose-500">
+                  <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-rose-500 dark:text-rose-400">
                     {t.debit > 0 ? formatBDT(t.debit).replace(/[৳,]/g, '') : '-'}
                   </td>
-                  <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-emerald-500">
+                  <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-emerald-500 dark:text-emerald-400">
                     {t.credit > 0 ? formatBDT(t.credit).replace(/[৳,]/g, '') : '-'}
                   </td>
                 </tr>
@@ -682,12 +697,12 @@ export default function Dashboard() {
 
 function ReportShortcut({ title, desc, icon: Icon, to, color }: any) {
   const colors = {
-    indigo: "bg-indigo-50 text-indigo-600 border-indigo-100/50 hover:bg-indigo-100/50",
-    emerald: "bg-emerald-50 text-emerald-600 border-emerald-100/50 hover:bg-emerald-100/50",
-    amber: "bg-amber-50 text-amber-600 border-amber-100/50 hover:bg-amber-100/50",
-    rose: "bg-rose-50 text-rose-600 border-rose-100/50 hover:bg-rose-100/50",
-    slate: "bg-slate-50 text-slate-600 border-slate-100/50 hover:bg-slate-100/50",
-  }[color as keyof typeof colors] || "bg-slate-50 text-slate-600";
+    indigo: "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-100/50 dark:border-indigo-800/50 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/40",
+    emerald: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-100/50 dark:border-emerald-800/50 hover:bg-emerald-100/50 dark:hover:bg-emerald-900/40",
+    amber: "bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border-amber-100/50 dark:border-amber-800/50 hover:bg-amber-100/50 dark:hover:bg-amber-900/40",
+    rose: "bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 border-rose-100/50 dark:border-rose-800/50 hover:bg-rose-100/50 dark:hover:bg-rose-900/40",
+    slate: "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-100/50 dark:border-slate-800 hover:bg-slate-100/50 dark:hover:bg-slate-700",
+  }[color as keyof typeof colors] || "bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400";
 
   return (
     <Link 
@@ -698,14 +713,14 @@ function ReportShortcut({ title, desc, icon: Icon, to, color }: any) {
       )}
     >
       <div className="flex justify-between items-start">
-        <div className="p-2 bg-white rounded-lg shadow-sm">
+        <div className="p-2 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-transparent dark:border-slate-800">
           <Icon size={18} />
         </div>
         <ArrowRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
       </div>
-      <div>
-        <h4 className="text-xs font-bold uppercase tracking-wider mb-1">{title}</h4>
-        <p className="text-[9px] font-medium leading-tight opacity-70">{desc}</p>
+      <div className="mt-4">
+        <h4 className="text-xs font-bold uppercase tracking-wider mb-1 text-slate-800 dark:text-slate-100">{title}</h4>
+        <p className="text-[9px] font-medium leading-tight text-slate-400 dark:text-slate-500">{desc}</p>
       </div>
     </Link>
   );

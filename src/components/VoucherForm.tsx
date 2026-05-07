@@ -50,7 +50,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   const [voucherNo, setVoucherNo] = useState('');
   const [manualVoucherNo, setManualVoucherNo] = useState(false);
   const [narration, setNarration] = useState('');
-  const [isAutoNarration, setIsAutoNarration] = useState(!editingVoucher);
+  const [isAutoNarration, setIsAutoNarration] = useState(true);
   const [items, setItems] = useState<VoucherItemWithNarration[]>([
     { account_id: '', debit: 0, credit: 0, narration: '' }
   ]);
@@ -324,39 +324,35 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     generateVoucherNo();
   }, [type, selectedCompany]);
 
+  const isAutoBalancedType = type === 'PAYMENT' || type === 'RECEIPT';
+  const balancingAccount = isAutoBalancedType ? findAccountForChannel(channel) : null;
+
+  const getAutoBalanceAmount = () => {
+    if (type === 'PAYMENT') return items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
+    if (type === 'RECEIPT') return items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
+    return 0;
+  };
+
   // Enhanced Auto-Narration Logic - Only for Primary Narration
   useEffect(() => {
-    if (!isAutoNarration || (type !== 'PAYMENT' && type !== 'RECEIPT')) return;
+    if (!isAutoNarration || !isAutoBalancedType) return;
 
     const amount = getAutoBalanceAmount();
-    if (amount <= 0) {
-      setNarration('');
-      return;
-    }
-
     const paymentMethodLabel = PAYMENT_CHANNELS.find(c => c.value === channel)?.label || channel;
-    const formattedDate = format(new Date(date), 'dd-MMM-yyyy');
-    const uniqueLedgers = items
+    const ledgerNames = items
       .map(item => accounts.find(a => a.id === item.account_id)?.name)
-      .filter(Boolean)
-      .filter((v, i, a) => a.indexOf(v) === i) as string[];
-    
-    const maxLedgers = 2;
-    const ledgersStr = uniqueLedgers.length > maxLedgers 
-      ? uniqueLedgers.slice(0, maxLedgers).join(', ') + ' etc.'
-      : uniqueLedgers.join(', ');
-      
-    const count = items.filter(i => i.account_id).length;
+      .filter(Boolean) as string[];
 
-    const formattedAmount = new Intl.NumberFormat('en-IN', { 
-      minimumFractionDigits: 2, 
-      maximumFractionDigits: 2 
-    }).format(amount);
-
-    const newNarration = `${type} of ${formattedAmount} BDT via ${paymentMethodLabel} on ${formattedDate} for ${ledgersStr || '...'} (${count} entries).`;
+    const newNarration = batchOperations.generateVoucherNarration(
+      type,
+      amount,
+      paymentMethodLabel,
+      date,
+      ledgerNames
+    );
     
     setNarration(newNarration);
-  }, [type, channel, date, items, accounts, isAutoNarration]);
+  }, [type, channel, date, items, accounts, isAutoNarration, isAutoBalancedType]);
 
   const addItem = () => {
     setItems([...items, { account_id: '', debit: 0, credit: 0, narration: '' }]);
@@ -371,15 +367,6 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
     const newItems = [...items as any];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
-  };
-
-  const isAutoBalancedType = type === 'PAYMENT' || type === 'RECEIPT';
-  const balancingAccount = isAutoBalancedType ? findAccountForChannel(channel) : null;
-
-  const getAutoBalanceAmount = () => {
-    if (type === 'PAYMENT') return items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
-    if (type === 'RECEIPT') return items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
-    return 0;
   };
 
   const totalDebit = isAutoBalancedType 
@@ -521,10 +508,10 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   return (
     <>
       <div 
-        className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden max-w-5xl mx-auto"
+        className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden max-w-5xl mx-auto"
       >
         {/* Pro Header */}
-        <div className="px-6 py-3 bg-slate-900 text-white flex items-center justify-between">
+        <div className="px-6 py-3 bg-slate-900 dark:bg-slate-950 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-600/20">
               <BookOpen size={16} className="text-white" />
@@ -544,19 +531,19 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
         </div>
 
         <form ref={containerRef} onSubmit={handleSubmit} className="p-5 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-4 bg-slate-50/50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
             <div className="space-y-1">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block pl-1">Voucher Type</label>
+              <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">Voucher Type</label>
               <div className="relative group">
                 <select 
                   ref={firstInputRef}
-                  className="appearance-none w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900 cursor-pointer uppercase"
+                  className="appearance-none w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900 dark:text-slate-100 cursor-pointer uppercase"
                   value={type}
                   onChange={(e) => setType(e.target.value as VoucherType)}
                 >
                   {VOUCHER_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                 </select>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 dark:text-slate-600">
                   <ChevronDown size={11} />
                 </div>
               </div>
@@ -564,18 +551,18 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
 
             {type !== 'JOURNAL' && (
               <div className="space-y-1">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block pl-1">
+                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">
                   {type === 'CONTRA' ? 'Contra Hub' : (type === 'RECEIPT' ? 'Receipt Hub' : 'Payment Hub')}
                 </label>
                 <div className="relative group">
                   <select 
-                    className="appearance-none w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900 cursor-pointer uppercase"
+                    className="appearance-none w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900 dark:text-slate-100 cursor-pointer uppercase"
                     value={channel}
                     onChange={(e) => setChannel(e.target.value as PaymentChannel)}
                   >
                     {PAYMENT_CHANNELS.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                   </select>
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                  <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300 dark:text-slate-600">
                     <ChevronDown size={11} />
                   </div>
                 </div>
@@ -583,10 +570,10 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
             )}
 
             <div className="space-y-1">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block pl-1">Posting Date</label>
+              <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">Posting Date</label>
               <input 
                 type="date"
-                className="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900"
+                className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-1.5 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-bold text-slate-900 dark:text-slate-100"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
               />
@@ -594,15 +581,15 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
 
             <div className="space-y-1">
               <div className="flex items-center justify-between px-1">
-                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Reference</label>
+                <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block">Reference</label>
                 {!manualVoucherNo && (
-                    <button type="button" onClick={() => setManualVoucherNo(true)} className="text-[8px] font-black text-indigo-500 hover:text-indigo-700 uppercase tracking-tighter">Edit</button>
+                    <button type="button" onClick={() => setManualVoucherNo(true)} className="text-[8px] font-black text-indigo-500 hover:text-indigo-400 uppercase tracking-tighter">Edit</button>
                 )}
               </div>
               <input 
                 className={cn(
                   "w-full border rounded-lg px-3 py-1.5 text-[11px] outline-none transition-all font-mono font-bold",
-                  manualVoucherNo ? "bg-white border-slate-300 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 text-slate-900" : "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
+                  manualVoucherNo ? "bg-white dark:bg-slate-950 border-slate-300 dark:border-slate-700 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 text-slate-900 dark:text-slate-100" : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed"
                 )}
                 value={voucherNo}
                 onChange={(e) => setVoucherNo(e.target.value)}
@@ -614,46 +601,46 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
 
           {/* Consolidated Ledger Section */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-[10px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+              <h3 className="text-[10px] font-black text-slate-900 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
                 Transaction Ledger
-                <span className="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded">
+                <span className="text-[9px] font-bold px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 rounded">
                   {items.length} Nodes
                 </span>
               </h3>
               <button 
                 type="button" 
                 onClick={addItem}
-                className="flex items-center gap-1.5 bg-slate-900 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 transition-all shadow-sm active:scale-95"
+                className="flex items-center gap-1.5 bg-slate-900 dark:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-slate-800 dark:hover:bg-indigo-500 transition-all shadow-sm active:scale-95"
               >
                 <Plus size={13} /> Add Entry
               </button>
             </div>
 
-            <div className="bg-white border border-slate-100 rounded-xl shadow-sm">
+            <div className="bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-xl shadow-sm">
               <div className="overflow-visible">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="bg-slate-50/50 border-b border-slate-100">
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest w-10 text-center">#</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Account Ledger</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest w-36 text-right">Debit (৳)</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest w-36 text-right">Credit (৳)</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest">Narration</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest w-10 text-center"></th>
+                    <tr className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
+                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-10 text-center">#</th>
+                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Account Ledger</th>
+                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-36 text-right">Debit (৳)</th>
+                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-36 text-right">Credit (৳)</th>
+                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Narration</th>
+                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-10 text-center"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-900">
                     {items.map((item, index) => (
-                      <tr key={index} className="group hover:bg-slate-50/10 transition-colors">
-                        <td className="px-4 py-1.5 text-[10px] font-mono text-slate-300 text-center font-bold">{index + 1}</td>
+                      <tr key={index} className="group hover:bg-slate-50/10 dark:hover:bg-slate-800/10 transition-colors">
+                        <td className="px-4 py-1.5 text-[10px] font-mono text-slate-300 dark:text-slate-700 text-center font-bold">{index + 1}</td>
                         <td className="px-4 py-1.5">
                           <div className="relative">
                             <div 
                               tabIndex={0}
                               className={cn(
-                                "w-full bg-slate-50/20 border rounded-lg px-3 py-1.5 text-[11px] transition-all font-bold flex items-center justify-between cursor-pointer group-hover:bg-white outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500",
-                                activeAccountSearch?.index === index ? "border-indigo-500 bg-white ring-4 ring-indigo-500/5 shadow-sm" : "border-slate-100"
+                                "w-full bg-slate-50/20 dark:bg-slate-900/20 border rounded-lg px-3 py-1.5 text-[11px] transition-all font-bold flex items-center justify-between cursor-pointer group-hover:bg-white dark:group-hover:bg-slate-900 outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500",
+                                activeAccountSearch?.index === index ? "border-indigo-500 dark:border-indigo-400 bg-white dark:bg-slate-900 ring-4 ring-indigo-500/5 shadow-sm" : "border-slate-100 dark:border-slate-800"
                               )}
                               onClick={(e) => openSearch(index, e)}
                               onKeyDown={(e) => {
@@ -664,13 +651,13 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                               }}
                             >
                               <div className="flex flex-col truncate pr-3">
-                                <span className={cn("truncate", item.account_id ? "text-slate-900" : "text-slate-300")}>
+                                <span className={cn("truncate", item.account_id ? "text-slate-900 dark:text-slate-100" : "text-slate-300 dark:text-slate-700")}>
                                   {item.account_id 
                                     ? accounts.find(a => a.id === item.account_id)?.name 
                                     : "Select Ledger..."}
                                 </span>
                               </div>
-                              <Search size={10} className={cn(activeAccountSearch?.index === index ? "text-indigo-500" : "text-slate-300")} />
+                              <Search size={10} className={cn(activeAccountSearch?.index === index ? "text-indigo-500 dark:text-indigo-400" : "text-slate-300 dark:text-slate-700")} />
                             </div>
 
                             {activeAccountSearch?.index === index && createPortal(
@@ -683,14 +670,14 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                     width: activeAccountSearch.rect?.width,
                                     zIndex: 9999
                                   }}
-                                  className="bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-xl overflow-hidden mt-1 animate-in fade-in zoom-in-95 duration-100"
+                                  className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-[0_20px_50px_rgba(0,0,0,0.2)] rounded-xl overflow-hidden mt-1 animate-in fade-in zoom-in-95 duration-100"
                                 >
-                                  <div className="p-2 border-b border-slate-50 bg-slate-50/50">
+                                  <div className="p-2 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                                     <div className="relative">
-                                      <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                      <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
                                       <input 
                                         ref={searchInputRef}
-                                        className="w-full bg-white border border-slate-200 rounded-lg pl-8 pr-4 py-1.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium placeholder:text-slate-300"
+                                        className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg pl-8 pr-4 py-1.5 text-[11px] outline-none focus:ring-2 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium placeholder:text-slate-300 dark:placeholder:text-slate-600 text-slate-900 dark:text-slate-100"
                                         placeholder="Type name or code..."
                                         value={activeAccountSearch.query}
                                         onChange={(e) => {
@@ -746,7 +733,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                     {(() => {
                                       if (filteredAccounts.length === 0) {
                                         return (
-                                          <div className="py-6 text-center text-[9px] font-medium text-slate-300 uppercase tracking-widest">
+                                          <div className="py-6 text-center text-[9px] font-medium text-slate-300 dark:text-slate-700 uppercase tracking-widest">
                                             No Ledgers Found
                                           </div>
                                         );
@@ -775,14 +762,14 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                             }}
                                             className={cn(
                                               "w-full text-left px-2 py-1.5 rounded-lg border border-transparent group flex items-center justify-between transition-all mb-2",
-                                              selectedIndex === 0 ? "bg-rose-50 border-rose-100" : "hover:bg-rose-50 hover:border-rose-100"
+                                              selectedIndex === 0 ? "bg-rose-50 dark:bg-rose-900/20 border-rose-100 dark:border-rose-900/40" : "hover:bg-rose-50 dark:hover:bg-rose-900/20 hover:border-rose-100 dark:hover:border-rose-900/40"
                                             )}
                                           >
-                                            <span className={cn("text-[10px] font-semibold tracking-tight", selectedIndex === 0 ? "text-rose-600" : "text-rose-500")}>No Selection</span>
+                                            <span className={cn("text-[10px] font-semibold tracking-tight", selectedIndex === 0 ? "text-rose-600 dark:text-rose-400" : "text-rose-500 dark:text-rose-500")}>No Selection</span>
                                           </button>
                                           {groups.map(group => (
                                             <div key={group.value} className="mb-1 last:mb-0">
-                                              <div className="px-2 py-1 text-[7px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-0.5">{group.label}</div>
+                                              <div className="px-2 py-1 text-[7px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-0.5">{group.label}</div>
                                               {group.accounts.map(a => {
                                                 const globalIndex = filteredAccounts.indexOf(a) + 1;
                                                 const isSelected = selectedIndex === globalIndex;
@@ -800,22 +787,22 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                                                       "w-full text-left px-2 py-1.5 rounded-lg group flex items-center justify-between transition-all outline-none",
                                                       isSelected 
                                                         ? "bg-indigo-600 shadow-md scale-[1.02] ring-2 ring-indigo-300 ring-offset-1" 
-                                                        : "hover:bg-indigo-50 border border-transparent"
+                                                        : "hover:bg-indigo-50 dark:hover:bg-indigo-900/20 border border-transparent"
                                                     )}
                                                   >
                                                     <div className="flex flex-col">
                                                       <span className={cn(
                                                         "text-[10px] font-medium tracking-tight",
-                                                        isSelected ? "text-white" : "text-slate-700"
+                                                        isSelected ? "text-white" : "text-slate-700 dark:text-slate-300"
                                                       )}>{a.name}</span>
                                                       <span className={cn(
                                                         "text-[8px] font-mono tracking-widest",
-                                                        isSelected ? "text-indigo-100" : "text-slate-400"
+                                                        isSelected ? "text-indigo-100" : "text-slate-400 dark:text-slate-500"
                                                       )}>{a.code}</span>
                                                     </div>
                                                     <Plus size={10} className={cn(
                                                       "transition-all",
-                                                      isSelected ? "text-white opacity-100" : "text-slate-300 opacity-0 group-hover:opacity-100"
+                                                      isSelected ? "text-white opacity-100" : "text-slate-300 dark:text-slate-600 opacity-0 group-hover:opacity-100"
                                                     )} />
                                                   </button>
                                                 );
@@ -837,8 +824,8 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                             step="0.01"
                             placeholder="0.00"
                             className={cn(
-                              "w-full border rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 group-hover:bg-white",
-                              type === 'RECEIPT' ? "bg-slate-100 border-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-50/20 border-slate-100 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
+                              "w-full border rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 group-hover:bg-white dark:group-hover:bg-slate-900",
+                              type === 'RECEIPT' ? "bg-slate-100 dark:bg-slate-800 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-slate-50/20 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
                             )}
                             value={item.debit === 0 ? '' : item.debit}
                             onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
@@ -859,8 +846,8 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                             step="0.01"
                             placeholder="0.00"
                             className={cn(
-                              "w-full border rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 group-hover:bg-white",
-                              type === 'PAYMENT' ? "bg-slate-100 border-slate-100 text-slate-400 cursor-not-allowed" : "bg-slate-50/20 border-slate-100 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
+                              "w-full border rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 group-hover:bg-white dark:group-hover:bg-slate-900",
+                              type === 'PAYMENT' ? "bg-slate-100 dark:bg-slate-800 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-slate-50/20 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
                             )}
                             value={item.credit === 0 ? '' : item.credit}
                             onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
@@ -877,7 +864,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                         </td>
                         <td className="px-4 py-1.5">
                           <input 
-                            className="w-full bg-slate-50/20 border border-slate-100 rounded-lg px-3 py-1 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium text-slate-700 group-hover:bg-white"
+                            className="w-full bg-slate-50/20 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium text-slate-700 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-900"
                             placeholder="Entry detail..."
                             value={item.narration}
                             onChange={(e) => updateItem(index, 'narration', e.target.value)}
@@ -895,7 +882,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                             <button 
                               type="button" 
                               onClick={() => removeItem(index)}
-                              className="p-1 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded transition-all active:scale-90"
+                              className="p-1 text-slate-300 dark:text-slate-600 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded transition-all active:scale-90"
                             >
                               <Trash2 size={12} />
                             </button>
@@ -903,16 +890,57 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                         </td>
                       </tr>
                     ))}
+
+                    {/* Auto-balancing Row (Requirement 1) */}
+                    {isAutoBalancedType && balancingAccount && (
+                      <tr className="bg-indigo-50/30 dark:bg-indigo-900/10 border-t border-indigo-100/50 dark:border-indigo-800/30">
+                        <td className="px-4 py-1.5 text-center">
+                          <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center mx-auto shadow-sm">
+                            <BookOpen size={10} className="text-white" />
+                          </div>
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <div className="flex flex-col">
+                            <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-100">{balancingAccount.name}</span>
+                            <span className="text-[8px] font-black text-indigo-400 dark:text-indigo-500 uppercase tracking-widest leading-none">System Balanced Account</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <input 
+                            readOnly
+                            className="w-full bg-indigo-50/50 dark:bg-slate-900 border border-indigo-100 dark:border-indigo-800 rounded-lg px-3 py-1 text-[11px] text-right transition-all font-mono font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-not-allowed"
+                            value={type === 'RECEIPT' ? (getAutoBalanceAmount() || '') : ''}
+                            placeholder="0.00"
+                          />
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <input 
+                            readOnly
+                            className="w-full bg-indigo-50/50 dark:bg-slate-900 border border-indigo-100 dark:border-indigo-800 rounded-lg px-3 py-1 text-[11px] text-right transition-all font-mono font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-not-allowed"
+                            value={type === 'PAYMENT' ? (getAutoBalanceAmount() || '') : ''}
+                            placeholder="0.00"
+                          />
+                        </td>
+                        <td className="px-4 py-1.5">
+                          <input 
+                            readOnly
+                            className="w-full bg-indigo-50/20 dark:bg-slate-900 border border-indigo-100/30 dark:border-indigo-800/30 rounded-lg px-3 py-1 text-[11px] outline-none font-medium italic text-indigo-400/80 dark:text-indigo-500/60 cursor-not-allowed"
+                            value="Auto-generated flow"
+                          />
+                        </td>
+                        <td className="px-4 py-1.5 text-center"></td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
               
               {/* Secondary Add Button for easier workflow */}
-              <div className="p-2 border-t border-slate-50 bg-slate-50/10 flex justify-center">
+              <div className="p-2 border-t border-slate-50 dark:border-slate-800 bg-slate-50/10 dark:bg-slate-800/10 flex justify-center">
                 <button 
                   type="button" 
                   onClick={addItem}
-                  className="flex items-center gap-1.5 bg-white text-indigo-600 border border-indigo-100 px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-indigo-50 transition-all active:scale-95"
+                  className="flex items-center gap-1.5 bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 px-4 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-indigo-900/50 transition-all active:scale-95"
                 >
                   <Plus size={12} /> Add Entry
                 </button>
@@ -923,9 +951,9 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
           {/* Lower Narrative & Footer */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
             <div className="space-y-1">
-              <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest block pl-1">Primary Narration</label>
+              <label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">Primary Narration</label>
               <textarea 
-                className="w-full bg-slate-50/30 border border-slate-100 rounded-xl px-4 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all resize-none h-20 font-medium leading-relaxed"
+                className="w-full bg-slate-50/30 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800 rounded-xl px-4 py-2 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all resize-none h-20 font-medium leading-relaxed text-slate-700 dark:text-slate-100 placeholder:text-slate-300 dark:placeholder:text-slate-600"
                 value={narration}
                 onChange={(e) => {
                   setNarration(e.target.value);
@@ -942,27 +970,27 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 5 }}
-                      className="bg-indigo-50/50 border border-indigo-100/50 rounded-xl px-4 py-2 flex items-center justify-between"
+                      className="bg-indigo-50/50 dark:bg-indigo-900/20 border border-indigo-100/50 dark:border-indigo-800/30 rounded-xl px-4 py-2 flex items-center justify-between"
                     >
                       <div className="flex flex-col">
-                        <span className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-0.5 pl-0.5">Auto-Balanced Account</span>
-                        <span className="text-[11px] font-bold text-indigo-900 leading-tight">{balancingAccount.name}</span>
+                        <span className="text-[8px] font-black text-indigo-400 dark:text-indigo-500 uppercase tracking-widest mb-0.5 pl-0.5">Auto-Balanced Account</span>
+                        <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-100 leading-tight">{balancingAccount.name}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[14px] font-mono font-bold text-indigo-600 tracking-tight tabular-nums">{formatBDT(getAutoBalanceAmount())}</span>
+                        <span className="text-[14px] font-mono font-bold text-indigo-600 dark:text-indigo-400 tracking-tight tabular-nums">{formatBDT(getAutoBalanceAmount())}</span>
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                <div className="bg-slate-900 rounded-xl p-4 text-white shadow-lg relative overflow-hidden group">
+                <div className="bg-slate-900 dark:bg-slate-950 rounded-xl p-4 text-white shadow-lg relative overflow-hidden group">
                   <div className="relative z-10 grid grid-cols-2 gap-4 divide-x divide-white/10">
                     <div className="space-y-0.5">
-                      <span className="text-[8px] font-bold text-indigo-300 uppercase tracking-widest block">Total Debit</span>
+                      <span className="text-[8px] font-bold text-indigo-300 dark:text-indigo-400 uppercase tracking-widest block">Total Debit</span>
                       <span className="text-lg font-bold font-mono tracking-tight tabular-nums">{formatBDT(totalDebit)}</span>
                     </div>
                     <div className="space-y-0.5 pl-4">
-                      <span className="text-[8px] font-bold text-indigo-300 uppercase tracking-widest block">Total Credit</span>
+                      <span className="text-[8px] font-bold text-indigo-300 dark:text-indigo-400 uppercase tracking-widest block">Total Credit</span>
                       <span className="text-lg font-bold font-mono tracking-tight tabular-nums">{formatBDT(totalCredit)}</span>
                     </div>
                   </div>
@@ -982,7 +1010,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                       <button 
                         disabled={loading || !isBalanced || Math.max(totalDebit, totalCredit) <= 0}
                         type="submit"
-                        className="bg-white text-slate-900 px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-all shadow-sm active:scale-95 disabled:grayscale disabled:opacity-50 flex items-center gap-1.5"
+                        className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-slate-700 transition-all shadow-sm active:scale-95 disabled:grayscale disabled:opacity-50 flex items-center gap-1.5 border dark:border-slate-700"
                       >
                         <Save size={13} /> {loading ? 'Wait...' : (editingVoucher ? 'Update' : 'Post')}
                       </button>

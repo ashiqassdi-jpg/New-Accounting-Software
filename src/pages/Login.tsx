@@ -90,17 +90,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fcfcfb] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[#fcfcfb] dark:bg-slate-950 relative overflow-hidden">
       {/* Background Orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-50/50 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-50/50 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-50/50 dark:bg-indigo-900/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-rose-50/50 dark:bg-rose-900/10 rounded-full blur-[120px] pointer-events-none" />
       
       <motion.div
         layout
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="max-w-md w-full space-y-8 bg-white/80 backdrop-blur-xl p-10 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-white relative z-10"
+        className="max-w-md w-full space-y-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl p-10 rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-white dark:border-slate-800 relative z-10"
       >
         <div>
           <div className="flex justify-center">
@@ -108,15 +108,15 @@ export default function Login() {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="bg-slate-900 p-4 rounded-2xl shadow-xl shadow-slate-200"
+              className="bg-slate-900 dark:bg-indigo-600 p-4 rounded-2xl shadow-xl shadow-slate-200 dark:shadow-none"
             >
               <Lock className="h-7 w-7 text-white" />
             </motion.div>
           </div>
-          <h2 className="mt-8 text-center text-4xl font-serif font-bold text-slate-900 tracking-tight">
+          <h2 className="mt-8 text-center text-4xl font-serif font-bold text-slate-900 dark:text-slate-100 tracking-tight">
             Ashiq's Creation
           </h2>
-          <p className="mt-3 text-center text-sm text-slate-500 font-medium tracking-wide">
+          <p className="mt-3 text-center text-sm text-slate-500 dark:text-slate-400 font-medium tracking-wide">
             {mode === 'signin' ? 'Welcome back to your dashboard' : 'Join our professional accounting network'}
           </p>
         </div>
@@ -137,7 +137,7 @@ export default function Login() {
                     name="name"
                     type="text"
                     required
-                    className="appearance-none relative block w-full px-12 py-4 border border-slate-100 placeholder-slate-400 text-slate-900 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all sm:text-sm font-medium bg-slate-50/30"
+                    className="appearance-none relative block w-full px-12 py-4 border border-slate-100 dark:border-slate-800 placeholder-slate-400 text-slate-900 dark:text-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 dark:focus:ring-indigo-500/10 focus:border-slate-900 dark:focus:border-indigo-500 transition-all sm:text-sm font-medium bg-slate-50/30 dark:bg-slate-800/50"
                     placeholder="Full Name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -159,7 +159,7 @@ export default function Login() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none relative block w-full px-12 py-4 border border-slate-100 placeholder-slate-400 text-slate-900 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all sm:text-sm font-medium bg-slate-50/30"
+                className="appearance-none relative block w-full px-12 py-4 border border-slate-100 dark:border-slate-800 placeholder-slate-400 text-slate-900 dark:text-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 dark:focus:ring-indigo-500/10 focus:border-slate-900 dark:focus:border-indigo-500 transition-all sm:text-sm font-medium bg-slate-50/30 dark:bg-slate-800/50"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -179,7 +179,7 @@ export default function Login() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none relative block w-full px-12 py-4 border border-slate-100 placeholder-slate-400 text-slate-900 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 transition-all sm:text-sm font-medium bg-slate-50/30"
+                className="appearance-none relative block w-full px-12 py-4 border border-slate-100 dark:border-slate-800 placeholder-slate-400 text-slate-900 dark:text-slate-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-slate-900/5 dark:focus:ring-indigo-500/10 focus:border-slate-900 dark:focus:border-indigo-500 transition-all sm:text-sm font-medium bg-slate-50/30 dark:bg-slate-800/50"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -193,7 +193,7 @@ export default function Login() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex items-center gap-2 bg-rose-50 text-rose-600 p-4 rounded-2xl text-xs font-bold border border-rose-100 italic"
+                className="flex items-center gap-2 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 p-4 rounded-2xl text-xs font-bold border border-rose-100 dark:border-rose-900/30 italic"
               >
                 <AlertCircle size={16} />
                 <span>{error}</span>
@@ -205,7 +205,7 @@ export default function Login() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="flex items-center gap-2 bg-emerald-50 text-emerald-600 p-4 rounded-2xl text-xs font-bold border border-emerald-100"
+                className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 p-4 rounded-2xl text-xs font-bold border border-emerald-100 dark:border-emerald-900/30"
               >
                 <CheckCircle2 size={16} />
                 <span>{success}</span>
@@ -217,7 +217,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-4.5 px-4 border border-transparent text-[15px] font-bold rounded-2xl text-white bg-slate-900 hover:bg-black focus:outline-none focus:ring-4 focus:ring-slate-900/10 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-slate-200"
+              className="group relative w-full flex justify-center py-4.5 px-4 border border-transparent text-[15px] font-bold rounded-2xl text-white bg-slate-900 dark:bg-indigo-600 hover:bg-black dark:hover:bg-indigo-500 focus:outline-none focus:ring-4 focus:ring-slate-900/10 dark:focus:ring-indigo-900/10 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-slate-200 dark:shadow-none"
             >
               {loading 
                 ? (mode === 'signin' ? 'Securing entrance...' : 'Building profile...') 
@@ -231,7 +231,7 @@ export default function Login() {
                 setError(null);
                 setSuccess(null);
               }}
-              className="w-full text-center text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors uppercase tracking-widest text-[10px]"
+              className="w-full text-center text-sm font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors uppercase tracking-widest text-[10px]"
             >
               {mode === 'signin' 
                 ? "Don't have an account? Join us" 
