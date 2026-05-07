@@ -7,6 +7,7 @@ import React from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import { useAuth } from '../../hooks/useAuth';
+import ThemeSwitcher from '../ThemeSwitcher';
 import { useNavigate } from 'react-router-dom';
 
 export default function DashboardLayout() {
@@ -26,9 +27,12 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex bg-[#F9FAFB] min-h-screen">
+    <div className="flex bg-slate-50 dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-100">
       <Sidebar />
       <main className="flex-1 overflow-y-auto max-h-screen h-screen">
+        <header className="flex justify-end p-4">
+          <ThemeSwitcher />
+        </header>
         <div className="px-5 py-6 md:px-8 w-full max-w-[1600px] mx-auto">
           <Outlet />
         </div>

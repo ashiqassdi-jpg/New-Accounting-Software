@@ -7,6 +7,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import { CompanyProvider } from './hooks/useCompany';
+import { ThemeProvider } from './context/ThemeContext';
 import KeyboardManager from './components/KeyboardManager';
 import DashboardLayout from './components/layout/DashboardLayout';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,33 +29,35 @@ export default function App() {
   return (
     <AuthProvider>
       <CompanyProvider>
-        <Toaster position="top-right" richColors />
-        <BrowserRouter>
-          <KeyboardManager />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            
-            <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="vouchers" element={<Vouchers />} />
-              <Route path="coa" element={<ChartOfAccounts />} />
-              <Route path="ledger" element={<Ledger />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="companies" element={<Companies />} />
-              <Route 
-                path="users" 
-                element={
-                  <ProtectedRoute requiredRole="ADMIN">
-                    <UserManagement />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route path="settings" element={<Settings />} />
-            </Route>
+        <ThemeProvider>
+          <Toaster position="top-right" richColors />
+          <BrowserRouter>
+            <KeyboardManager />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              
+              <Route path="/" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="vouchers" element={<Vouchers />} />
+                <Route path="coa" element={<ChartOfAccounts />} />
+                <Route path="ledger" element={<Ledger />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="companies" element={<Companies />} />
+                <Route 
+                  path="users" 
+                  element={
+                    <ProtectedRoute requiredRole="ADMIN">
+                      <UserManagement />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route path="settings" element={<Settings />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+        </ThemeProvider>
       </CompanyProvider>
     </AuthProvider>
   );
