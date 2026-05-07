@@ -32,6 +32,7 @@ import {
   Legend
 } from 'recharts';
 import { DateRangeFilter } from '../components/DateRangeFilter';
+import ThemeSwitcher from '../components/ThemeSwitcher';
 import { motion } from 'motion/react';
 import { StatCard } from '../components/dashboard/StatCard';
 import { ChartBox } from '../components/dashboard/ChartBox';
@@ -424,11 +425,12 @@ export default function Dashboard() {
             >
               Sync
             </button>
+            <ThemeSwitcher />
           </div>
 
           <button 
             onClick={() => window.print()}
-            className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-slate-600 transition-colors shadow-sm no-print"
+            className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors shadow-sm no-print"
             title="Print Dashboard"
           >
             <Printer size={20} />
@@ -518,18 +520,18 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', backgroundColor: 'var(--tw-bg-opacity)' }}
                     formatter={(val: number) => formatBDT(val)}
                   />
                   <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{ fontSize: '9px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            <div className="shrink-0 space-y-3 px-6 border-l border-slate-50 md:min-w-[200px]">
+            <div className="shrink-0 space-y-3 px-6 border-l border-slate-50 dark:border-slate-800 md:min-w-[200px]">
               {expenseDistribution.map((item, index) => (
                 <div key={item.name} className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }}></div>
-                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{item.name}</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{item.name}</span>
                 </div>
               ))}
             </div>
@@ -549,11 +551,11 @@ export default function Dashboard() {
                   <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:stroke-slate-800" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#64748b', fontWeight: 600 }} tickFormatter={(val) => `৳${val/1000}k`} />
               <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px' }}
+                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)', padding: '12px', backgroundColor: 'var(--tw-bg-opacity)' }}
                 formatter={(val: number) => formatBDT(val)}
               />
               <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
@@ -566,35 +568,35 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden mb-8">
-        <div className="p-6 border-b border-slate-50 flex items-center justify-between">
-          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-widest flex items-center gap-2">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden mb-8">
+        <div className="p-6 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+          <h3 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest flex items-center gap-2">
             <ClipboardList size={14} className="text-indigo-500" />
             Recent Financial Narrative
           </h3>
-          <Link to="/reports?tab=DAYBOOK" className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest hover:text-indigo-700 transition-colors">
+          <Link to="/reports?tab=DAYBOOK" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest hover:text-indigo-700 transition-colors">
             View Register <ArrowRight size={10} className="inline ml-1" />
           </Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="bg-slate-50/50">
-                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Date</th>
-                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Account</th>
-                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Description</th>
-                <th className="px-6 py-4 text-right text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Debit</th>
-                <th className="px-6 py-4 text-right text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em]">Credit</th>
+              <tr className="bg-slate-50/50 dark:bg-slate-800/50">
+                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Date</th>
+                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Account</th>
+                <th className="px-6 py-4 text-left text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Description</th>
+                <th className="px-6 py-4 text-right text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Debit</th>
+                <th className="px-6 py-4 text-right text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Credit</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
               {recentTransactions.map((t) => (
-                <tr key={t.id} className="hover:bg-slate-50/30 transition-colors">
-                  <td className="px-6 py-4 text-[11px] font-medium text-slate-500">{format(new Date(t.date), 'dd MMM')}</td>
-                  <td className="px-6 py-4 text-[11px] font-bold text-slate-700 uppercase tracking-tight">{t.accounts?.name}</td>
+                <tr key={t.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-800/30 transition-colors">
+                  <td className="px-6 py-4 text-[11px] font-medium text-slate-500 dark:text-slate-400">{format(new Date(t.date), 'dd MMM')}</td>
+                  <td className="px-6 py-4 text-[11px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-tight">{t.accounts?.name}</td>
                   <td className="px-6 py-4">
-                    <p className="text-[11px] text-slate-500 truncate max-w-[200px] italic">{t.narration || t.vouchers?.narration || 'N/A'}</p>
-                    <p className="text-[9px] font-bold text-slate-300 uppercase tracking-widest mt-0.5">Voucher: {t.vouchers?.voucher_no}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate max-w-[200px] italic">{t.narration || t.vouchers?.narration || 'N/A'}</p>
+                    <p className="text-[9px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-widest mt-0.5">Voucher: {t.vouchers?.voucher_no}</p>
                   </td>
                   <td className="px-6 py-4 text-right text-[11px] font-mono font-bold text-rose-500">
                     {t.debit > 0 ? formatBDT(t.debit).replace(/[৳,]/g, '') : '-'}
@@ -606,7 +608,7 @@ export default function Dashboard() {
               ))}
               {recentTransactions.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-[10px] font-bold text-slate-300 uppercase tracking-widest italic">
+                  <td colSpan={5} className="px-6 py-12 text-center text-[10px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-widest italic">
                     No recent digital footprints found
                   </td>
                 </tr>
@@ -620,16 +622,17 @@ export default function Dashboard() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-slate-800 uppercase tracking-[0.2em] flex items-center gap-2">
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-200 uppercase tracking-[0.2em] flex items-center gap-2">
               <ClipboardList size={14} className="text-indigo-500" />
               Financial Intelligence Hub
             </h2>
             <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-widest mt-1">Direct access to regulatory & analytical reporting</p>
           </div>
         </div>
-
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <ReportShortcut 
+            ... 
+      <ReportShortcut 
             title="Daybook Register" 
             desc="Chronological audit trail of all events"
             icon={BookOpen}
