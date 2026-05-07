@@ -14,21 +14,22 @@ export interface ExportData {
   numericColumns?: number[]; // indices of numeric columns for alignment and formatting
 }
 
+const formatNumberPDF = (num: any) => {
+  const val = getRawNumber(num);
+  if (val === 0) return '-';
+  return val.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 const formatNumber = (num: any) => {
-  if (typeof num === 'number') {
-    return '৳ ' + num.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
-  const parsed = parseFloat(String(num).replace(/[,৳ ]/g, ''));
-  if (!isNaN(parsed)) {
-    return '৳ ' + parsed.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  }
-  return num || '-';
+  const val = getRawNumber(num);
+  if (val === 0) return '-';
+  return '৳ ' + val.toLocaleString('en-IN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 };
 
 const getRawNumber = (num: any): number => {
@@ -77,7 +78,7 @@ export const ExportService = {
     // Table Data Formatting
     const formattedData = config.data.map(row => 
         row.map((cell, idx) => 
-            config.numericColumns?.includes(idx) ? formatNumber(cell) : cell
+            config.numericColumns?.includes(idx) ? formatNumberPDF(cell) : cell
         )
     );
 
@@ -85,8 +86,20 @@ export const ExportService = {
     const columnStyles: any = {};
     if (config.numericColumns) {
         config.numericColumns.forEach(idx => {
-            columnStyles[idx] = { halign: 'right' };
+            columnStyles[idx] = { 
+                halign: 'right',
+                cellWidth: 'wrap', // Minimize width to fit content
+                minCellWidth: 20   // But ensure at least enough for typical amounts
+            };
         });
+    }
+
+    // Special case for Narration/Particulars - allow it to grow
+    const textColIdx = config.columns.findIndex(c => 
+        ['Narration', 'Particulars', 'Account', 'Description'].includes(c)
+    );
+    if (textColIdx !== -1) {
+        columnStyles[textColIdx] = { cellWidth: 'auto' };
     }
 
     autoTable(doc, {
@@ -96,10 +109,11 @@ export const ExportService = {
       theme: 'grid',
       styles: {
         font: 'times',
-        fontSize: 10,
-        cellPadding: 4,
+        fontSize: 9, // Slightly smaller for better fit
+        cellPadding: 2,
         lineColor: [200, 200, 200],
         lineWidth: 0.1,
+        overflow: 'linebreak'
       },
       headStyles: {
         fillColor: [30, 41, 59], // Slate 900
@@ -277,12 +291,14 @@ export const ExportService = {
                 
                 if (cellData !== undefined && cellData !== null && config.numericColumns?.includes(colIdx)) {
                     const numericValue = getRawNumber(cellData);
-                    cell.value = numericValue;
-                    cell.numFmt = '[$৳-bn-BD] #,##0.00';
+                    if (numericValue === 0) {
+                        cell.value = null; // Blank for zero
+                    } else {
+                        cell.value = numericValue;
+                        cell.numFmt = '#,##0.00;(#,##0.00);"-"';
+                        totalRowSums[colIdx] += numericValue;
+                    }
                     cell.alignment = { horizontal: 'right', vertical: 'middle' };
-                    // We only accumulate if this is not likely a subtotal row itself. 
-                    // To be safe and simple, we'll accumulate everything, but we will disable the global subtotal for P&L/Balance Sheet later
-                    totalRowSums[colIdx] += numericValue;
                 } else {
                     cell.value = cellData || '';
                     if (row[0] && String(row[0]).toLowerCase().includes('total')) {
@@ -328,8 +344,13 @@ export const ExportService = {
                  cell.value = 'Total';
                  cell.alignment = { horizontal: 'center', vertical: 'middle' };
              } else if (config.numericColumns?.includes(colIdx)) {
-                 cell.value = totalRowSums[colIdx];
-                 cell.numFmt = '[$৳-bn-BD] #,##0.00';
+                 const totalValue = totalRowSums[colIdx];
+                 if (totalValue === 0) {
+                     cell.value = null;
+                 } else {
+                     cell.value = totalValue;
+                     cell.numFmt = '#,##0.00;(#,##0.00);"-"';
+                 }
                  cell.alignment = { horizontal: 'right', vertical: 'middle' };
                  // For running balances, a simple sum might be misleading, 
                  // but typically total debit/credit makes sense.
