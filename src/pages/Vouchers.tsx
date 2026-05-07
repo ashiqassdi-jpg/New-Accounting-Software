@@ -20,9 +20,7 @@ import { format } from 'date-fns';
 import { useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import { ExportService } from '../services/ExportService';
 
 export default function Vouchers() {
   const { user, profile, canEdit, canDelete, canAdd } = useAuth();
@@ -190,47 +188,46 @@ export default function Vouchers() {
   );
 
   const handleExportPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Ashiq's Creation", 14, 15);
-    doc.setFontSize(14);
-    doc.text(selectedCompany?.name || '', 14, 25);
-    doc.setFontSize(12);
-    doc.text('Voucher Register', 14, 35);
-    
     const columns = ['Type', 'Date', 'Voucher Number', 'Narration', 'Amount'];
     const body = filteredVouchers.map(v => [
       v.type,
       format(new Date(v.date), 'dd/MM/yyyy'),
       v.voucher_no,
       v.narration,
-      new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(v.amount)
+      v.amount || 0
     ]);
 
-    autoTable(doc, {
-      head: [columns],
-      body: body,
-      startY: 45,
-      theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241] },
-      styles: { fontSize: 8 }
+    ExportService.exportToPDF({
+        title: 'Voucher Register',
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA',
+        dateRange: confirmedDateRange,
+        columns,
+        data: body,
+        filename: 'vouchers',
+        numericColumns: [4]
     });
-
-    doc.save(`vouchers_${format(new Date(), 'yyyyMMdd')}.pdf`);
   };
 
   const handleExportExcel = () => {
-    const data = filteredVouchers.map(v => ({
-      Type: v.type,
-      Date: format(new Date(v.date), 'dd/MM/yyyy'),
-      'Voucher No': v.voucher_no,
-      Narration: v.narration,
-      Amount: v.amount
-    }));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Vouchers");
-    XLSX.writeFile(wb, `vouchers.xlsx`);
+    const body = filteredVouchers.map(v => [
+      v.type,
+      format(new Date(v.date), 'dd/MM/yyyy'),
+      v.voucher_no,
+      v.narration,
+      v.amount || 0
+    ]);
+    
+    ExportService.exportToExcel({
+        title: 'Voucher Register',
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA',
+        dateRange: confirmedDateRange,
+        columns: ['Type', 'Date', 'Voucher Number', 'Narration', 'Amount'],
+        data: body,
+        filename: 'vouchers',
+        numericColumns: [4]
+    });
   };
 
   const handleDeleteVoucher = async (id: string, voucherNo: string) => {

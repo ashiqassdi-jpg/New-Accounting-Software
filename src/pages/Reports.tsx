@@ -44,9 +44,7 @@ import VoucherForm from '../components/VoucherForm';
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
 import { DateRangeFilter } from '../components/DateRangeFilter';
 import { Voucher, VoucherType, Account } from '../types';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import { ExportService } from '../services/ExportService';
 
 type ReportTab = 'TRIAL_BALANCE' | 'DAYBOOK' | 'LEDGER_REPORT' | 'PROFIT_LOSS' | 'BALANCE_SHEET';
 
@@ -131,80 +129,40 @@ export default function Reports() {
   };
 
   const handleExportPDF = (data: any[], title: string, columns: string[], filename: string) => {
-    const doc = new jsPDF();
-    
-    // Professional Centered Header for PDF
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(24);
-    doc.setTextColor(15, 23, 42);
-    doc.text(selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)", 105, 25, { align: 'center' });
-    
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(100, 116, 139);
-    doc.text((selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212').toUpperCase(), 105, 32, { align: 'center' });
-    
-    // Centered Title with lines
-    doc.setLineWidth(0.5);
-    doc.setDrawColor(15, 23, 42);
-    doc.line(65, 40, 145, 40);
-    
-    doc.setFontSize(14);
-    doc.setTextColor(15, 23, 42);
-    doc.text(title.toUpperCase(), 105, 48, { align: 'center' });
-    
-    doc.line(65, 52, 145, 52);
-    
-    doc.setFontSize(9);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(51, 65, 85);
-    doc.text(`AUDIT PERIOD: ${dateRange.from || 'START'} — ${dateRange.to || 'TODAY'}`, 105, 62, { align: 'center' });
-    
-    doc.setFontSize(7);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(148, 163, 184);
-    doc.text(`PROTOCOL: ${filename.toUpperCase()} • GENERATED: ${format(new Date(), 'dd-MM-yyyy HH:mm')}`, 105, 68, { align: 'center' });
-    
-    // Format numbers for PDF export
-    const formattedData = data.map(row => 
-      row.map((cell: any) => {
-        if (typeof cell === 'number') {
-          return new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(cell);
-        }
-        return cell;
-      })
-    );
-    
-    autoTable(doc, {
-      head: [columns],
-      body: formattedData,
-      startY: 75,
-      theme: 'grid',
-      headStyles: { 
-        fillColor: [248, 250, 252], 
-        textColor: [15, 23, 42], 
-        fontSize: 8, 
-        fontStyle: 'bold',
-        lineWidth: 0.1,
-        lineColor: [226, 232, 240]
-      },
-      styles: { fontSize: 8, textColor: [51, 65, 85], cellPadding: 4 },
-      alternateRowStyles: { fillColor: [252, 253, 255] },
-      columnStyles: {
-        // Find indices for Debit, Credit, Amount, and Vch Type to make them stand out if needed
-        // but keeping it professional for global use
-      },
-      margin: { top: 75 }
+    const numericColumns = columns.map((col, idx) => ['Debit', 'Credit', 'Balance', 'Amount'].includes(col) ? idx : -1).filter(idx => idx !== -1);
+    ExportService.exportToPDF({
+        title,
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212',
+        dateRange,
+        columns,
+        data,
+        filename,
+        numericColumns
     });
-    
-    doc.save(`${filename}_${format(new Date(), 'yyyyMMdd')}.pdf`);
   };
 
-  const handleExportExcel = (data: any[], filename: string) => {
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    XLSX.writeFile(wb, `${filename}.xlsx`);
+  const handleExportExcel = (data: any[], filename: string, title: string, columns: string[]) => {
+    let formattedData: any[][] = [];
+    if (data.length > 0) {
+      if (Array.isArray(data[0])) {
+         formattedData = data;
+      } else {
+         formattedData = data.map(item => Object.values(item));
+      }
+    }
+    const numericColumns = columns.map((col, idx) => ['Debit', 'Credit', 'Balance', 'Amount'].includes(col) ? idx : -1).filter(idx => idx !== -1);
+    
+    ExportService.exportToExcel({
+        title,
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212',
+        dateRange,
+        columns,
+        data: formattedData,
+        filename,
+        numericColumns
+    });
   };
 
   return (
@@ -518,7 +476,7 @@ export default function Reports() {
                     filters={confirmedFilters}
                     onEdit={setEditingVoucher}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Daybook', ['Date', 'Voucher Number', 'Main Account', 'Type', 'Description', 'Amount'], 'daybook')}
-                    onExportExcel={(data: any) => handleExportExcel(data, 'daybook')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'daybook', 'Daybook', ['Date', 'Voucher Number', 'Main Account', 'Type', 'Description', 'Amount'])}
                   />
                 )}
                 {activeTab === 'LEDGER_REPORT' && (
@@ -527,7 +485,7 @@ export default function Reports() {
                     dateRange={confirmedDateRange} 
                     filters={confirmedFilters}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'], 'ledger_statement')}
-                    onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'ledger_statement', 'Ledger Statement', ['Date', 'Narration', 'Type', 'Debit', 'Credit', 'Balance'])}
                   />
                 )}
                 {activeTab === 'TRIAL_BALANCE' && (
@@ -536,7 +494,7 @@ export default function Reports() {
                     dateRange={confirmedDateRange} 
                     filters={confirmedFilters}
                     onExportPDF={(data: any) => handleExportPDF(data, 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'], 'trial_balance')}
-                    onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'trial_balance', 'Trial Balance', ['Code', 'Account', 'Debit', 'Credit'])}
                   />
                 )}
                 {activeTab === 'PROFIT_LOSS' && (
@@ -544,7 +502,7 @@ export default function Reports() {
                     companyId={selectedCompany?.id} 
                     dateRange={confirmedDateRange} 
                     onExportPDF={(data: any) => handleExportPDF(data, 'Profit & Loss Statement', ['Particulars', 'Amount'], 'profit_and_loss')}
-                    onExportExcel={(data: any) => handleExportExcel(data, 'profit_and_loss')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'profit_and_loss', 'Profit & Loss Statement', ['Particulars', 'Amount'])}
                   />
                 )}
                 {activeTab === 'BALANCE_SHEET' && (
@@ -552,7 +510,7 @@ export default function Reports() {
                     companyId={selectedCompany?.id} 
                     dateRange={confirmedDateRange} 
                     onExportPDF={(data: any) => handleExportPDF(data, 'Balance Sheet', ['Particulars', 'Amount'], 'balance_sheet')}
-                    onExportExcel={(data: any) => handleExportExcel(data, 'balance_sheet')}
+                    onExportExcel={(data: any) => handleExportExcel(data, 'balance_sheet', 'Balance Sheet', ['Particulars', 'Amount'])}
                   />
                 )}
             </div>

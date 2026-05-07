@@ -13,10 +13,8 @@ import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import VoucherPrintPreview from '../components/VoucherPrintPreview';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import { ExportService } from '../services/ExportService';
 import { DateRangeFilter } from '../components/DateRangeFilter';
-import * as XLSX from 'xlsx';
 
 export default function Ledger() {
   const { profile } = useAuth();
@@ -154,48 +152,50 @@ export default function Ledger() {
 
   const handleExportPDF = () => {
     if (!selectedAccount) return;
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text("Ashiq's Creation", 14, 15);
-    doc.setFontSize(14);
-    doc.text(selectedCompany?.name || '', 14, 25);
-    doc.setFontSize(12);
-    doc.text(`General Ledger: ${selectedAccount.name} (${selectedAccount.code})`, 14, 35);
     
-    const columns = ['Date', 'Reference Number', 'Narration', 'Debit', 'Credit'];
+    const columns = ['Date', 'Reference Number', 'Narration', 'Debit', 'Credit', 'Balance'];
     const body = transactions.map(t => [
       format(new Date(t.date), 'dd/MM/yyyy'),
       t.voucher?.voucher_no || '-',
       t.narration ? `${t.narration} - ${t.voucher?.narration}` : (t.voucher?.narration || '-'),
-      t.debit > 0 ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.debit) : '-',
-      t.credit > 0 ? new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2 }).format(t.credit) : '-'
+      t.debit > 0 ? t.debit : '-',
+      t.credit > 0 ? t.credit : '-',
+      t.balance
     ]);
 
-    autoTable(doc, {
-      head: [columns],
-      body: body,
-      startY: 45,
-      theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241] },
-      styles: { fontSize: 8 }
+    ExportService.exportToPDF({
+        title: `General Ledger: ${selectedAccount.name}`,
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA',
+        dateRange: confirmedDateRange,
+        columns,
+        data: body,
+        filename: `ledger_${selectedAccount.code}`,
+        numericColumns: [3, 4, 5]
     });
-
-    doc.save(`ledger_${selectedAccount.code}_${format(new Date(), 'yyyyMMdd')}.pdf`);
   };
 
   const handleExportExcel = () => {
     if (!selectedAccount) return;
-    const data = transactions.map(t => ({
-      Date: format(new Date(t.date), 'dd/MM/yyyy'),
-      'Voucher No': t.voucher?.voucher_no,
-      Narration: t.narration ? `${t.narration} - ${t.voucher?.narration}` : t.voucher?.narration,
-      Debit: t.debit,
-      Credit: t.credit
-    }));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Ledger");
-    XLSX.writeFile(wb, `ledger_${selectedAccount.code}.xlsx`);
+    const body = transactions.map(t => [
+      format(new Date(t.date), 'dd/MM/yyyy'),
+      t.voucher?.voucher_no || '-',
+      t.narration ? `${t.narration} - ${t.voucher?.narration}` : (t.voucher?.narration || '-'),
+      t.debit || 0,
+      t.credit || 0,
+      t.balance || 0
+    ]);
+    
+    ExportService.exportToExcel({
+        title: `General Ledger: ${selectedAccount.name}`,
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA',
+        dateRange: confirmedDateRange,
+        columns: ['Date', 'Reference Number', 'Narration', 'Debit', 'Credit', 'Balance'],
+        data: body,
+        filename: `ledger_${selectedAccount.code}`,
+        numericColumns: [3, 4, 5]
+    });
   };
 
   return (

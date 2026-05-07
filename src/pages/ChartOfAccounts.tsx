@@ -17,9 +17,7 @@ import { ACCOUNT_GROUPS, formatBDT, getDisplayBalance } from '../constants';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import { toast } from 'sonner';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
+import { ExportService } from '../services/ExportService';
 import { format } from 'date-fns';
 
 export default function ChartOfAccounts() {
@@ -284,16 +282,22 @@ export default function ChartOfAccounts() {
     .reduce((sum, acc) => sum + getDisplayBalance(acc.type, acc.current_balance || 0), 0);
 
   const handleExportExcel = () => {
-    const data = accounts.map(acc => ({
-      Type: acc.type,
-      Code: acc.code,
-      'Account Name': acc.name,
-      'Balance': acc.current_balance
-    }));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "COA");
-    XLSX.writeFile(wb, `chart_of_accounts_${format(new Date(), 'yyyyMMdd')}.xlsx`);
+    const body = accounts.map(acc => [
+      acc.type,
+      acc.code,
+      acc.name,
+      acc.current_balance || 0
+    ]);
+    ExportService.exportToExcel({
+        title: 'Chart of Accounts',
+        companyName: selectedCompany?.name || "As-Sunnah Skill Development Institute",
+        companyAddress: selectedCompany?.address || 'BLOCK-D, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA',
+        dateRange: {},
+        columns: ['Type', 'Code', 'Account Name', 'Balance'],
+        data: body,
+        filename: 'chart_of_accounts',
+        numericColumns: [3]
+    });
   };
 
   return (
