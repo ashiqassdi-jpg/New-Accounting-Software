@@ -111,6 +111,7 @@ export default function Dashboard() {
         .from('accounts')
         .select('id')
         .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null)
         .in('name', ['Cash', 'Bank', 'bKash', 'Nagad']);
 
       if (!quickAccounts || quickAccounts.length === 0) return;
@@ -120,6 +121,7 @@ export default function Dashboard() {
         .from('transactions')
         .select('date, debit, credit')
         .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null)
         .in('account_id', accountIds);
 
       if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
@@ -157,6 +159,7 @@ export default function Dashboard() {
         .from('transactions')
         .select('*, accounts(name), vouchers(voucher_no)')
         .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null)
         .order('date', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(5);
@@ -173,6 +176,7 @@ export default function Dashboard() {
         .from('accounts')
         .select('*')
         .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null)
         .eq('type', 'ASSET');
 
       if (!accounts) return;
@@ -180,7 +184,8 @@ export default function Dashboard() {
       let query = supabase
         .from('transactions')
         .select('account_id, debit, credit')
-        .eq('company_id', selectedCompany!.id);
+        .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null);
 
       if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
 
@@ -205,6 +210,7 @@ export default function Dashboard() {
         .from('transactions')
         .select('date, debit, credit, accounts!inner(type)')
         .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null)
         .in('accounts.type', ['INCOME', 'EXPENSE']);
 
       if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
@@ -241,6 +247,7 @@ export default function Dashboard() {
         .from('transactions')
         .select('debit, credit, accounts!inner(name, type)')
         .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null)
         .eq('accounts.type', 'EXPENSE');
 
       if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
@@ -274,7 +281,8 @@ export default function Dashboard() {
       let query = supabase
         .from('transactions')
         .select('date, debit, credit, accounts!inner(type)')
-        .eq('company_id', selectedCompany!.id);
+        .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null);
 
       if (confirmedDateRange.from) query = query.gte('date', confirmedDateRange.from);
       if (confirmedDateRange.to) query = query.lte('date', confirmedDateRange.to);
@@ -319,7 +327,8 @@ export default function Dashboard() {
       const { data: accounts } = await supabase
         .from('accounts')
         .select('*')
-        .eq('company_id', selectedCompany!.id);
+        .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null);
 
       if (!accounts) return;
 
@@ -327,7 +336,8 @@ export default function Dashboard() {
       let transQuery = supabase
         .from('transactions')
         .select('account_id, debit, credit, accounts!inner(type)')
-        .eq('company_id', selectedCompany!.id);
+        .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null);
 
       if (confirmedDateRange.from) transQuery = transQuery.gte('date', confirmedDateRange.from);
       if (confirmedDateRange.to) transQuery = transQuery.lte('date', confirmedDateRange.to);
@@ -338,7 +348,8 @@ export default function Dashboard() {
       let balanceQuery = supabase
         .from('transactions')
         .select('account_id, debit, credit')
-        .eq('company_id', selectedCompany!.id);
+        .eq('company_id', selectedCompany!.id)
+        .is('deleted_at', null);
       
       if (confirmedDateRange.to) balanceQuery = balanceQuery.lte('date', confirmedDateRange.to);
       const { data: balanceTransactions } = await balanceQuery;

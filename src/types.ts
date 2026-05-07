@@ -34,6 +34,7 @@ export interface Company {
   financial_status?: 'ACTIVE' | 'CLOSED' | 'AUDITED';
   created_at: string;
   created_by: string;
+  deleted_at?: string;
 }
 
 export type VoucherType = 'PAYMENT' | 'RECEIPT' | 'JOURNAL' | 'CONTRA' | 'SALES' | 'PURCHASE';
@@ -47,6 +48,7 @@ export interface Account {
   type: 'ASSET' | 'LIABILITY' | 'EQUITY' | 'INCOME' | 'EXPENSE';
   parent_id?: string;
   current_balance: number;
+  deleted_at?: string;
 }
 
 export interface Voucher {
@@ -64,6 +66,7 @@ export interface Voucher {
   updated_by?: string;
   creator?: { name: string; email: string };
   editor?: { name: string; email: string };
+  deleted_at?: string;
 }
 
 export interface Transaction {
@@ -75,6 +78,7 @@ export interface Transaction {
   credit: number;
   date: string;
   narration?: string | null;
+  deleted_at?: string;
 }
 
 export interface DashboardStats {

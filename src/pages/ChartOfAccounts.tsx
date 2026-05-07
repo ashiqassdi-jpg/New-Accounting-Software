@@ -137,6 +137,7 @@ export default function ChartOfAccounts() {
       .from('accounts')
       .select('*')
       .eq('company_id', selectedCompany!.id)
+      .is('deleted_at', null)
       .order('code');
 
     if (error) {
@@ -248,16 +249,20 @@ export default function ChartOfAccounts() {
       return;
     }
 
-    if (!confirm(`Permanently delete ledger "${account.name}"?`)) {
+    if (!confirm(`Move ledger "${account.name}" to Recycle Bin?`)) {
       setLoading(false);
       return;
     }
     
-    const { error } = await supabase.from('accounts').delete().eq('id', id);
+    const { error } = await supabase
+      .from('accounts')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', id);
+      
     if (error) {
       toast.error('Deletion Failed');
     } else {
-      toast.success('Ledger Removed');
+      toast.success('Ledger Moved to Recycle Bin');
       fetchAccounts();
     }
     setLoading(false);

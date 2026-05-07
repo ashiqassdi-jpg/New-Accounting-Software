@@ -14,7 +14,8 @@ CREATE TABLE companies (
   currency_symbol TEXT DEFAULT '৳',
   financial_status TEXT DEFAULT 'ACTIVE' CHECK (financial_status IN ('ACTIVE', 'CLOSED', 'AUDITED')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  created_by UUID REFERENCES auth.users(id)
+  created_by UUID REFERENCES auth.users(id),
+  deleted_at TIMESTAMPTZ
 );
 
 -- Profiles Table (RBAC)
@@ -46,7 +47,8 @@ CREATE TABLE accounts (
   type TEXT NOT NULL CHECK (type IN ('ASSET', 'LIABILITY', 'EQUITY', 'INCOME', 'EXPENSE')),
   parent_id UUID REFERENCES accounts(id),
   current_balance DECIMAL(15,2) DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
 );
 
 -- Trigger to update account balance
@@ -90,7 +92,8 @@ CREATE TABLE vouchers (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   created_by UUID REFERENCES auth.users(id),
   updated_at TIMESTAMPTZ,
-  updated_by UUID REFERENCES auth.users(id)
+  updated_by UUID REFERENCES auth.users(id),
+  deleted_at TIMESTAMPTZ
 );
 
 -- Transactions Table (Double Entry)
@@ -102,7 +105,8 @@ CREATE TABLE transactions (
   debit DECIMAL(15,2) DEFAULT 0,
   credit DECIMAL(15,2) DEFAULT 0,
   date DATE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
 );
 
 -- Row Level Security (RLS)

@@ -269,6 +269,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       .from('accounts')
       .select('*')
       .eq('company_id', selectedCompany!.id)
+      .is('deleted_at', null)
       .order('code');
     setAccounts(data || []);
   };

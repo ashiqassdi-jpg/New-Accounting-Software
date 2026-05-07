@@ -45,7 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchAccessibleCompanies = async (profile: UserProfile | null) => {
     if (!profile) return [];
     
-    let query = supabase.from('companies').select('*');
+    let query = supabase.from('companies').select('*').is('deleted_at', null);
     
     const isSuperAdminUser = profile.role === 'SUPER_ADMIN' || profile.email === 'ashiq.assdi@gmail.com';
 

@@ -128,7 +128,8 @@ export default function Vouchers() {
         *,
         items:transactions(*)
       `)
-      .eq('company_id', selectedCompany.id);
+      .eq('company_id', selectedCompany.id)
+      .is('deleted_at', null);
 
     if (filterMode === 'RECENT' && !showDeepFilter && !search) {
       query = query.limit(20);
@@ -241,28 +242,37 @@ export default function Vouchers() {
       return;
     }
 
-    const confirmed = window.confirm(`Are you sure you want to permanently delete voucher ${voucherNo}? All associated ledger entries will be removed.`);
+    const confirmed = window.confirm(`Are you sure you want to move voucher ${voucherNo} to the Recycle Bin?`);
     if (!confirmed) return;
 
     setLoading(true);
     try {
-      // We rely on ON DELETE CASCADE in the database to remove transactions
-      // This is safer and ensures single transaction atomicity
+      const now = new Date().toISOString();
+      
+      // Soft delete transactions first
+      const { error: transError } = await supabase
+        .from('transactions')
+        .update({ deleted_at: now })
+        .eq('voucher_id', id);
+      
+      if (transError) throw transError;
+
+      // Soft delete the voucher
       const { error: voucherError } = await supabase
         .from('vouchers')
-        .delete()
+        .update({ deleted_at: now })
         .eq('id', id);
 
       if (voucherError) {
         throw voucherError;
       }
       
-      toast.success('Voucher Deleted', { description: `Voucher ${voucherNo} has been removed successfully.` });
+      toast.success('Voucher Moved to Recycle Bin', { description: `Voucher ${voucherNo} has been soft-deleted.` });
       await fetchVouchers();
     } catch (err: any) {
       console.error('Operation failed:', err);
       toast.error('Deletion Failed', { 
-        description: err.message || 'Failed to delete voucher. Please check your connection or permissions.' 
+        description: err.message || 'Failed to soft delete voucher.' 
       });
     } finally {
       setLoading(false);

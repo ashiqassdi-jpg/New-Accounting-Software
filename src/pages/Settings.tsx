@@ -36,7 +36,7 @@ export default function Settings() {
   const { profile, refreshProfile, isSuperAdmin, canWipeData, canManageCompanies } = useAuth();
   const { selectedCompany, refreshCompanies } = useCompany();
   
-  const [activeTab, setActiveTab] = useState<'PROFILE' | 'COMPANY' | 'USERS'>('PROFILE');
+  const [activeTab, setActiveTab] = useState<'PROFILE' | 'COMPANY' | 'USERS' | 'RECYCLE_BIN'>('PROFILE');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   
@@ -223,13 +223,13 @@ export default function Settings() {
         </button>
         {isSuperAdmin && (
           <button 
-            onClick={() => setActiveTab('USERS')}
+            onClick={() => setActiveTab('RECYCLE_BIN')}
             className={cn(
-              "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest",
-              activeTab === 'USERS' ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-md border border-slate-100 dark:border-slate-700" : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+              "px-6 py-2.5 rounded-xl text-[10px] font-semibold transition-all uppercase tracking-widest flex items-center gap-2",
+              activeTab === 'RECYCLE_BIN' ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-md border border-slate-100 dark:border-slate-700" : "text-rose-400 dark:text-rose-500 hover:text-rose-600 dark:hover:text-rose-300"
             )}
           >
-            Access Control
+            <History size={14} /> Recycle Bin
           </button>
         )}
       </div>
@@ -489,7 +489,261 @@ export default function Settings() {
             <Users />
           </motion.div>
         )}
+        {activeTab === 'RECYCLE_BIN' && isSuperAdmin && (
+          <motion.div
+            key="recycle_bin"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+          >
+            <RecycleBin />
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function RecycleBin() {
+  const { selectedCompany } = useCompany();
+  const [loading, setLoading] = useState(true);
+  const [deletedCompanies, setDeletedCompanies] = useState<any[]>([]);
+  const [deletedAccounts, setDeletedAccounts] = useState<any[]>([]);
+  const [deletedVouchers, setDeletedVouchers] = useState<any[]>([]);
+  const [activeFilter, setActiveFilter] = useState<'ALL' | 'COMPANIES' | 'ACCOUNTS' | 'VOUCHERS'>('ALL');
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [companiesRes, accountsRes, vouchersRes] = await Promise.all([
+        supabase.from('companies').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
+        supabase.from('accounts').select('*, companies(name)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
+        supabase.from('vouchers').select('*, companies(name)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false })
+      ]);
+
+      setDeletedCompanies(companiesRes.data || []);
+      setDeletedAccounts(accountsRes.data || []);
+      setDeletedVouchers(vouchersRes.data || []);
+    } catch (error) {
+      console.error('Error fetching recycle bin:', error);
+      toast.error('Fetch Failed', { description: 'Could not retrieve deleted items.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const handleRestore = async (type: 'company' | 'account' | 'voucher', id: string, name: string) => {
+    const confirmed = window.confirm(`Restore "${name}" to active records?`);
+    if (!confirmed) return;
+
+    try {
+      let table = '';
+      if (type === 'company') table = 'companies';
+      else if (type === 'account') table = 'accounts';
+      else if (type === 'voucher') table = 'vouchers';
+
+      const { error } = await supabase.from(table).update({ deleted_at: null }).eq('id', id);
+      if (error) throw error;
+
+      if (type === 'voucher') {
+        // Also restore transactions
+        await supabase.from('transactions').update({ deleted_at: null }).eq('voucher_id', id);
+      }
+
+      toast.success('Record Restored', { description: `"${name}" is now active again.` });
+      fetchData();
+    } catch (error: any) {
+      toast.error('Restore Failed', { description: error.message });
+    }
+  };
+
+  const handlePurge = async (type: 'company' | 'account' | 'voucher', id: string, name: string) => {
+    const firstConfirm = window.confirm(`CRITICAL: Purge "${name}" permanently? This cannot be undone.`);
+    if (!firstConfirm) return;
+    
+    const secondConfirm = window.confirm(`FINAL WARNING: Information associated with "${name}" will be erased from existence. Proceed?`);
+    if (!secondConfirm) return;
+
+    try {
+      let table = '';
+      if (type === 'company') table = 'companies';
+      else if (type === 'account') table = 'accounts';
+      else if (type === 'voucher') table = 'vouchers';
+
+      // For vouchers, transactions will be deleted by Cascade (if set) or we handle it
+      if (type === 'voucher') {
+        await supabase.from('transactions').delete().eq('voucher_id', id);
+      }
+
+      const { error } = await supabase.from(table).delete().eq('id', id);
+      if (error) throw error;
+
+      toast.success('Record Purged', { description: `"${name}" has been permanently erased.` });
+      fetchData();
+    } catch (error: any) {
+      toast.error('Purge Failed', { description: error.message });
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="bg-rose-50 dark:bg-rose-500/10 p-3 rounded-2xl border border-rose-100 dark:border-rose-500/20">
+            <History className="text-rose-600 dark:text-rose-400" size={24} />
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-widest">Digital Purgatory</h2>
+            <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Recycle Bin Management</p>
+          </div>
+        </div>
+        <div className="flex gap-2 bg-slate-50 dark:bg-slate-800 p-1 rounded-xl border border-slate-100 dark:border-slate-800 shadow-inner">
+          <FilterButton active={activeFilter === 'ALL'} onClick={() => setActiveFilter('ALL')} label="All" count={deletedCompanies.length + deletedAccounts.length + deletedVouchers.length} />
+          <FilterButton active={activeFilter === 'COMPANIES'} onClick={() => setActiveFilter('COMPANIES')} label="Entities" count={deletedCompanies.length} />
+          <FilterButton active={activeFilter === 'ACCOUNTS'} onClick={() => setActiveFilter('ACCOUNTS')} label="Accounts" count={deletedAccounts.length} />
+          <FilterButton active={activeFilter === 'VOUCHERS'} onClick={() => setActiveFilter('VOUCHERS')} label="Vouchers" count={deletedVouchers.length} />
+        </div>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden min-h-[400px]">
+        {loading ? (
+          <div className="py-40 text-center">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-r-transparent mb-4"></div>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Synchronizing with Purgatory...</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 dark:bg-slate-800/50">
+                  <th className="px-10 py-6 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Item Information</th>
+                  <th className="px-10 py-6 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Origin Entity</th>
+                  <th className="px-10 py-6 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Temporal Exit</th>
+                  <th className="px-10 py-6 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest text-right">Administrative Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                {(activeFilter === 'ALL' || activeFilter === 'COMPANIES') && deletedCompanies.map(c => (
+                  <RecycleItem 
+                    key={c.id} 
+                    item={c} 
+                    type="ENTITY" 
+                    name={c.name} 
+                    origin="Platform" 
+                    onRestore={() => handleRestore('company', c.id, c.name)}
+                    onPurge={() => handlePurge('company', c.id, c.name)}
+                  />
+                ))}
+                {(activeFilter === 'ALL' || activeFilter === 'ACCOUNTS') && deletedAccounts.map(a => (
+                  <RecycleItem 
+                    key={a.id} 
+                    item={a} 
+                    type="ACCOUNT" 
+                    name={a.name} 
+                    origin={a.companies?.name || 'Unknown'} 
+                    onRestore={() => handleRestore('account', a.id, a.name)}
+                    onPurge={() => handlePurge('account', a.id, a.name)}
+                  />
+                ))}
+                {(activeFilter === 'ALL' || activeFilter === 'VOUCHERS') && deletedVouchers.map(v => (
+                  <RecycleItem 
+                    key={v.id} 
+                    item={v} 
+                    type="VOUCHER" 
+                    name={v.voucher_no} 
+                    origin={v.companies?.name || 'Unknown'} 
+                    onRestore={() => handleRestore('voucher', v.id, v.voucher_no)}
+                    onPurge={() => handlePurge('voucher', v.id, v.voucher_no)}
+                  />
+                ))}
+                {deletedCompanies.length === 0 && deletedAccounts.length === 0 && deletedVouchers.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-40 text-center">
+                      <div className="bg-slate-50 dark:bg-slate-800 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-slate-100 dark:border-slate-800">
+                        <History className="text-slate-200 dark:text-slate-700" size={32} />
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-300 dark:text-slate-600 uppercase tracking-[0.3em] italic">Purgatory is currently vacant</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function RecycleItem({ type, name, origin, item, onRestore, onPurge }: any) {
+  return (
+    <tr className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-all">
+      <td className="px-10 py-5">
+        <div className="flex items-center gap-4">
+          <div className={cn(
+            "w-10 h-10 rounded-xl flex items-center justify-center shadow-sm",
+            type === 'ENTITY' ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" :
+            type === 'ACCOUNT' ? "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400" :
+            "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+          )}>
+            <History size={18} />
+          </div>
+          <div>
+            <span className="text-[8px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{type}</span>
+            <p className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-tight">{name}</p>
+          </div>
+        </div>
+      </td>
+      <td className="px-10 py-5">
+        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">{origin}</span>
+      </td>
+      <td className="px-10 py-5">
+        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500">{item.deleted_at ? format(new Date(item.deleted_at), 'dd MMM yyyy p') : 'N/A'}</span>
+      </td>
+      <td className="px-10 py-5">
+         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+           <button 
+             onClick={onRestore}
+             className="p-2.5 text-emerald-600 bg-emerald-50 hover:bg-emerald-100 dark:text-emerald-400 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 rounded-xl transition-all shadow-sm"
+             title="Restore Item"
+           >
+             <History size={16} />
+           </button>
+           <button 
+             onClick={onPurge}
+             className="p-2.5 text-rose-600 bg-rose-50 hover:bg-rose-100 dark:text-rose-400 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-xl transition-all shadow-sm"
+             title="Purge Permanently"
+           >
+             <Trash2 size={16} />
+           </button>
+         </div>
+      </td>
+    </tr>
+  );
+}
+
+function FilterButton({ active, onClick, label, count }: any) {
+  return (
+    <button 
+      onClick={onClick}
+      className={cn(
+        "px-4 py-2 rounded-lg text-[9px] font-bold uppercase tracking-widest transition-all flex items-center gap-2",
+        active 
+          ? "bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 shadow-sm border border-slate-100 dark:border-slate-600" 
+          : "text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300"
+      )}
+    >
+      {label}
+      <span className={cn(
+        "px-1.5 py-0.5 rounded text-[8px] font-black",
+        active ? "bg-indigo-600 text-white" : "bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400"
+      )}>
+        {count}
+      </span>
+    </button>
   );
 }

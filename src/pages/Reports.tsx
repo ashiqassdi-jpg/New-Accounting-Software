@@ -74,7 +74,7 @@ export default function Reports() {
 
   useEffect(() => {
     if (selectedCompany) {
-      supabase.from('accounts').select('*').eq('company_id', selectedCompany.id).order('code').then(({ data }) => setAccounts(data || []));
+      supabase.from('accounts').select('*').eq('company_id', selectedCompany.id).is('deleted_at', null).order('code').then(({ data }) => setAccounts(data || []));
     }
   }, [selectedCompany]);
 
@@ -549,7 +549,7 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   const fetchTrialBalance = async () => {
     setLoading(true);
-    let accQuery = supabase.from('accounts').select('*').eq('company_id', companyId).order('code');
+    let accQuery = supabase.from('accounts').select('*').eq('company_id', companyId).is('deleted_at', null).order('code');
     if (filters.accountType) accQuery = accQuery.eq('type', filters.accountType);
 
     const { data: accounts, error: accError } = await accQuery;
@@ -558,7 +558,8 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
     let transQuery = supabase
       .from('transactions')
       .select('*')
-      .eq('company_id', companyId);
+      .eq('company_id', companyId)
+      .is('deleted_at', null);
 
     if (dateRange.to) {
       transQuery = transQuery.lte('date', dateRange.to);
@@ -723,7 +724,8 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
           account:accounts(*)
         )
       `)
-      .eq('company_id', companyId);
+      .eq('company_id', companyId)
+      .is('deleted_at', null);
 
     if (dateRange.from) query = query.gte('date', dateRange.from);
     if (dateRange.to) query = query.lte('date', dateRange.to);
@@ -770,14 +772,26 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       toast.error('Permission Denied', { description: 'Contact admin for deletion rights.' });
       return;
     }
-    const confirmed = window.confirm(`Confirm destructive deletion of Voucher ${voucherNo}?`);
+    const confirmed = window.confirm(`Confirm moving Voucher ${voucherNo} to Recycle Bin?`);
     if (!confirmed) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('vouchers').delete().eq('id', id);
-      if (error) throw error;
-      toast.success('Voucher Liquidated', { description: `${voucherNo} has been removed from records.` });
+      const { error: vError } = await supabase
+        .from('vouchers')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
+        
+      if (vError) throw vError;
+
+      const { error: tError } = await supabase
+        .from('transactions')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('voucher_id', id);
+
+      if (tError) throw tError;
+
+      toast.success('Voucher Moved to Recycle Bin', { description: `${voucherNo} has been soft-deleted.` });
       fetchDaybook();
     } catch (err: any) {
       toast.error('Deletion Failed', { description: err.message });
@@ -1086,8 +1100,8 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
 
   const fetchPL = async () => {
     setLoading(true);
-    const { data: accounts } = await supabase.from('accounts').select('*').eq('company_id', companyId).in('type', ['INCOME', 'EXPENSE']);
-    const { data: transactions } = await supabase.from('transactions').select('account_id, debit, credit').eq('company_id', companyId).gte('date', dateRange.from || '1970-01-01').lte('date', dateRange.to || '2100-12-31');
+    const { data: accounts } = await supabase.from('accounts').select('*').eq('company_id', companyId).is('deleted_at', null).in('type', ['INCOME', 'EXPENSE']);
+    const { data: transactions } = await supabase.from('transactions').select('account_id, debit, credit').eq('company_id', companyId).is('deleted_at', null).gte('date', dateRange.from || '1970-01-01').lte('date', dateRange.to || '2100-12-31');
 
     const balances: any = {};
     transactions?.forEach(t => {
@@ -1230,10 +1244,10 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
 
   const fetchBS = async () => {
     setLoading(true);
-    const { data: accounts } = await supabase.from('accounts').select('*').eq('company_id', companyId);
+    const { data: accounts } = await supabase.from('accounts').select('*').eq('company_id', companyId).is('deleted_at', null);
     
     // We need all transactions to get cumulative balances for Balance Sheet
-    const { data: transactions } = await supabase.from('transactions').select('account_id, debit, credit').eq('company_id', companyId).lte('date', dateRange.to || '2100-12-31');
+    const { data: transactions } = await supabase.from('transactions').select('account_id, debit, credit').eq('company_id', companyId).is('deleted_at', null).lte('date', dateRange.to || '2100-12-31');
 
     const balances: any = {};
     transactions?.forEach(t => {
@@ -1485,7 +1499,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   useEffect(() => {
     if (companyId) {
-      supabase.from('accounts').select('*').eq('company_id', companyId).order('code').then(({ data }) => setAccounts(data || []));
+      supabase.from('accounts').select('*').eq('company_id', companyId).is('deleted_at', null).order('code').then(({ data }) => setAccounts(data || []));
     }
   }, [companyId]);
 
@@ -1507,6 +1521,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         .from('transactions')
         .select('debit, credit')
         .eq('account_id', selectedAccountId)
+        .is('deleted_at', null)
         .lt('date', dateRange.from);
       
       const acc = accounts.find(a => a.id === selectedAccountId);
@@ -1522,7 +1537,8 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
         *,
         voucher:vouchers(*)
       `)
-      .eq('account_id', selectedAccountId);
+      .eq('account_id', selectedAccountId)
+      .is('deleted_at', null);
       
     if (dateRange.from) query = query.gte('date', dateRange.from);
     if (dateRange.to) query = query.lte('date', dateRange.to);

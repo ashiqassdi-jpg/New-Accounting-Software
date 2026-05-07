@@ -125,12 +125,16 @@ export default function Companies() {
         return;
       }
 
-      if (!confirm(`Are you sure you want to delete "${name}"? This entity appears to be empty of financial records and will be permanently removed.`)) return;
+      if (!confirm(`Are you sure you want to move "${name}" to the Recycle Bin?`)) return;
       
-      const { error } = await supabase.from('companies').delete().eq('id', id);
+      const { error } = await supabase
+        .from('companies')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', id);
+        
       if (error) throw error;
       
-      toast.success('Entity Decommissioned', { description: `"${name}" has been successfully removed from your portfolio.` });
+      toast.success('Entity Moved to Recycle Bin', { description: `"${name}" has been soft-deleted.` });
       refreshCompanies();
     } catch (err: any) {
       toast.error('Deletion Failed', { description: err.message || 'Error occurred during deletion.' });
