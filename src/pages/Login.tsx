@@ -52,10 +52,10 @@ export default function Login() {
       }
 
       if (data.user) {
-        // Create profile
+        // Create or update profile (use upsert to handle race condition with useAuth auto-creation)
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([
+          .upsert([
             {
               id: data.user.id,
               name: name,
@@ -67,12 +67,10 @@ export default function Login() {
               can_delete: false,
               joining_date: new Date().toISOString().split('T')[0]
             }
-          ]);
+          ], { onConflict: 'id' });
 
         if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Note: The user exists in Auth but profile failed. 
-          // In a real app, you might want to handle this retry or cleanup.
+          console.error('Error syncing profile:', profileError);
         }
 
         setSuccess('Account created! Please check your email for confirmation.');

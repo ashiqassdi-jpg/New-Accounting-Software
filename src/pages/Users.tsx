@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X, ChevronDown, Filter } from 'lucide-react';
+import { Mail, Shield, UserPlus, Search, UserCheck, ShieldAlert, X, ChevronDown, Filter, Lock, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { UserProfile, UserRole } from '../types';
 import { useAuth } from '../hooks/useAuth';
@@ -32,6 +32,14 @@ export default function UserManagement() {
     companies: [] as string[]
   });
   const [isInviting, setIsInviting] = useState(false);
+  const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
+
+  const togglePasswordVisibility = (id: string) => {
+    setVisiblePasswords(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const { isSuperAdmin } = useAuth();
 
@@ -551,9 +559,17 @@ export default function UserManagement() {
                               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={12} />
                               <input 
                                 readOnly
-                                className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-[10px] font-mono text-slate-500 outline-none cursor-not-allowed"
+                                type={visiblePasswords[editingUser.id] ? "text" : "password"}
+                                className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl pl-9 pr-10 py-2 text-[10px] font-mono text-slate-500 outline-none cursor-not-allowed"
                                 value={editingUser.password}
                               />
+                              <button 
+                                type="button"
+                                onClick={() => togglePasswordVisibility(editingUser.id)}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-indigo-500 transition-colors"
+                              >
+                                {visiblePasswords[editingUser.id] ? <EyeOff size={12} /> : <Eye size={12} />}
+                              </button>
                             </div>
                           </div>
                         )}

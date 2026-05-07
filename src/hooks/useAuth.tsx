@@ -74,12 +74,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Profile missing, creating automatic profile for user:', u.email);
       
       const isInitialSuperAdmin = u.email === 'ashiq.assdi@gmail.com';
+      const fullName = u.user_metadata?.full_name || u.user_metadata?.name || u.email?.split('@')[0] || 'New User';
       
       const { data: newProfile, error: insertError } = await supabase
         .from('profiles')
         .insert([{
           id: u.id,
-          name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'New User',
+          name: fullName,
           email: u.email,
           role: isInitialSuperAdmin ? 'SUPER_ADMIN' : 'MODERATOR',
           can_add: true,

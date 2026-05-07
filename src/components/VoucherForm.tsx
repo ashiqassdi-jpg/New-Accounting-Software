@@ -204,7 +204,7 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       const savedDate = localStorage.getItem(`last_date_${type}`);
       if (savedDate) setDate(savedDate);
     }
-  }, [editingVoucher, type]);
+  }, [editingVoucher, type, accounts.length]); // Added accounts.length to ensure re-filtering when accounts load
 
   const findAccountForChannel = (ch: PaymentChannel) => {
     if (!accounts.length) return null;
@@ -228,6 +228,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
 
   const fetchVoucherTransactions = async () => {
     if (!editingVoucher) return;
+    
+    // Explicitly check if we need accounts for filtering and wait for them if so
+    const isAutoBalanced = editingVoucher.type === 'PAYMENT' || editingVoucher.type === 'RECEIPT';
+    if (isAutoBalanced && accounts.length === 0) return;
+
     const { data, error } = await supabase
       .from('transactions')
       .select('*')
@@ -235,21 +240,21 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
       .order('created_at', { ascending: true });
 
     if (!error && data) {
-      // For automated vouchers, we filter out the balancing engine row if it's there
-      // because we want the user to manage only target rows
-      const isAutoBalanced = editingVoucher.type === 'PAYMENT' || editingVoucher.type === 'RECEIPT';
       const balancingAcc = isAutoBalanced ? findAccountForChannel(editingVoucher.payment_channel as PaymentChannel) : null;
       
       const targetTransactions = data.filter(t => 
         !balancingAcc || t.account_id !== balancingAcc.id
       );
 
-      setItems(targetTransactions.map(t => ({
-        account_id: t.account_id,
-        debit: t.debit,
-        credit: t.credit,
-        narration: t.narration || ''
-      })));
+      setItems(targetTransactions.length > 0 
+        ? targetTransactions.map(t => ({
+            account_id: t.account_id,
+            debit: t.debit,
+            credit: t.credit,
+            narration: t.narration || ''
+          }))
+        : [{ account_id: '', debit: 0, credit: 0, narration: '' }]
+      );
     }
   };
 
@@ -370,11 +375,11 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
   };
 
   const totalDebit = isAutoBalancedType 
-    ? (type === 'RECEIPT' ? getAutoBalanceAmount() + items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0) : items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0))
+    ? (type === 'RECEIPT' ? getAutoBalanceAmount() : items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0))
     : items.reduce((sum, item) => sum + (Number(item.debit) || 0), 0);
 
   const totalCredit = isAutoBalancedType
-    ? (type === 'PAYMENT' ? getAutoBalanceAmount() + items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0) : items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0))
+    ? (type === 'PAYMENT' ? getAutoBalanceAmount() : items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0))
     : items.reduce((sum, item) => sum + (Number(item.credit) || 0), 0);
 
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.001;
@@ -624,8 +629,8 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                     <tr className="bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
                       <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-10 text-center">#</th>
                       <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Account Ledger</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-36 text-right">Debit (৳)</th>
-                      <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-36 text-right">Credit (৳)</th>
+                      {type !== 'RECEIPT' && <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-36 text-right">Debit (৳)</th>}
+                      {type !== 'PAYMENT' && <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-36 text-right">Credit (৳)</th>}
                       <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Narration</th>
                       <th className="px-4 py-2 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest w-10 text-center"></th>
                     </tr>
@@ -818,50 +823,46 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                             )}
                           </div>
                         </td>
-                        <td className="px-4 py-1.5">
-                          <input 
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            className={cn(
-                              "w-full border rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 group-hover:bg-white dark:group-hover:bg-slate-900",
-                              type === 'RECEIPT' ? "bg-slate-100 dark:bg-slate-800 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-slate-50/20 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
-                            )}
-                            value={item.debit === 0 ? '' : item.debit}
-                            onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
-                            onFocus={(e) => e.target.select()}
-                            readOnly={type === 'RECEIPT'}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && e.currentTarget.value) {
-                                if (index === items.length - 1) {
-                                  addItem();
+                        {type !== 'RECEIPT' && (
+                          <td className="px-4 py-1.5">
+                            <input 
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="w-full bg-slate-50/20 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 group-hover:bg-white dark:group-hover:bg-slate-900 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
+                              value={item.debit === 0 ? '' : item.debit}
+                              onChange={(e) => updateItem(index, 'debit', e.target.value === '' ? 0 : Number(e.target.value))}
+                              onFocus={(e) => e.target.select()}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && e.currentTarget.value) {
+                                  if (index === items.length - 1) {
+                                    addItem();
+                                  }
                                 }
-                              }
-                            }}
-                          />
-                        </td>
-                        <td className="px-4 py-1.5">
-                          <input 
-                            type="number"
-                            step="0.01"
-                            placeholder="0.00"
-                            className={cn(
-                              "w-full border rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 group-hover:bg-white dark:group-hover:bg-slate-900",
-                              type === 'PAYMENT' ? "bg-slate-100 dark:bg-slate-800 border-slate-100 dark:border-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed" : "bg-slate-50/20 dark:bg-slate-900/20 border-slate-100 dark:border-slate-800 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
-                            )}
-                            value={item.credit === 0 ? '' : item.credit}
-                            onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
-                            onFocus={(e) => e.target.select()}
-                            readOnly={type === 'PAYMENT'}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && e.currentTarget.value) {
-                                if (index === items.length - 1) {
-                                  addItem();
+                              }}
+                            />
+                          </td>
+                        )}
+                        {type !== 'PAYMENT' && (
+                          <td className="px-4 py-1.5">
+                            <input 
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              className="w-full bg-slate-50/20 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1 text-[11px] text-right outline-none transition-all font-mono font-bold text-slate-900 dark:text-slate-100 group-hover:bg-white dark:group-hover:bg-slate-900 focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500"
+                              value={item.credit === 0 ? '' : item.credit}
+                              onChange={(e) => updateItem(index, 'credit', e.target.value === '' ? 0 : Number(e.target.value))}
+                              onFocus={(e) => e.target.select()}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' && e.currentTarget.value) {
+                                  if (index === items.length - 1) {
+                                    addItem();
+                                  }
                                 }
-                              }
-                            }}
-                          />
-                        </td>
+                              }}
+                            />
+                          </td>
+                        )}
                         <td className="px-4 py-1.5">
                           <input 
                             className="w-full bg-slate-50/20 dark:bg-slate-900/20 border border-slate-100 dark:border-slate-800 rounded-lg px-3 py-1 text-[11px] outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-medium text-slate-700 dark:text-slate-300 group-hover:bg-white dark:group-hover:bg-slate-900"
@@ -890,47 +891,6 @@ export default function VoucherForm({ onSuccess, onCancel, initialType, editingV
                         </td>
                       </tr>
                     ))}
-
-                    {/* Auto-balancing Row (Requirement 1) */}
-                    {isAutoBalancedType && balancingAccount && (
-                      <tr className="bg-indigo-50/30 dark:bg-indigo-900/10 border-t border-indigo-100/50 dark:border-indigo-800/30">
-                        <td className="px-4 py-1.5 text-center">
-                          <div className="w-5 h-5 bg-indigo-600 rounded flex items-center justify-center mx-auto shadow-sm">
-                            <BookOpen size={10} className="text-white" />
-                          </div>
-                        </td>
-                        <td className="px-4 py-1.5">
-                          <div className="flex flex-col">
-                            <span className="text-[11px] font-bold text-indigo-900 dark:text-indigo-100">{balancingAccount.name}</span>
-                            <span className="text-[8px] font-black text-indigo-400 dark:text-indigo-500 uppercase tracking-widest leading-none">System Balanced Account</span>
-                          </div>
-                        </td>
-                        <td className="px-4 py-1.5">
-                          <input 
-                            readOnly
-                            className="w-full bg-indigo-50/50 dark:bg-slate-900 border border-indigo-100 dark:border-indigo-800 rounded-lg px-3 py-1 text-[11px] text-right transition-all font-mono font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-not-allowed"
-                            value={type === 'RECEIPT' ? (getAutoBalanceAmount() || '') : ''}
-                            placeholder="0.00"
-                          />
-                        </td>
-                        <td className="px-4 py-1.5">
-                          <input 
-                            readOnly
-                            className="w-full bg-indigo-50/50 dark:bg-slate-900 border border-indigo-100 dark:border-indigo-800 rounded-lg px-3 py-1 text-[11px] text-right transition-all font-mono font-bold text-indigo-600 dark:text-indigo-400 outline-none cursor-not-allowed"
-                            value={type === 'PAYMENT' ? (getAutoBalanceAmount() || '') : ''}
-                            placeholder="0.00"
-                          />
-                        </td>
-                        <td className="px-4 py-1.5">
-                          <input 
-                            readOnly
-                            className="w-full bg-indigo-50/20 dark:bg-slate-900 border border-indigo-100/30 dark:border-indigo-800/30 rounded-lg px-3 py-1 text-[11px] outline-none font-medium italic text-indigo-400/80 dark:text-indigo-500/60 cursor-not-allowed"
-                            value="Auto-generated flow"
-                          />
-                        </td>
-                        <td className="px-4 py-1.5 text-center"></td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
