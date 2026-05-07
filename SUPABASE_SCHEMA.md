@@ -21,6 +21,8 @@ CREATE TABLE companies (
 CREATE TABLE profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
+  email TEXT,
+  password TEXT,
   phone TEXT,
   address TEXT,
   designation TEXT,

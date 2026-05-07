@@ -163,12 +163,20 @@ export default function UserManagement() {
     setEditingUser({ ...editingUser, companies: updated });
   };
 
-  const filteredProfiles = profiles.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.designation?.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = confirmedFilterRole === 'ALL' ? true : p.role === confirmedFilterRole;
-    const matchesDesignation = !confirmedFilterDesignation || p.designation?.toLowerCase().includes(confirmedFilterDesignation.toLowerCase());
-    return matchesSearch && matchesRole && matchesDesignation;
-  });
+  const rolePriority: Record<UserRole, number> = {
+    'SUPER_ADMIN': 0,
+    'ADMIN': 1,
+    'MODERATOR': 2
+  };
+
+  const filteredProfiles = profiles
+    .filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.designation?.toLowerCase().includes(search.toLowerCase());
+      const matchesRole = confirmedFilterRole === 'ALL' ? true : p.role === confirmedFilterRole;
+      const matchesDesignation = !confirmedFilterDesignation || p.designation?.toLowerCase().includes(confirmedFilterDesignation.toLowerCase());
+      return matchesSearch && matchesRole && matchesDesignation;
+    })
+    .sort((a, b) => rolePriority[a.role] - rolePriority[b.role]);
 
   return (
     <div className="space-y-8">
@@ -329,7 +337,18 @@ export default function UserManagement() {
               <div className="bg-slate-50/50 dark:bg-slate-800/30 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 group-hover:border-indigo-100 dark:group-hover:border-indigo-900 transition-all">
                 <p className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold uppercase tracking-[0.2em] mb-1">Designation</p>
                 <p className="text-[11px] text-slate-700 dark:text-slate-300 font-semibold italic">{p.designation || 'Specialist'}</p>
-                {p.email && <p className="text-[9px] text-indigo-400 dark:text-indigo-500 font-mono mt-2 truncate font-semibold">{p.email}</p>}
+                
+                {p.email && <p className="text-[9px] text-indigo-400 dark:text-indigo-500 font-mono mt-2 truncate font-semibold lowercase">{p.email}</p>}
+                
+                {isSuperAdmin && p.role !== 'SUPER_ADMIN' && p.password && (
+                  <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50">
+                    <p className="text-[8px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em] mb-1">Gate Key (Password)</p>
+                    <div className="flex items-center gap-2 bg-slate-100/50 dark:bg-slate-900/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                      <Lock size={10} className="text-slate-400 shrink-0" />
+                      <span className="text-[10px] font-mono text-slate-600 dark:text-slate-400 truncate">{p.password}</span>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="grid grid-cols-2 gap-4">

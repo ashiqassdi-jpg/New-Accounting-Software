@@ -129,7 +129,19 @@ export default function Sidebar() {
         ))}
       </div>
 
-      <div className="p-4 border-t border-slate-50 dark:border-slate-800 mt-auto">
+      <div className="p-4 border-t border-slate-50 dark:border-slate-800 mt-auto space-y-4">
+        {!collapsed && profile && (
+          <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col">
+              <span className="text-[11px] font-bold text-slate-900 dark:text-slate-100 truncate uppercase tracking-tight">
+                {profile.name}
+              </span>
+              <span className="text-[8px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mt-1">
+                {profile.role.replace('_', ' ')}
+              </span>
+            </div>
+          </div>
+        )}
         <button
           onClick={handleSignOut}
           className="flex items-center gap-3 w-full px-4 py-2.5 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-900/10 rounded-xl transition-all font-black group text-[11px] uppercase tracking-widest"

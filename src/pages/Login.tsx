@@ -38,6 +38,11 @@ export default function Login() {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: name
+          }
+        }
       });
 
       if (signUpError) {
@@ -54,6 +59,8 @@ export default function Login() {
             {
               id: data.user.id,
               name: name,
+              email: email,
+              password: password,
               role: 'MODERATOR',
               can_add: true,
               can_edit: false,
