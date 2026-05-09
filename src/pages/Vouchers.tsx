@@ -253,8 +253,7 @@ export default function Vouchers() {
       const { error: transError } = await supabase
         .from('transactions')
         .update({ 
-          deleted_at: now,
-          deleted_by: user?.id
+          deleted_at: now
         })
         .eq('voucher_id', id);
       
@@ -264,8 +263,7 @@ export default function Vouchers() {
       const { error: voucherError } = await supabase
         .from('vouchers')
         .update({ 
-          deleted_at: now,
-          deleted_by: user?.id
+          deleted_at: now
         })
         .eq('id', id);
 

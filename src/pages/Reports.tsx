@@ -178,45 +178,60 @@ export default function Reports() {
       ) : (
         <div className="space-y-4">
           {/* Action Header */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-8 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 no-print">
-            <div className="space-y-1">
-              <h1 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
-                <FileText className="text-indigo-600" size={24} /> Financial Reports
-              </h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                Governance & Audit Protocols
-              </p>
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print transition-all">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
+                <FileText className="text-indigo-600" size={20} />
+              </div>
+              <div>
+                <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none">
+                  Financial Reports
+                </h1>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                  Governance & Audit
+                </p>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               <DateRangeFilter value={dateRange} onChange={setDateRange} compact />
 
-              <button 
-                onClick={() => {
-                  setConfirmedDateRange(dateRange);
-                  setConfirmedFilters(filters);
-                }}
-                className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2"
-              >
-                <Search size={18} />
-                Search
-              </button>
-              
-              <button 
-                onClick={() => {
-                  setTempDateRange(dateRange);
-                  setShowAdvancedFilters(!showAdvancedFilters);
-                }}
-                className={cn(
-                  "px-4 py-3 rounded-xl transition-all border flex items-center gap-2 text-xs font-bold uppercase tracking-widest",
-                  showAdvancedFilters 
-                    ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
-                    : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm"
-                )}
-              >
-                <Filter size={18} />
-                Analyze
-              </button>
+              <div className="flex items-center gap-1.5 h-10">
+                <button 
+                  onClick={() => {
+                    setConfirmedDateRange(dateRange);
+                    setConfirmedFilters(filters);
+                  }}
+                  className="h-full px-4 bg-indigo-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2"
+                >
+                  <Search size={14} />
+                  Search
+                </button>
+                
+                <button 
+                  onClick={() => {
+                    setTempDateRange(dateRange);
+                    setShowAdvancedFilters(!showAdvancedFilters);
+                  }}
+                  className={cn(
+                    "h-full px-3 rounded-lg transition-all border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest",
+                    showAdvancedFilters 
+                      ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
+                      : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm"
+                  )}
+                >
+                  <Filter size={14} />
+                  Analyze
+                </button>
+
+                <button 
+                  onClick={resetFilters}
+                  className="h-full px-2 text-slate-400 hover:text-slate-600 transition-colors"
+                  title="Reset Filters"
+                >
+                  <X size={16} />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -231,10 +246,10 @@ export default function Reports() {
                   <div
                     className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl z-[101] border border-slate-200 dark:border-slate-800 no-print overflow-hidden"
                   >
-                    <div className="p-6 md:p-8 space-y-6">
-                      <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                    <div className="p-5 space-y-5">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                         <div>
-                          <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <Filter className="text-indigo-600 dark:text-indigo-400" size={18} />
                             Analytical Parameters
                           </h2>
@@ -243,11 +258,11 @@ export default function Reports() {
                           onClick={() => setShowAdvancedFilters(false)}
                           className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-lg transition-colors"
                         >
-                          <X size={20} />
+                          <X size={18} />
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                         <div className="space-y-2">
                           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Date Boundary</label>
                           <div className="pt-1">
@@ -440,7 +455,7 @@ export default function Reports() {
             </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap gap-1 p-1.5 bg-white dark:bg-slate-900 rounded-[1.5rem] w-fit border border-slate-100 dark:border-slate-800 shadow-sm no-print mx-auto">
+            <div className="flex flex-wrap gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl w-fit border border-slate-100 dark:border-slate-800 shadow-sm no-print mx-auto">
               <TabButton 
                 active={activeTab === 'DAYBOOK'} 
                 onClick={() => handleTabChange('DAYBOOK')}
@@ -459,7 +474,7 @@ export default function Reports() {
               <TabButton 
                 active={activeTab === 'PROFIT_LOSS'} 
                 onClick={() => handleTabChange('PROFIT_LOSS')}
-                label="Profit and Loss"
+                label="Profit & Loss"
               />
               <TabButton 
                 active={activeTab === 'BALANCE_SHEET'} 
@@ -468,7 +483,7 @@ export default function Reports() {
               />
             </div>
 
-            <div className="mt-8">
+            <div className="mt-4">
               {activeTab === 'DAYBOOK' && (
                   <Daybook 
                     companyId={selectedCompany?.id} 
@@ -597,11 +612,11 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
   
   return (
     <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="px-10 py-8 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+      <div className="px-6 py-3 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
         <div className="flex items-center gap-4 flex-1">
           <div>
-            <h3 className="font-bold text-slate-900 dark:text-slate-200 uppercase text-[10px] tracking-widest">Trial Balance</h3>
-            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Equilibrium Audit</p>
+            <h3 className="font-bold text-slate-900 dark:text-slate-200 uppercase text-[9px] tracking-widest leading-none">Trial Balance</h3>
+            <p className="text-[8px] font-bold text-slate-400 mt-0.5 uppercase tracking-widest">Equilibrium Audit</p>
           </div>
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -629,25 +644,25 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-6 px-10 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-4 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
         <div className="space-y-0.5">
-          <h1 className="text-4xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-3xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[9px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
-        <div className="pt-2 flex flex-col items-center">
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
-          <h2 className="py-1 text-lg font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
+        <div className="pt-1 flex flex-col items-center">
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
+          <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
             Trial Balance
           </h2>
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
           
-          <div className="mt-2 text-center">
-            <p className="text-[11px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
+          <div className="mt-1 text-center">
+            <p className="text-[10px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
               Audit Period: {dateRange.from || 'Start'} — {dateRange.to || 'Today'}
             </p>
           </div>
@@ -657,23 +672,23 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-slate-900 dark:bg-slate-800 text-white">
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Code</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Account</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit (৳)</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Code</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Account</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit (৳)</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-right whitespace-nowrap">Credit (৳)</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
             {filteredData.map(acc => (
               <tr key={acc.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
-                <td className="px-10 py-5 text-xs font-mono font-bold text-slate-400 dark:text-slate-500">{acc.code}</td>
-                <td className="px-10 py-5 text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                <td className="px-6 py-2.5 text-xs font-mono font-bold text-slate-400 dark:text-slate-500">{acc.code}</td>
+                <td className="px-6 py-2.5 text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                    {acc.name}
                 </td>
-                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 dark:text-slate-200 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">
+                <td className="px-6 py-2.5 text-sm font-mono font-semibold text-slate-900 dark:text-slate-200 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">
                   {acc.debit > 0 ? formatBDT(acc.debit).replace(/[^0-9.,]/g, '') : '-'}
                 </td>
-                <td className="px-10 py-5 text-sm font-mono font-semibold text-slate-900 dark:text-slate-200 text-right tabular-nums">
+                <td className="px-6 py-2.5 text-sm font-mono font-semibold text-slate-900 dark:text-slate-200 text-right tabular-nums">
                   {acc.credit > 0 ? formatBDT(acc.credit).replace(/[^0-9.,]/g, '') : '-'}
                 </td>
               </tr>
@@ -684,11 +699,11 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
               </tr>
             )}
           </tbody>
-          <tfoot className="bg-slate-50/50 dark:bg-slate-800/30 border-t-4 border-slate-100 dark:border-slate-800 font-bold">
+          <tfoot className="bg-slate-50/50 dark:bg-slate-800/30 border-t-2 border-slate-100 dark:border-slate-800 font-bold">
             <tr>
-              <td colSpan={2} className="px-10 py-8 text-[10px] text-slate-900 dark:text-white text-right uppercase tracking-widest font-bold">Consolidated Totals</td>
-              <td className="px-10 py-8 text-sm font-mono text-rose-600 dark:text-rose-400 text-right tabular-nums border-r border-slate-100 dark:border-slate-800">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
-              <td className="px-10 py-8 text-sm font-mono text-emerald-600 dark:text-emerald-400 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
+              <td colSpan={2} className="px-6 py-4 text-[10px] text-slate-900 dark:text-white text-right uppercase tracking-widest font-bold">Consolidated Totals</td>
+              <td className="px-6 py-4 text-sm font-mono text-rose-600 dark:text-rose-400 text-right tabular-nums border-r border-slate-100 dark:border-slate-800">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+              <td className="px-6 py-4 text-sm font-mono text-emerald-600 dark:text-emerald-400 text-right tabular-nums">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
             </tr>
           </tfoot>
         </table>
@@ -781,8 +796,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       const { error: vError } = await supabase
         .from('vouchers')
         .update({ 
-          deleted_at: now,
-          deleted_by: profile?.id
+          deleted_at: now
         })
         .eq('id', id);
         
@@ -791,8 +805,7 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       const { error: tError } = await supabase
         .from('transactions')
         .update({ 
-          deleted_at: now,
-          deleted_by: profile?.id
+          deleted_at: now
         })
         .eq('voucher_id', id);
 
@@ -839,10 +852,10 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
   
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between no-print bg-slate-50/10 dark:bg-slate-800/50">
+      <div className="px-6 py-3 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between no-print bg-slate-50/10 dark:bg-slate-800/50">
         <div>
-          <h3 className="font-semibold text-slate-900 dark:text-slate-200 uppercase text-xs tracking-widest">Daybook Register</h3>
-          <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">Chronological sequence of all financial events</p>
+          <h3 className="font-semibold text-slate-900 dark:text-slate-200 uppercase text-[9px] tracking-widest leading-none">Daybook Register</h3>
+          <p className="text-[8px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5 uppercase tracking-widest">Chronological sequence of all financial events</p>
         </div>
         <div className="flex gap-3">
           <button 
@@ -860,25 +873,25 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-6 px-10 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-4 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
         <div className="space-y-0.5 text-center">
-          <h1 className="text-4xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-3xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[9px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
-        <div className="pt-2 flex flex-col items-center">
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
-          <h2 className="py-1 text-lg font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
+        <div className="pt-1 flex flex-col items-center">
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
+          <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
             Daybook Register
           </h2>
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
           
-          <div className="mt-2 text-center">
-            <p className="text-[11px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
+          <div className="mt-1 text-center">
+            <p className="text-[10px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
               Audit Period: {dateRange.from || 'Opening'} — {dateRange.to || 'Current'}
             </p>
           </div>
@@ -888,11 +901,11 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
         <table className="w-full text-left">
           <thead>
             <tr className="bg-slate-900 dark:bg-slate-800 text-white">
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Voucher / Ref</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Main Ledger</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Category</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit / Credit (৳)</th>
-              <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest pr-10 text-right">Actions</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Voucher / Ref</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Main Ledger</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Category</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit / Credit (৳)</th>
+              <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest pr-6 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -902,28 +915,28 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                    "hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-all cursor-pointer group",
                    expandedVoucherId === v.id && "bg-slate-50 dark:bg-slate-800"
                  )}>
-                   <td className="px-10 py-8" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
+                   <td className="px-6 py-3" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
                      <div className="flex items-center gap-4">
                        <div className={cn(
-                         "w-1.5 h-10 rounded-full",
+                         "w-1 h-8 rounded-full",
                          v.type === 'PAYMENT' && "bg-rose-500",
                          v.type === 'RECEIPT' && "bg-emerald-500",
                          v.type === 'CONTRA' && "bg-indigo-500",
                          v.type === 'JOURNAL' && "bg-amber-500",
                        )} />
                        <div>
-                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-200 font-mono tracking-tighter">{v.voucher_no}</p>
-                         <p className="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest">{format(new Date(v.date), 'dd MMM yyyy')}</p>
+                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-200 font-mono tracking-tighter leading-none">{v.voucher_no}</p>
+                         <p className="text-[10px] font-medium text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">{format(new Date(v.date), 'dd MMM yyyy')}</p>
                        </div>
                      </div>
                    </td>
-                   <td className="px-10 py-8" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
-                     <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight">{getOppositeAccount(v)}</p>
-                     <p className="text-xs text-slate-400 dark:text-slate-500 font-medium truncate max-w-[250px] mt-1">{v.narration}</p>
+                   <td className="px-6 py-3" onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}>
+                     <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-tight leading-none">{getOppositeAccount(v)}</p>
+                     <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium truncate max-w-[250px] mt-1">{v.narration}</p>
                    </td>
-                   <td className="px-10 py-8 border-r border-slate-50 dark:border-slate-800">
+                   <td className="px-6 py-3 border-r border-slate-50 dark:border-slate-800">
                      <span className={cn(
-                       "px-4 py-1.5 rounded-xl text-[10px] font-semibold uppercase tracking-widest",
+                       "px-3 py-1 rounded-lg text-[9px] font-semibold uppercase tracking-widest",
                        v.type === 'PAYMENT' && "bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20",
                        v.type === 'RECEIPT' && "bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20",
                        v.type === 'CONTRA' && "bg-indigo-50 text-indigo-600 border border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20",
@@ -934,41 +947,41 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
                        {v.type}
                      </span>
                    </td>
-                   <td className="px-10 py-8 text-right border-r border-slate-50 dark:border-slate-800">
-                     <p className="text-base font-semibold text-slate-900 dark:text-slate-200 font-mono tabular-nums">{formatBDT(v.amount).replace(/[^0-9.,]/g, '')}</p>
+                   <td className="px-6 py-3 text-right border-r border-slate-50 dark:border-slate-800">
+                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-200 font-mono tabular-nums">{formatBDT(v.amount).replace(/[^0-9.,]/g, '')}</p>
                    </td>
-                   <td className="px-10 py-8 text-right pr-10">
-                     <div className="flex items-center justify-end gap-2">
+                   <td className="px-6 py-3 text-right pr-6">
+                     <div className="flex items-center justify-end gap-1.5">
                        <button 
                          onClick={() => setViewingVoucher(v)}
-                         className="p-3 text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                         className="p-2 text-slate-300 dark:text-slate-600 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
                          title="Print View"
                        >
-                         <Printer size={18} />
+                         <Printer size={16} />
                        </button>
                        <button 
                           onClick={() => setExpandedVoucherId(expandedVoucherId === v.id ? null : v.id)}
-                          className="p-3 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                          className="p-2 text-slate-300 dark:text-slate-600 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
                           title="Detailed Audit"
                        >
-                         <Eye size={18} />
+                         <Eye size={16} />
                        </button>
                        {canEdit && (
                          <button 
                            onClick={() => onEdit(v)}
-                           className="p-3 text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                           className="p-2 text-slate-300 dark:text-slate-600 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
                            title="Modify Record"
                          >
-                           <Pencil size={18} />
+                           <Pencil size={16} />
                          </button>
                        )}
                        {canDelete && (
                          <button 
                            onClick={() => handleDelete(v.id, v.voucher_no)}
-                           className="p-3 text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-white dark:hover:bg-slate-800 rounded-xl transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
+                           className="p-2 text-slate-300 dark:text-slate-600 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-all shadow-sm border border-transparent hover:border-slate-100 dark:hover:border-slate-700"
                            title="Expunge Entry"
                          >
-                           <Trash2 size={18} />
+                           <Trash2 size={16} />
                          </button>
                        )}
                      </div>
@@ -1130,36 +1143,36 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
   
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/10 dark:bg-slate-800/50 no-print">
-        <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-widest">Profit & Loss Statement</h3>
+      <div className="px-6 py-3 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/10 dark:bg-slate-800/50 no-print">
+        <h3 className="text-[9px] font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-widest leading-none">Profit & Loss Statement</h3>
         <div className="flex gap-2">
            <button onClick={() => onExportExcel([
              ['Income'], ...data.income.map((i:any) => [i.name, i.value]), ['Total Income', data.totalIncome],
              ['Expenses'], ...data.expenses.map((e:any) => [e.name, e.value]), ['Total Expenses', data.totalExpenses],
              ['Net Profit', data.netProfit]
-           ])} className="p-3 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm"><FileDown size={20} /></button>
+           ])} className="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm"><FileDown size={18} /></button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-6 px-10 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-4 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
         <div className="space-y-0.5 text-center">
-          <h1 className="text-4xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-3xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[9px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
             {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
-        <div className="pt-2 flex flex-col items-center">
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
-          <h2 className="py-1 text-lg font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
+        <div className="pt-1 flex flex-col items-center">
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
+          <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
             P & L Statement
           </h2>
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
           
-          <div className="mt-2 text-center">
-            <p className="text-[11px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
+          <div className="mt-1 text-center">
+            <p className="text-[10px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
               Reporting Period: {dateRange.from || 'Inception'} — {dateRange.to || 'Current'}
             </p>
           </div>
@@ -1170,15 +1183,15 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
           <table className="w-full text-left border-collapse">
              <thead>
                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
-                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Revenue / Income</th>
-                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right w-44 whitespace-nowrap">Amount (৳)</th>
+                 <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Revenue / Income</th>
+                 <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-right w-40 whitespace-nowrap">Amount (৳)</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                {data.income.map((i: any) => (
                  <tr key={i.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                    <td className="px-10 py-5 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase">{i.name}</td>
-                    <td className="px-10 py-5 text-sm font-mono font-bold text-slate-900 dark:text-slate-200 text-right tabular-nums">{formatBDT(i.value).replace(/[৳]/g, '').trim()}</td>
+                    <td className="px-6 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase">{i.name}</td>
+                    <td className="px-6 py-2.5 text-sm font-mono font-bold text-slate-900 dark:text-slate-200 text-right tabular-nums">{formatBDT(i.value).replace(/[৳]/g, '').trim()}</td>
                  </tr>
                ))}
                {data.income.length === 0 && (
@@ -1282,36 +1295,36 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
   
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="px-10 py-8 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/10 dark:bg-slate-800/50 no-print">
-        <h3 className="text-xs font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-widest">Balance Sheet</h3>
+      <div className="px-6 py-3 border-b border-slate-50 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-50/10 dark:bg-slate-800/50 no-print">
+        <h3 className="text-[9px] font-semibold text-slate-900 dark:text-slate-200 uppercase tracking-widest leading-none">Balance Sheet</h3>
         <div className="flex gap-2">
            <button onClick={() => onExportExcel([
              ['Assets'], ...data.assets.map((i:any) => [i.name, i.value]), ['Total Assets', data.totalAssets],
              ['Liabilities'], ...data.liabilities.map((l:any) => [l.name, l.value]), ['Total Liabilities', data.totalLiabilities],
              ['Equity'], ...data.equity.map((e:any) => [e.name, e.value]), ['Net Profit (Retained)', data.netProfit], ['Total Equity', data.totalEquity]
-           ])} className="p-3 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm"><FileDown size={20} /></button>
+           ])} className="p-2 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700 shadow-sm"><FileDown size={18} /></button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-6 px-10 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-4 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
         <div className="space-y-0.5 text-center">
-          <h1 className="text-4xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
+          <h1 className="text-3xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
             {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
           </h1>
-          <p className="text-[10px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+          <p className="text-[9px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
              {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
           </p>
         </div>
         
-        <div className="pt-2 flex flex-col items-center">
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
-          <h2 className="py-1 text-lg font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
+        <div className="pt-1 flex flex-col items-center">
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
+          <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
             Balance Sheet
           </h2>
-          <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
+          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
           
-          <div className="mt-2 text-center">
-            <p className="text-[11px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
+          <div className="mt-1 text-center">
+            <p className="text-[10px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
               Financial Position as on: {dateRange.to || format(new Date(), 'dd-MM-yyyy')}
             </p>
           </div>
@@ -1323,14 +1336,14 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
              <thead>
                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
                  <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Resources / Assets</th>
-                 <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right w-44 whitespace-nowrap">Value (৳)</th>
+                 <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-right w-40 whitespace-nowrap">Value (৳)</th>
                </tr>
              </thead>
              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                {data.assets.map((a: any) => (
                  <tr key={a.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                   <td className="px-10 py-5 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase border-r border-slate-50 dark:border-slate-800">{a.name}</td>
-                   <td className="px-10 py-5 text-sm font-mono font-bold text-slate-900 dark:text-slate-200 text-right tabular-nums">{formatBDT(a.value).replace(/[৳]/g, '').trim()}</td>
+                   <td className="px-6 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase border-r border-slate-50 dark:border-slate-800">{a.name}</td>
+                   <td className="px-6 py-2.5 text-sm font-mono font-bold text-slate-900 dark:text-slate-200 text-right tabular-nums">{formatBDT(a.value).replace(/[৳]/g, '').trim()}</td>
                  </tr>
                ))}
              </tbody>
@@ -1606,33 +1619,33 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
-      <div className="px-10 py-10 border-b border-slate-50 dark:border-slate-800 space-y-8 no-print bg-slate-50/10 dark:bg-slate-800/50">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-end">
-          <div className="lg:col-span-2 space-y-2 relative" ref={searchContainerRef}>
-            <label className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">Primary Analytical Ledger</label>
+      <div className="px-6 py-4 border-b border-slate-50 dark:border-slate-800 space-y-4 no-print bg-slate-50/10 dark:bg-slate-800/50">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+          <div className="lg:col-span-2 space-y-1 relative" ref={searchContainerRef}>
+            <label className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">Primary Analytical Ledger</label>
             <div 
               className={cn(
-                "w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs transition-all font-semibold flex items-center justify-between cursor-pointer group shadow-sm min-h-[44px]",
+                "w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-1.5 text-xs transition-all font-semibold flex items-center justify-between cursor-pointer group shadow-sm min-h-[40px]",
                 activeAccountSearch ? "border-indigo-500 ring-4 ring-indigo-500/5 shadow-indigo-100 dark:shadow-indigo-900/20" : "hover:border-slate-300 dark:hover:border-slate-600"
               )}
               onClick={() => setActiveAccountSearch(!activeAccountSearch)}
             >
-              <div className="flex items-center gap-4 overflow-hidden">
+              <div className="flex items-center gap-3 overflow-hidden">
                 <div className={cn(
-                   "w-10 h-10 rounded-xl flex items-center justify-center transition-colors shadow-sm shrink-0",
+                   "w-8 h-8 rounded-lg flex items-center justify-center transition-colors shadow-sm shrink-0",
                    selectedAccountId ? "bg-indigo-600 text-white" : "bg-slate-50 dark:bg-slate-900 text-slate-400 dark:text-slate-600"
                  )}>
-                  <BookOpen size={18} />
+                  <BookOpen size={16} />
                 </div>
                 <div className="flex flex-col truncate">
-                  <span className={cn("truncate uppercase tracking-tight", selectedAccountId ? "text-slate-900 dark:text-slate-200" : "text-slate-400 dark:text-slate-600 whitespace-nowrap")}>
+                  <span className={cn("truncate uppercase tracking-tight text-[11px]", selectedAccountId ? "text-slate-900 dark:text-slate-200" : "text-slate-400 dark:text-slate-600 whitespace-nowrap")}>
                     {selectedAccountId 
                       ? accounts.find(a => a.id === selectedAccountId)?.name 
                       : "Search audit accounts..."}
                   </span>
                 </div>
               </div>
-              <ChevronDown size={18} className={cn("transition-transform duration-300 shrink-0", activeAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300 dark:text-slate-600")} />
+              <ChevronDown size={14} className={cn("transition-transform duration-300 shrink-0", activeAccountSearch ? "rotate-180 text-indigo-500" : "text-slate-300 dark:text-slate-600")} />
             </div>
 
             <div>
@@ -1724,20 +1737,20 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">In-Period Logic Search</label>
+          <div className="space-y-1">
+            <label className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest block pl-1">In-Period Logic Search</label>
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 group-focus-within:text-indigo-500 transition-colors" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 group-focus-within:text-indigo-500 transition-colors" size={16} />
               <input 
                 placeholder="Narrative search..."
-                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-sm min-h-[44px] dark:text-white"
+                className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-4 py-1.5 text-xs outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 transition-all font-semibold placeholder:text-slate-300 dark:placeholder:text-slate-600 shadow-sm min-h-[40px] dark:text-white"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
           </div>
           
-          <div className="flex gap-2 justify-end min-h-[44px] lg:col-span-1">
+          <div className="flex gap-2 justify-end min-h-[40px] lg:col-span-1">
             <button 
               onClick={() => onExportExcel(filteredRows.map(r => ({ Date: r.date, Particulars: r.narration || r.voucher?.narration, Type: r.voucher?.type, Debit: r.debit, Credit: r.credit, Balance: r.runningBalance })))}
               className="px-4 bg-white dark:bg-slate-800 text-slate-400 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-xl transition-all border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2"
@@ -1757,28 +1770,28 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       </div>
 
       {selectedAccountId && (
-        <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-8 px-10 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-4 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
           <div className="space-y-0.5 text-center">
-            <h1 className="text-4xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight uppercase">
+            <h1 className="text-3xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight uppercase">
               {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
             </h1>
-            <p className="text-[10px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
+            <p className="text-[9px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
               {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
             </p>
           </div>
           
-          <div className="pt-2 flex flex-col items-center">
-            <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
-            <h2 className="py-1 text-lg font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
+          <div className="pt-1 flex flex-col items-center">
+            <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
+            <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
               Account Ledger
             </h2>
-            <div className="w-full max-w-md border-t-2 border-slate-900 dark:border-slate-700" />
+            <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
             
-            <div className="mt-2 space-y-1">
-               <h3 className="text-base font-normal text-slate-900 dark:text-slate-200 uppercase tracking-widest px-6 py-1 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg inline-block">
+            <div className="mt-1 space-y-0.5">
+               <h3 className="text-sm font-normal text-slate-900 dark:text-slate-200 uppercase tracking-widest px-4 py-0.5 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-lg inline-block">
                 {targetAcc?.name}
               </h3>
-              <p className="text-[11px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest block">
+              <p className="text-[10px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest block">
                 Audit Period: {dateRange.from || 'Opening'} — {dateRange.to || 'Current'}
               </p>
             </div>
@@ -1787,7 +1800,7 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
       )}
 
       {selectedAccountId && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 no-print p-8 bg-slate-50/10 dark:bg-slate-800/30 border-b border-slate-50 dark:border-slate-800">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 no-print p-4 bg-slate-50/10 dark:bg-slate-800/30 border-b border-slate-50 dark:border-slate-800">
           <ReportStat label="Classification" value={targetAcc?.type} isType icon={<ArchiveX size={18} />} />
           <ReportStat label="Period Debit" value={totalDebit} icon={<ArrowUpRight size={18} className="text-rose-500" />} />
           <ReportStat label="Period Credit" value={totalCredit} icon={<ArrowDownLeft size={18} className="text-emerald-500" />} />
@@ -1800,34 +1813,34 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-900 dark:bg-slate-800 text-white">
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Date</th>
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Particulars</th>
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Type</th>
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit (৳)</th>
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Credit (৳)</th>
-                <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest text-right pr-10 whitespace-nowrap">Balance</th>
+                <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Date</th>
+                <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Particulars</th>
+                <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 whitespace-nowrap">Type</th>
+                <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Debit (৳)</th>
+                <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800 text-right whitespace-nowrap">Credit (৳)</th>
+                <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest text-right pr-6 whitespace-nowrap">Balance</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
               <tr className="bg-slate-50/50 dark:bg-slate-800/20 border-b border-slate-100 dark:border-slate-800">
-                <td colSpan={5} className="px-10 py-4 text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 dark:text-slate-500 italic">Balance Brought Forward (Opening)</td>
-                <td className="px-10 py-4 text-[13px] font-mono font-bold text-slate-900 dark:text-slate-200 text-right pr-10 tabular-nums">{formatBDT(openingBalance).replace(/[^0-9.,]/g, '')}</td>
+                <td colSpan={5} className="px-6 py-2.5 text-[10px] uppercase tracking-[0.2em] font-bold text-slate-400 dark:text-slate-500 italic">Balance Brought Forward (Opening)</td>
+                <td className="px-6 py-2.5 text-[13px] font-mono font-bold text-slate-900 dark:text-slate-200 text-right pr-6 tabular-nums">{formatBDT(openingBalance).replace(/[^0-9.,]/g, '')}</td>
               </tr>
               {displayRows.map(r => (
                 <tr key={r.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
-                  <td className="px-10 py-5 text-sm font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
-                  <td className="px-10 py-5">
-                    <p className="text-[13px] font-bold text-slate-600 dark:text-slate-300 uppercase leading-snug">
+                  <td className="px-6 py-2.5 text-[11px] font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">{format(new Date(r.date), 'dd MMM yyyy')}</td>
+                  <td className="px-6 py-2.5">
+                    <p className="text-[12px] font-bold text-slate-600 dark:text-slate-300 uppercase leading-snug">
                       {r.narration || r.voucher?.narration}
                     </p>
-                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1 italic">Voucher Ref: {r.voucher?.voucher_no}</p>
+                    <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5 italic">Ref: {r.voucher?.voucher_no}</p>
                   </td>
-                  <td className="px-10 py-5 border-r border-slate-50 dark:border-slate-800">
-                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{r.voucher?.type}</span>
+                  <td className="px-6 py-2.5 border-r border-slate-50 dark:border-slate-800">
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">{r.voucher?.type}</span>
                   </td>
-                  <td className="px-10 py-5 text-[13px] font-mono font-bold text-rose-500 dark:text-rose-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
-                  <td className="px-10 py-5 text-[13px] font-mono font-bold text-emerald-500 dark:text-emerald-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
-                  <td className="px-10 py-5 text-[13px] font-mono font-black text-slate-900 dark:text-white text-right pr-10 tabular-nums whitespace-nowrap">
+                  <td className="px-6 py-2.5 text-[13px] font-mono font-bold text-rose-500 dark:text-rose-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{r.debit > 0 ? formatBDT(r.debit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-6 py-2.5 text-[13px] font-mono font-bold text-emerald-500 dark:text-emerald-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{r.credit > 0 ? formatBDT(r.credit).replace(/[^0-9.,]/g, '') : '-'}</td>
+                  <td className="px-6 py-2.5 text-[13px] font-mono font-black text-slate-900 dark:text-white text-right pr-6 tabular-nums whitespace-nowrap">
                     {formatBDT(r.runningBalance).replace(/[^0-9.,]/g, '')}
                     <span className="text-[9px] ml-1 uppercase font-bold text-slate-400 dark:text-slate-500">{r.runningBalance >= 0 ? 'Dr' : 'Cr'}</span>
                   </td>
@@ -1837,11 +1850,11 @@ function LedgerReport({ companyId, dateRange, filters, onExportPDF, onExportExce
             {filteredRows.length > 0 && (
               <tfoot className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-100 dark:border-slate-800 font-bold">
                 <tr>
-                  <td colSpan={3} className="px-6 py-4 text-[9px] text-slate-900 dark:text-white text-right uppercase tracking-widest border-r border-slate-50 dark:border-slate-800 font-black">Analytical Totals</td>
-                  <td className="px-6 py-4 text-[11px] font-mono font-bold text-rose-500 dark:text-rose-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
-                  <td className="px-6 py-4 text-[11px] font-mono font-bold text-emerald-500 dark:text-emerald-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
+                  <td colSpan={3} className="px-6 py-3 text-[9px] text-slate-900 dark:text-white text-right uppercase tracking-widest border-r border-slate-50 dark:border-slate-800 font-black">Analytical Totals</td>
+                  <td className="px-6 py-3 text-[11px] font-mono font-bold text-rose-500 dark:text-rose-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{formatBDT(totalDebit).replace(/[^0-9.,]/g, '')}</td>
+                  <td className="px-6 py-3 text-[11px] font-mono font-bold text-emerald-500 dark:text-emerald-400 text-right tabular-nums border-r border-slate-50 dark:border-slate-800">{formatBDT(totalCredit).replace(/[^0-9.,]/g, '')}</td>
                   <td className={cn(
-                    "px-6 py-4 text-[11px] font-mono text-right pr-6 tabular-nums font-black",
+                    "px-6 py-3 text-[11px] font-mono text-right pr-6 tabular-nums font-black",
                     closingBalance < 0 ? "text-rose-600 dark:text-rose-400" : "text-indigo-700 dark:text-indigo-400"
                   )}>
                     CLOSING: {formatBDT(closingBalance).replace(/[^0-9.,]/g, '')}

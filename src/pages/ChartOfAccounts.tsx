@@ -257,8 +257,7 @@ export default function ChartOfAccounts() {
     const { error } = await supabase
       .from('accounts')
       .update({ 
-        deleted_at: new Date().toISOString(),
-        deleted_by: profile?.id
+        deleted_at: new Date().toISOString()
       })
       .eq('id', id);
       
