@@ -522,7 +522,7 @@ function RecycleBin() {
       const [companiesRes, accountsRes, vouchersRes, profilesRes] = await Promise.all([
         supabase.from('companies').select('*').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
         supabase.from('accounts').select('*, companies(name)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
-        supabase.from('vouchers').select('*, companies(name), items:transactions(*)').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
+        supabase.from('vouchers').select('*, companies(name), items:transactions(*, accounts(name))').not('deleted_at', 'is', null).order('deleted_at', { ascending: false }),
         supabase.from('profiles').select('id, name, email')
       ]);
 
@@ -530,7 +530,7 @@ function RecycleBin() {
       
       const mapDeleter = (items: any[]) => items.map(item => ({
         ...item,
-        deleter: item.deleted_by ? profileMap.get(item.deleted_by) : null
+        deleter: (item.deleted_by ? profileMap.get(item.deleted_by) : profileMap.get(item.updated_by)) || null
       }));
 
       setDeletedCompanies(mapDeleter(companiesRes.data || []));
@@ -653,7 +653,7 @@ function RecycleBin() {
                         {previewItem.data.items?.map((item: any, idx: number) => (
                            <div key={idx} className="flex items-center justify-between py-2 border-b border-slate-100/50 dark:border-slate-800/50 last:border-0">
                               <div>
-                                 <p className="text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase">{item.account_name || 'Processing Account...'}</p>
+                                 <p className="text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase">{item.accounts?.name || 'Processing Account...'}</p>
                                  <p className="text-[9px] text-slate-400 dark:text-slate-500 font-mono mt-0.5 truncate max-w-[200px]">{item.narration || 'No annotation'}</p>
                               </div>
                               <div className="text-right">

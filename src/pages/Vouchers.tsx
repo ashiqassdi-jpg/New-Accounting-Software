@@ -263,7 +263,9 @@ export default function Vouchers() {
       const { error: voucherError } = await supabase
         .from('vouchers')
         .update({ 
-          deleted_at: now
+          deleted_at: now,
+          updated_at: now,
+          updated_by: user?.id
         })
         .eq('id', id);
 

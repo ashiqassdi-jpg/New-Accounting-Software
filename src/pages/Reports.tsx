@@ -796,7 +796,9 @@ function Daybook({ companyId, dateRange, filters, onEdit, onExportPDF, onExportE
       const { error: vError } = await supabase
         .from('vouchers')
         .update({ 
-          deleted_at: now
+          deleted_at: now,
+          updated_at: now,
+          updated_by: profile?.id
         })
         .eq('id', id);
         
