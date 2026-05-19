@@ -16,6 +16,16 @@
   body {
     @apply bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+    /* PWA Native Feel */
+    overscroll-behavior-y: contain;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    user-select: none;
+  }
+
+  /* Re-enable selection for inputs and text areas */
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
   }
 
   input, select, textarea {
