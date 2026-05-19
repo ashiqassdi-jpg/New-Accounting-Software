@@ -680,8 +680,9 @@ export default function Vouchers() {
             )}
 
             {/* List */}
-            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden transition-all">
+              {/* Desktop Table View */}
+              <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-800/50">
@@ -694,7 +695,7 @@ export default function Vouchers() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {filteredVouchers.map((v) => (
-                      <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                      <tr key={v.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors group">
                         <td className="px-6 py-4 pl-8">
                           <span className={cn(
                             "text-[9px] font-bold px-2 py-0.5 rounded text-white uppercase tracking-widest",
@@ -713,7 +714,7 @@ export default function Vouchers() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex flex-col">
-                            <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{v.voucher_no}</span>
+                            <span className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate group-hover:text-indigo-600 transition-colors">{v.voucher_no}</span>
                             <span className="text-[11px] text-slate-500 font-medium truncate max-w-[200px]">{v.narration}</span>
                           </div>
                         </td>
@@ -727,7 +728,7 @@ export default function Vouchers() {
                               onClick={() => setViewingVoucher(v)}
                               disabled={loading}
                             >
-                              <Eye size={20} />
+                              <Eye size={18} />
                             </button>
                             
                             {canEdit && (
@@ -736,7 +737,7 @@ export default function Vouchers() {
                                 onClick={() => setEditingVoucher(v)}
                                 disabled={loading}
                               >
-                                <Pencil size={20} />
+                                <Pencil size={18} />
                               </button>
                             )}
                             {canDelete && (
@@ -745,7 +746,7 @@ export default function Vouchers() {
                                 onClick={() => handleDeleteVoucher(v.id, v.voucher_no)}
                                 disabled={loading}
                               >
-                                <Trash2 size={20} />
+                                <Trash2 size={18} />
                               </button>
                             )}
                           </div>
@@ -754,6 +755,70 @@ export default function Vouchers() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden divide-y divide-slate-100 dark:divide-slate-800">
+                {filteredVouchers.map((v) => (
+                  <div key={v.id} className="p-4 space-y-3 active:bg-slate-50 dark:active:bg-slate-800/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <span className={cn(
+                        "text-[8px] font-black px-1.5 py-0.5 rounded text-white uppercase tracking-[0.2em]",
+                        v.type === 'PAYMENT' && "bg-rose-500",
+                        v.type === 'RECEIPT' && "bg-emerald-500",
+                        v.type === 'JOURNAL' && "bg-amber-500",
+                        v.type === 'CONTRA' && "bg-indigo-600",
+                        v.type === 'SALES' && "bg-sky-500",
+                        v.type === 'PURCHASE' && "bg-slate-500",
+                      )}>
+                        {v.type}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400 tracking-tighter">
+                        {format(new Date(v.date), 'dd MMM yyyy')}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-start">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-bold text-slate-900 dark:text-slate-100 uppercase truncate">{v.voucher_no}</p>
+                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5">{v.narration || 'No annotation'}</p>
+                      </div>
+                      <div className="ml-4 text-right">
+                        <p className="text-[15px] font-mono font-black text-slate-900 dark:text-indigo-400 tabular-nums">
+                          {formatBDT(v.amount).split('.')[0]}
+                          <span className="text-[10px] opacity-60">.{formatBDT(v.amount).split('.')[1]}</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-1 pt-1">
+                      <button 
+                        onClick={() => setViewingVoucher(v)}
+                        className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400"
+                      >
+                        <Eye size={14} />
+                        View
+                      </button>
+                      {canEdit && (
+                        <button 
+                          onClick={() => setEditingVoucher(v)}
+                          className="flex-1 flex items-center justify-center gap-2 py-2 px-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
+                        >
+                          <Pencil size={14} />
+                          Edit
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button 
+                          onClick={() => handleDeleteVoucher(v.id, v.voucher_no)}
+                          className="p-2 text-rose-500 dark:text-rose-400 bg-rose-50 dark:bg-rose-900/20 rounded-xl"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </div>
 
               {filteredVouchers.length === 0 && !loading && (

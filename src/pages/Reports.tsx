@@ -178,31 +178,33 @@ export default function Reports() {
       ) : (
         <div className="space-y-4">
           {/* Action Header */}
-          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print transition-all">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/60 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 no-print transition-all">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl">
                 <FileText className="text-indigo-600" size={20} />
               </div>
-              <div>
-                <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none">
+              <div className="min-w-0">
+                <h1 className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none truncate">
                   Financial Reports
                 </h1>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">
                   Governance & Audit
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <DateRangeFilter value={dateRange} onChange={setDateRange} compact />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="flex-1 min-w-0 sm:w-64">
+                <DateRangeFilter value={dateRange} onChange={setDateRange} compact />
+              </div>
 
-              <div className="flex items-center gap-1.5 h-10">
+              <div className="flex items-center gap-1.5 h-10 w-full sm:w-auto">
                 <button 
                   onClick={() => {
                     setConfirmedDateRange(dateRange);
                     setConfirmedFilters(filters);
                   }}
-                  className="h-full px-4 bg-indigo-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 flex items-center gap-2"
+                  className="flex-1 sm:flex-none h-full px-4 bg-indigo-600 text-white rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Search size={14} />
                   Search
@@ -214,7 +216,7 @@ export default function Reports() {
                     setShowAdvancedFilters(!showAdvancedFilters);
                   }}
                   className={cn(
-                    "h-full px-3 rounded-lg transition-all border flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest",
+                    "h-full px-3 rounded-lg transition-all border flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest",
                     showAdvancedFilters 
                       ? "bg-indigo-50 border-indigo-200 text-indigo-600 shadow-sm" 
                       : "bg-white border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 shadow-sm"
@@ -226,7 +228,7 @@ export default function Reports() {
 
                 <button 
                   onClick={resetFilters}
-                  className="h-full px-2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="h-full px-2 text-slate-400 hover:text-slate-600 transition-colors bg-slate-50 dark:bg-slate-800 rounded-lg"
                   title="Reset Filters"
                 >
                   <X size={16} />
@@ -244,10 +246,10 @@ export default function Reports() {
                     className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] no-print"
                   />
                   <div
-                    className="fixed inset-x-4 top-[10%] md:left-1/2 md:-translate-x-1/2 md:max-w-2xl bg-white dark:bg-slate-900 rounded-2xl shadow-xl z-[101] border border-slate-200 dark:border-slate-800 no-print overflow-hidden"
+                    className="fixed inset-x-0 bottom-0 sm:inset-x-4 sm:top-[10%] sm:bottom-auto md:left-1/2 md:-translate-x-1/2 md:max-w-2xl bg-white dark:bg-slate-900 rounded-t-[2rem] sm:rounded-2xl shadow-xl z-[101] border border-slate-200 dark:border-slate-800 no-print overflow-hidden max-h-[90vh] flex flex-col"
                   >
-                    <div className="p-5 space-y-5">
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="p-5 flex-1 overflow-y-auto space-y-6 scrollbar-hide">
+                      <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
                         <div>
                           <h2 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
                             <Filter className="text-indigo-600 dark:text-indigo-400" size={18} />
@@ -262,21 +264,21 @@ export default function Reports() {
                         </button>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Date Boundary</label>
+                          <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 pl-1">Date Boundary</label>
                           <div className="pt-1">
                             <DateRangeFilter value={tempDateRange} onChange={setTempDateRange} />
                           </div>
                         </div>
 
                         <div className="space-y-2">
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Voucher Identification</label>
-                          <div className="relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <label className="block text-xs font-bold uppercase tracking-widest text-slate-400 pl-1">Voucher Identification</label>
+                          <div className="relative group">
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
                             <input 
                               placeholder="Search Narrative or Number..."
-                              className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg pl-9 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 shadow-sm transition-colors placeholder:text-slate-400 dark:text-white"
+                              className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-10 pr-3 py-3 text-sm outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 shadow-sm transition-all placeholder:text-slate-300 dark:text-white font-medium"
                               value={filters.searchQuery}
                               onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
                             />
@@ -455,7 +457,7 @@ export default function Reports() {
             </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl w-fit border border-slate-100 dark:border-slate-800 shadow-sm no-print mx-auto">
+            <div className="flex overflow-x-auto no-scrollbar gap-1 p-1 bg-white dark:bg-slate-900 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm no-print mb-4 scrollbar-hide">
               <TabButton 
                 active={activeTab === 'DAYBOOK'} 
                 onClick={() => handleTabChange('DAYBOOK')}
@@ -464,22 +466,22 @@ export default function Reports() {
               <TabButton 
                 active={activeTab === 'LEDGER_REPORT'} 
                 onClick={() => handleTabChange('LEDGER_REPORT')}
-                label="Accounts Ledger"
+                label="Ledger"
               />
               <TabButton 
                 active={activeTab === 'TRIAL_BALANCE'} 
                 onClick={() => handleTabChange('TRIAL_BALANCE')}
-                label="Trial Balance"
+                label="Trial"
               />
               <TabButton 
                 active={activeTab === 'PROFIT_LOSS'} 
                 onClick={() => handleTabChange('PROFIT_LOSS')}
-                label="Profit & Loss"
+                label="P & L"
               />
               <TabButton 
                 active={activeTab === 'BALANCE_SHEET'} 
                 onClick={() => handleTabChange('BALANCE_SHEET')}
-                label="Balance Sheet"
+                label="Balance"
               />
             </div>
 
@@ -631,45 +633,42 @@ function TrialBalance({ companyId, dateRange, filters, onExportPDF, onExportExce
         <div className="flex gap-2">
           <button 
             onClick={() => onExportExcel(filteredData.map(acc => ({ Code: acc.code, Account: acc.name, Debit: acc.debit, Credit: acc.credit })))}
-            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-200 dark:border-slate-700"
+            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-emerald-600 rounded-xl transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
           >
-            <Download size={20} />
+            <Download size={18} />
           </button>
           <button 
             onClick={() => onExportPDF(filteredData.map(acc => [acc.code, acc.name, acc.debit, acc.credit]))}
-            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-indigo-600 rounded-xl transition-all border border-slate-200 dark:border-slate-700"
+            className="p-2.5 bg-white dark:bg-slate-800 text-slate-400 hover:text-rose-600 rounded-xl transition-all border border-slate-200 dark:border-slate-700 shadow-sm"
           >
-            <Printer size={20} />
+            <Printer size={18} />
           </button>
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-4 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
-        <div className="space-y-0.5">
-          <h1 className="text-3xl font-normal text-slate-900 dark:text-white tracking-tight leading-tight">
-            {selectedCompany?.name || "As-Sunnah Skill Development Institute (New Shade)"}
+      <div className="bg-white dark:bg-slate-900 text-slate-900 dark:text-white py-6 px-6 text-center space-y-1 border-b border-slate-50 dark:border-slate-800">
+        <div>
+          <h1 className="text-xl md:text-3xl font-medium text-slate-900 dark:text-white tracking-tight leading-tight">
+            {selectedCompany?.name}
           </h1>
-          <p className="text-[9px] font-normal text-slate-500 dark:text-slate-400 uppercase tracking-[0.2em] max-w-3xl mx-auto">
-            {selectedCompany?.address || 'BLOCK-D, PLOT: U-4, ROAD: SHADHINATA SHARANI, SATARKUL, NORTH BADDA, DHAKA 1212'}
+          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-[0.2em] max-w-2xl mx-auto mt-2">
+            {selectedCompany?.address}
           </p>
         </div>
         
-        <div className="pt-1 flex flex-col items-center">
-          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
-          <h2 className="py-0.5 text-base font-normal text-slate-900 dark:text-white uppercase tracking-[0.4em]">
+        <div className="pt-4 flex flex-col items-center">
+          <div className="w-24 border-t-2 border-indigo-600 mb-2" />
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.3em]">
             Trial Balance
           </h2>
-          <div className="w-full max-w-md border-t border-slate-900 dark:border-slate-700" />
-          
-          <div className="mt-1 text-center">
-            <p className="text-[10px] font-normal text-slate-900 dark:text-slate-300 uppercase tracking-widest">
-              Audit Period: {dateRange.from || 'Start'} — {dateRange.to || 'Today'}
-            </p>
-          </div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+            Period: {dateRange.from || 'Opening'} — {dateRange.to || 'Present'}
+          </p>
         </div>
       </div>
-      <div className="overflow-x-auto print:overflow-visible">
-        <table className="w-full text-left border-collapse">
+
+      <div className="overflow-x-auto scrollbar-hide">
+        <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="bg-slate-900 dark:bg-slate-800 text-white">
               <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Code</th>
@@ -1180,9 +1179,9 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
-        <div className="p-0">
-          <table className="w-full text-left border-collapse">
+      <div className="flex flex-col md:grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800 border-b border-slate-100 dark:border-slate-800">
+        <div className="p-0 overflow-x-auto scrollbar-hide">
+          <table className="w-full text-left border-collapse min-w-[320px]">
              <thead>
                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
                  <th className="px-6 py-3 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Revenue / Income</th>
@@ -1192,7 +1191,7 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                {data.income.map((i: any) => (
                  <tr key={i.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50">
-                    <td className="px-6 py-2.5 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase">{i.name}</td>
+                    <td className="px-6 py-2.5 text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase">{i.name}</td>
                     <td className="px-6 py-2.5 text-sm font-mono font-bold text-slate-900 dark:text-slate-200 text-right tabular-nums">{formatBDT(i.value).replace(/[৳]/g, '').trim()}</td>
                  </tr>
                ))}
@@ -1210,8 +1209,8 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
              </tfoot>
           </table>
         </div>
-        <div className="p-0">
-          <table className="w-full text-left border-collapse">
+        <div className="p-0 overflow-x-auto scrollbar-hide">
+          <table className="w-full text-left border-collapse min-w-[320px]">
              <thead>
                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
                  <th className="px-10 py-6 text-[10px] font-bold uppercase tracking-widest border-r border-slate-800">Expenditures</th>
@@ -1221,7 +1220,7 @@ function ProfitAndLoss({ companyId, dateRange, onExportPDF, onExportExcel }: any
              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                {data.expenses.map((e: any) => (
                  <tr key={e.name} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                    <td className="px-10 py-5 text-sm font-bold text-slate-500 dark:text-slate-400 uppercase">{e.name}</td>
+                    <td className="px-10 py-5 text-[13px] font-bold text-slate-500 dark:text-slate-400 uppercase">{e.name}</td>
                     <td className="px-10 py-5 text-sm font-mono font-bold text-slate-900 dark:text-slate-200 text-right tabular-nums">{formatBDT(e.value).replace(/[৳]/g, '').trim()}</td>
                  </tr>
                ))}
@@ -1332,8 +1331,8 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 divide-x divide-slate-100 dark:divide-slate-800">
-        <div className="p-0 border-r border-slate-100 dark:border-slate-800">
+      <div className="flex flex-col md:grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100 dark:divide-slate-800">
+        <div className="p-0 border-r border-slate-100 dark:border-slate-800 overflow-x-auto">
           <table className="w-full text-left border-collapse">
              <thead>
                <tr className="bg-slate-900 dark:bg-slate-800 text-white">
@@ -1357,7 +1356,7 @@ function BalanceSheet({ companyId, dateRange, onExportPDF, onExportExcel }: any)
              </tfoot>
           </table>
         </div>
-        <div className="p-0">
+        <div className="p-0 overflow-x-auto">
           <div className="space-y-0">
             <table className="w-full text-left border-collapse">
                <thead>
